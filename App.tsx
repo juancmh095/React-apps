@@ -5,114 +5,113 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, { useRef } from 'react';
+import {Alert, View, StyleSheet, Modal, Pressable, TextInput } from 'react-native';
+import { Button, Icon,Text } from '@rneui/themed';
+import  DigitalSignature from './components/DigitalSignature';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function App() {
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const [modalVisible2, setModalVisible2] = React.useState(false);
+  const ref = useRef();
+
+  
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+    <>
+      <View style={styles.container}>
+        <Button 
+          buttonStyle={styles.button}
+          title="Archivos"
+          onPress={() => Alert.alert('Simple Button pressed')}
+          />
+        <Button
+          buttonStyle={styles.button}
+          title="Texto"
+          onPress={() => setModalVisible(true)}
+          />
+          {/* modal inicio de button texto */}
+          <Modal
+            animationType="slide"
+            visible={modalVisible}
+            onRequestClose={() => {
+            setModalVisible(!modalVisible);
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <TextInput 
+              multiline={true} 
+              style={styles.textarea} 
+              numberOfLines={8}
+              placeholder='Escribe tu texto...'
+            />
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={styles.textStyle}>Hide Modal</Text>
+              </Pressable>
+              </View>
+            </View>
+          </Modal>
+          {/* modal Final de button texto */}
+        <Button
+          buttonStyle={styles.button}
+          title="Firma"
+          onPress={() => setModalVisible2(true)}
+          />
+          {/* modal inicio de button texto */}
+          <Modal
+            animationType="slide"
+            visible={modalVisible2}
+            onRequestClose={() => {
+            setModalVisible(!modalVisible2);
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <DigitalSignature />
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible2(!modalVisible2)}>
+                <Text style={styles.textStyle}>Hide Modal2</Text>
+              </Pressable>
+              </View>
+            </View>
+          </Modal>
+          {/* modal Final de button texto */}
+        <Button
+          buttonStyle={styles.button}
+          title="Url"
+          onPress={() => Alert.alert('Simple Button pressed')}
+          />
+        <Button
+          buttonStyle={styles.button}
+          title="QR"
+          onPress={() => Alert.alert('Simple Button pressed')}
+        />
+      </View>
+    </>
   );
-}
+};
+
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  button: {
+    margin: 10,
+    borderRadius:10
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  container:{
+    margin:'auto',
+    width: '80%',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  textarea:{
+    height: '50px',
+    width:'80%',
+    borderWidth:1,
+    margin:'auto',
+    borderRadius:5,
+    borderColor:'gray'
+  }
 });
 
 export default App;
