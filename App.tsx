@@ -14,7 +14,7 @@ import { Card, Input } from 'react-native-elements';
 import axios from 'axios';
 import Contacts from 'react-native-contacts';
 import Geolocation from '@react-native-community/geolocation';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { pick } from 'react-native-document-picker'
 
 
@@ -82,6 +82,20 @@ function App() {
     console.log(result)
   }
 
+  const GetCamera = async () => {
+    
+    let options = {
+      mediaType:'mixed',
+      cameraType:'back',
+      includeBase64:true,
+    };
+    console.log(options);
+
+    const result = await launchCamera(options);
+    console.log(result)
+  }
+
+
   
   return (
     <>
@@ -122,6 +136,7 @@ function App() {
                 name='camera'
                 type='material-community'
                 color='#D8126A'
+                onPress={() => GetCamera()}
               />
               <Icon
                 reverse
