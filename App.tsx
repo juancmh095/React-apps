@@ -6,19 +6,23 @@
  */
 
 import React, { useRef } from 'react';
-import {Alert, View, StyleSheet, Modal, Pressable, TextInput } from 'react-native';
+import {Alert, View, StyleSheet, Modal, Pressable, TextInput, PermissionsAndroid } from 'react-native';
 import { Button, Icon,Text } from '@rneui/themed';
 import  DigitalSignature from './components/DigitalSignature';
 import  QRComponent from './components/QR';
-import { Input } from 'react-native-elements';
+import { Card, Input } from 'react-native-elements';
 import axios from 'axios';
-
+import Contacts from 'react-native-contacts';
+import Geolocation from '@react-native-community/geolocation';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { pick } from 'react-native-document-picker'
 
 
 function App() {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalVisible2, setModalVisible2] = React.useState(false);
   const [modalVisible3, setModalVisible3] = React.useState(false);
+  const [showActions, setShowActions] = React.useState(false);
   const ref = useRef();
   const _api = 'http://20.64.97.37/api/products';
   const urlFunction = async (text) => {
@@ -32,6 +36,51 @@ function App() {
 
   }
   
+  const GetContacts = async () =>{
+    try {
+      const andoidContactPermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_CONTACTS);
+      console.log(andoidContactPermission)
+      if (andoidContactPermission === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("Contacts Permission granted");
+        Contacts.getAll()
+        .then((contacts) => {
+            // work with contacts
+            console.log(contacts);
+        })
+        .catch((e) => {
+            console.log(e);
+        })
+      } else {
+        console.log("Contacts permission denied");
+      }
+    } catch (err) {
+      console.log('error',err);
+    }
+  
+  }
+
+  const getGeo = async () => {
+    await Geolocation.getCurrentPosition(info => console.log(info));
+  }
+
+  const GetPicker = async () => {
+    
+    let options = {
+      title: 'Select Image',
+      customButtons: [
+        { name: 'customOptionKey', title: 'Choose Photo from Custom Option' },
+      ],
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+    console.log(options);
+
+    const result = await launchImageLibrary(options);
+    console.log(result)
+  }
 
   
   return (
@@ -40,8 +89,66 @@ function App() {
         <Button 
           buttonStyle={styles.button}
           title="Archivos"
-          onPress={() => Alert.alert('Simple Button pressed')}
+          onPress={() => setShowActions(!showActions)}
           />
+          {(showActions && (
+
+            <Card>
+              <Card.Title>Acciones</Card.Title>
+              <Card.Divider />
+              <View
+                style={{
+                  flexDirection: 'row'
+                }}
+              >
+              <Icon
+                reverse
+                name='file-document-outline'
+                type='material-community'
+                color='#7552E5'
+                onPress={async () => {
+                  try {
+                    const [result] = await pick({
+                      mode: 'open',
+                    })
+                    console.log(result)
+                  } catch (err) {
+                    // see error handling
+                  }
+                }}
+              />
+              <Icon
+                reverse
+                name='camera'
+                type='material-community'
+                color='#D8126A'
+              />
+              <Icon
+                reverse
+                name='image-multiple'
+                type='material-community'
+                color='#C04BF5'
+                onPress={() => GetPicker()}
+              />
+              <Icon
+                reverse
+                name='map-marker'
+                type='material-community'
+                color='#2AAA52'
+                onPress={() => getGeo()}
+              />
+              </View>
+              <View>
+                <Icon
+                  reverse
+                  name='person'
+                  type='ionicons'
+                  color='#0F9ACD'
+                  onPress={() => GetContacts()}
+                />
+              </View>
+            </Card>
+          ))}
         <Button
           buttonStyle={styles.button}
           title="Texto"
@@ -151,6 +258,9 @@ const styles = StyleSheet.create({
     margin:'auto',
     borderRadius:5,
     borderColor:'gray'
+  },
+  iconsActions:{
+    
   }
 });
 

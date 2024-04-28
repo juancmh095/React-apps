@@ -11,12 +11,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-community/geolocation": "^3.2.1",
     "@rneui/base": "^4.0.0-rc.7",
     "@rneui/themed": "^4.0.0-rc.8",
     "axios": "^1.6.8",
     "react": "18.2.0",
     "react-native": "0.74.0",
+    "react-native-contacts": "^7.0.8",
+    "react-native-document-picker": "^9.1.2",
     "react-native-elements": "^3.4.3",
+    "react-native-image-picker": "^7.1.2",
     "react-native-signature-canvas": "^4.7.2",
     "react-native-smart-text": "^0.3.4",
     "react-native-vector-icons": "^10.0.3",
