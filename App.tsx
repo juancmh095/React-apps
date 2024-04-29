@@ -20,9 +20,8 @@ import { pick } from 'react-native-document-picker'
 
 function App() {
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [modalVisible2, setModalVisible2] = React.useState(false);
-  const [modalVisible3, setModalVisible3] = React.useState(false);
   const [showActions, setShowActions] = React.useState(false);
+  const [typeModal, setTypeModal] = React.useState('qr');
   const ref = useRef();
   const _api = 'http://20.64.97.37/api/products';
   const urlFunction = async (text) => {
@@ -88,12 +87,15 @@ function App() {
       mediaType:'mixed',
       cameraType:'back',
       includeBase64:true,
+      includeExtra: true
     };
     console.log(options);
 
     const result = await launchCamera(options);
     console.log(result)
   }
+
+  
 
 
   
@@ -167,9 +169,39 @@ function App() {
         <Button
           buttonStyle={styles.button}
           title="Texto"
-          onPress={() => setModalVisible(true)}
+          onPress={() => {
+            setTypeModal('text');
+            setModalVisible(true);
+          }}
           />
-          {/* modal inicio de button texto */}
+        <Button
+          buttonStyle={styles.button}
+          title="Firma"
+          onPress={() => {
+            setTypeModal('signature');
+            setModalVisible(true);
+          }}
+          />
+        <Button
+          buttonStyle={styles.button}
+          title="Url"
+          onPress={() => {
+            setTypeModal('url');
+            setModalVisible(true);
+          }}
+          />
+          
+        <Button
+          buttonStyle={styles.button}
+          title="QR"
+          onPress={() => {
+            setTypeModal('qr');
+            setModalVisible(true);
+          }}
+        />
+
+
+        {/* modal inicio de button URL */}
           <Modal
             animationType="slide"
             visible={modalVisible}
@@ -178,79 +210,39 @@ function App() {
           }}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-            <TextInput 
-              multiline={true} 
-              style={styles.textarea} 
-              numberOfLines={8}
-              placeholder='Escribe tu texto...'
-            />
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}>
-                <Text style={styles.textStyle}>Hide Modal</Text>
-              </Pressable>
+              {typeModal == 'qr'?  '' : ''}
+              {typeModal == 'signature'? <DigitalSignature /> : ''}
+              {typeModal == 'text'? <TextInput 
+                      multiline={true} 
+                      style={styles.textarea} 
+                      numberOfLines={8}
+                      placeholder='Escribe tu texto...'
+                    /> : ''}
+              {typeModal == 'url'? <Input
+                      label='Enter URL'
+                      leftIcon={{ type: 'font-awesome', name: 'comment' }}
+                      onEndEditing={value => urlFunction(value.nativeEvent.text)}
+                    /> : ''}
+              
+
+
+              <Button
+              title={'Cerrar'}
+                  buttonStyle={{
+                    borderColor: 'rgba(78, 116, 289, 1)',
+                  }}
+                  raised
+                  containerStyle={{
+                    width: 450,
+                    margin: 'auto',
+                    marginTop:20
+                  }}
+                onPress={() => setModalVisible(!modalVisible)}
+              ></Button>
               </View>
             </View>
           </Modal>
-          {/* modal Final de button texto */}
-        <Button
-          buttonStyle={styles.button}
-          title="Firma"
-          onPress={() => setModalVisible2(true)}
-          />
-          {/* modal inicio de button texto */}
-          <Modal
-            animationType="slide"
-            visible={modalVisible2}
-            onRequestClose={() => {
-            setModalVisible(!modalVisible2);
-          }}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <DigitalSignature />
-              {/* <QRComponent /> */}
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible2(!modalVisible2)}>
-                <Text style={styles.textStyle}>Hide Modal2</Text>
-              </Pressable>
-              </View>
-            </View>
-          </Modal>
-          {/* modal Final de button texto */}
-        <Button
-          buttonStyle={styles.button}
-          title="Url"
-          onPress={() => setModalVisible3(!modalVisible2)}
-          />
-          {/* modal inicio de button URL */}
-          <Modal
-            animationType="slide"
-            visible={modalVisible3}
-            onRequestClose={() => {
-            setModalVisible(!modalVisible3);
-          }}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Input
-                label='Enter URL'
-                leftIcon={{ type: 'font-awesome', name: 'comment' }}
-                onEndEditing={value => urlFunction(value.nativeEvent.text)}
-              />
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible3(!modalVisible3)}>
-                <Text style={styles.textStyle}>Hide Modal3</Text>
-              </Pressable>
-              </View>
-            </View>
-          </Modal>
-          {/* modal Final de button URL */}
-        <Button
-          buttonStyle={styles.button}
-          title="QR"
-          onPress={() => setModalVisible2(true)}
-        />
+        {/* modal Final de button URL */}
       </View>
     </>
   );
@@ -273,6 +265,11 @@ const styles = StyleSheet.create({
     margin:'auto',
     borderRadius:5,
     borderColor:'gray'
+  },
+  buttonCLose:{
+    width:'45%',
+    margin:10
+
   },
   iconsActions:{
     
