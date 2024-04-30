@@ -16,7 +16,8 @@
     "@rneui/themed": "^4.0.0-rc.8",
     "axios": "^1.6.8",
     "react": "18.2.0",
-    "react-native": "0.74.0",
+    "react-native": "0.73.7",
+    "react-native-cn-quill": "^0.7.18",
     "react-native-contacts": "^7.0.8",
     "react-native-document-picker": "^9.1.2",
     "react-native-elements": "^3.4.3",
@@ -24,9 +25,10 @@
     "react-native-qr-decode-image-camera": "^1.1.3",
     "react-native-signature-canvas": "^4.7.2",
     "react-native-smart-text": "^0.3.4",
+    "react-native-svg": "^15.2.0",
     "react-native-vector-icons": "^10.0.3",
     "react-native-vision-camera": "^3.9.2",
-    "react-native-webview": "^13.8.6"
+    "react-native-webview": "^13.8.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

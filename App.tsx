@@ -5,23 +5,27 @@
  * @format
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {Alert, View, StyleSheet, Modal, Pressable, TextInput, PermissionsAndroid } from 'react-native';
 import { Button, Icon,Text } from '@rneui/themed';
-import  DigitalSignature from './components/DigitalSignature';
-import  QRComponent from './components/QR';
 import { Card, Input } from 'react-native-elements';
 import axios from 'axios';
 import Contacts from 'react-native-contacts';
 import Geolocation from '@react-native-community/geolocation';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { pick } from 'react-native-document-picker'
+import { Camera, CodeScanner, getCameraDevice } from 'react-native-vision-camera';
+
+import  DigitalSignature from './components/DigitalSignature';
+import  QRComponent from './components/QR';
+import  QuillComponent from './components/Quill.jsx';
 
 
 function App() {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [showActions, setShowActions] = React.useState(false);
   const [typeModal, setTypeModal] = React.useState('qr');
+
   const ref = useRef();
   const _api = 'http://20.64.97.37/api/products';
   const urlFunction = async (text) => {
@@ -33,6 +37,17 @@ function App() {
     });
     console.log(reponse.data)
 
+  }
+
+  useEffect(() => {
+    checkPermission();
+  });
+
+
+  const checkPermission = async () => {
+      const newCameraPermission = await Camera.requestCameraPermission();
+      const newMicrophonePermission = await Camera.requestMicrophonePermission();
+      console.log(newCameraPermission,'permiso');
   }
   
   const GetContacts = async () =>{
@@ -95,7 +110,16 @@ function App() {
     console.log(result)
   }
 
+  const codeScanner: CodeScanner = {
+    codeTypes: ['qr', 'ean-13'],
+    onCodeScanned: (codes) => {
+      console.log(`Scanned ${codes.length} codes!`)
+    }
+  }
+
+  const devices = Camera.getAvailableCameraDevices()
   
+  const device = getCameraDevice(devices, 'back')
 
 
   
@@ -105,6 +129,7 @@ function App() {
         <Button 
           buttonStyle={styles.button}
           title="Archivos"
+          icon={{name:'document-outline', type:'ionicon', color:'white'}}
           onPress={() => setShowActions(!showActions)}
           />
           {(showActions && (
@@ -169,38 +194,42 @@ function App() {
         <Button
           buttonStyle={styles.button}
           title="Texto"
+          icon={{name:'document-text-outline', type:'ionicon', color:'white'}}
           onPress={() => {
             setTypeModal('text');
             setModalVisible(true);
           }}
           />
-        <Button
-          buttonStyle={styles.button}
-          title="Firma"
-          onPress={() => {
-            setTypeModal('signature');
-            setModalVisible(true);
-          }}
-          />
+        
         <Button
           buttonStyle={styles.button}
           title="Url"
+          icon={{name:'link-outline', type:'ionicon', color:'white'}}
           onPress={() => {
             setTypeModal('url');
             setModalVisible(true);
           }}
           />
-          
         <Button
-          buttonStyle={styles.button}
-          title="QR"
-          onPress={() => {
-            setTypeModal('qr');
-            setModalVisible(true);
-          }}
-        />
-
-
+            buttonStyle={styles.button}
+            title="Firma"
+            icon={{name:'pencil-outline', type:'ionicon', color:'white'}}
+            onPress={() => {
+              setTypeModal('signature');
+              setModalVisible(true);
+            }}
+          />
+            
+          <Button
+            buttonStyle={styles.button}
+            title="QR"
+            icon={{name:'qr-code-outline', type:'ionicon', color:'white'}}
+            onPress={async () => {
+              setTypeModal('qr');
+              setModalVisible(true);
+            }}
+          />
+  
         {/* modal inicio de button URL */}
           <Modal
             animationType="slide"
@@ -210,14 +239,9 @@ function App() {
           }}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              {typeModal == 'qr'?  '' : ''}
+              {typeModal == 'qr'?  <QRComponent /> : ''}
               {typeModal == 'signature'? <DigitalSignature /> : ''}
-              {typeModal == 'text'? <TextInput 
-                      multiline={true} 
-                      style={styles.textarea} 
-                      numberOfLines={8}
-                      placeholder='Escribe tu texto...'
-                    /> : ''}
+              {typeModal == 'text'? <QuillComponent  /> : ''}
               {typeModal == 'url'? <Input
                       label='Enter URL'
                       leftIcon={{ type: 'font-awesome', name: 'comment' }}
@@ -231,10 +255,11 @@ function App() {
                   buttonStyle={{
                     borderColor: 'rgba(78, 116, 289, 1)',
                   }}
-                  raised
+                  type='clear'
                   containerStyle={{
                     width: 450,
-                    margin: 'auto',
+                    marginEnd:'auto',
+                    marginStart:'auto',
                     marginTop:20
                   }}
                 onPress={() => setModalVisible(!modalVisible)}
@@ -255,7 +280,10 @@ const styles = StyleSheet.create({
     borderRadius:10
   },
   container:{
-    margin:'auto',
+    marginTop:'auto',
+    marginEnd:'auto',
+    marginStart:'auto',
+    marginBottom:'auto',
     width: '80%',
   },
   textarea:{
