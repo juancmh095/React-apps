@@ -6,19 +6,20 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import {Alert, View, StyleSheet, Modal, Pressable, TextInput, PermissionsAndroid } from 'react-native';
-import { Button, Icon,Text } from '@rneui/themed';
+import {Alert, View, StyleSheet, Modal,} from 'react-native';
+import { Button, Icon } from '@rneui/themed';
 import { Card, Input } from 'react-native-elements';
 import axios from 'axios';
-import Contacts from 'react-native-contacts';
+
 import Geolocation from '@react-native-community/geolocation';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { pick } from 'react-native-document-picker'
-import { Camera, CodeScanner, getCameraDevice } from 'react-native-vision-camera';
+import { Camera } from 'react-native-vision-camera';
 
 import  DigitalSignature from './components/DigitalSignature';
 import  QRComponent from './components/QR';
 import  QuillComponent from './components/Quill.jsx';
+import  ContactsComponent from './components/Contacts.jsx';
 
 
 function App() {
@@ -50,29 +51,7 @@ function App() {
       console.log(newCameraPermission,'permiso');
   }
   
-  const GetContacts = async () =>{
-    try {
-      const andoidContactPermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_CONTACTS);
-      console.log(andoidContactPermission)
-      if (andoidContactPermission === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("Contacts Permission granted");
-        Contacts.getAll()
-        .then((contacts) => {
-            // work with contacts
-            console.log(contacts);
-        })
-        .catch((e) => {
-            console.log(e);
-        })
-      } else {
-        console.log("Contacts permission denied");
-      }
-    } catch (err) {
-      console.log('error',err);
-    }
   
-  }
 
   const getGeo = async () => {
     await Geolocation.getCurrentPosition(info => console.log(info));
@@ -110,17 +89,7 @@ function App() {
     console.log(result)
   }
 
-  const codeScanner: CodeScanner = {
-    codeTypes: ['qr', 'ean-13'],
-    onCodeScanned: (codes) => {
-      console.log(`Scanned ${codes.length} codes!`)
-    }
-  }
-
-  const devices = Camera.getAvailableCameraDevices()
-  
-  const device = getCameraDevice(devices, 'back')
-
+ 
 
   
   return (
@@ -186,7 +155,10 @@ function App() {
                   name='person'
                   type='ionicons'
                   color='#0F9ACD'
-                  onPress={() => GetContacts()}
+                  onPress={() => {
+                    setTypeModal('contacts');
+                    setModalVisible(true);
+                  }}
                 />
               </View>
             </Card>
@@ -241,6 +213,7 @@ function App() {
             <View style={styles.modalView}>
               {typeModal == 'qr'?  <QRComponent /> : ''}
               {typeModal == 'signature'? <DigitalSignature /> : ''}
+              {typeModal == 'contacts'? <ContactsComponent /> : ''}
               {typeModal == 'text'? <QuillComponent  /> : ''}
               {typeModal == 'url'? <Input
                       label='Enter URL'
