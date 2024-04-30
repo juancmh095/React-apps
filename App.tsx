@@ -6,20 +6,21 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import {Alert, View, StyleSheet, Modal,} from 'react-native';
+import {Alert, View, StyleSheet, Modal, ToastAndroid,} from 'react-native';
 import { Button, Icon } from '@rneui/themed';
 import { Card, Input } from 'react-native-elements';
 import axios from 'axios';
-
+import RNFS from 'react-native-fs';
 import Geolocation from '@react-native-community/geolocation';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import { pick } from 'react-native-document-picker'
+import { pick, types } from 'react-native-document-picker'
 import { Camera } from 'react-native-vision-camera';
 
 import  DigitalSignature from './components/DigitalSignature';
 import  QRComponent from './components/QR';
 import  QuillComponent from './components/Quill.jsx';
 import  ContactsComponent from './components/Contacts.jsx';
+import  FilesComponent from './components/Files.jsx';
 
 
 function App() {
@@ -31,12 +32,18 @@ function App() {
   const _api = 'http://20.64.97.37/api/products';
   const urlFunction = async (text) => {
     console.log(text);
-    var reponse = await axios.get(`${_api}`,{
+    var reponse = await axios.post(`${_api}`,{
       Id:1,
-      json:'{Function:"ReadAtach",Base64:"",Parameter:"FUDC|55PL001|https://20.64.97.37/2/2.jpg|'+text+'|RROJAS|20240401|122300|DISPOSITIVO1"}',
+      json:'"{\"Function\":\"WriteAtach\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+text+'|URL|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
       Category:"Utilerias"
     });
     console.log(reponse.data)
+    if(reponse.data.Json == 'OK'){
+      showToast('Exito al guardar')
+      setModalVisible(false);
+    } else {
+      showToast('Error al guardar')
+    }
 
   }
 
@@ -54,7 +61,22 @@ function App() {
   
 
   const getGeo = async () => {
-    await Geolocation.getCurrentPosition(info => console.log(info));
+    await Geolocation.getCurrentPosition(async(info) => {
+      console.log(info);
+      var geo = info.coords.latitude + ',' + info.coords.longitude;
+      var reponse = await axios.post(`${_api}`,{
+        Id:1,
+        json:'"{\"Function\":\"WriteAtach\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+geo+'|GEO|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
+        Category:"Utilerias"
+      });
+      console.log(reponse.data);
+      if(reponse.data.Json == 'OK'){
+        showToast('Exito al guardar')
+      } else {
+        showToast('Error al guardar')
+      }
+    });
+    
   }
 
   const GetPicker = async () => {
@@ -68,11 +90,16 @@ function App() {
         skipBackup: true,
         path: 'images',
       },
+      includeBase64:true,
+      selectionLimit:1
     };
     console.log(options);
 
     const result = await launchImageLibrary(options);
-    console.log(result)
+    var name = result.assets[0].fileName;
+    name = name.split('.')
+    
+    await constHttpPost(result.assets[0].base64, result.assets[0].fileName, name[1]); q
   }
 
   const GetCamera = async () => {
@@ -86,8 +113,50 @@ function App() {
     console.log(options);
 
     const result = await launchCamera(options);
-    console.log(result)
+    await constHttpPost(result.assets[0].base64, result.assets[0].fileName, 'JPG');
+    
   }
+
+  const getDocuments = async ()=>{
+    try {
+      const [result] = await pick({
+        mode: 'open',
+        allowMultiSelection: false,
+        type: [types.pdf, types.docx, types.pptx, types.xlsx, types.plainText, types.csv, types.zip],
+      })
+      console.log(result)
+      var file = await RNFS.readFile(result.uri, 'base64');
+      var ext = result.type;
+      ext = ext.split('/');
+
+      await constHttpPost(file, result.name, ext[0]);
+      
+    } catch (err) {
+      // see error handling
+    }
+  }
+
+   const constHttpPost = async (file,name,ext) => {
+    var reponse = await axios.post(`${_api}`,{
+      Id:1,
+      json: JSON.stringify({
+        Function:"WriteAtach",
+        Base64:file,
+        Parameter:"0|FUDC|55PL001|"+name+"|"+ext+"|RROJAS|20240401|122300|DISPOSITIVO1|"
+      }),
+      Category:"Utilerias"
+    });
+    console.log(reponse.data);
+    if(reponse.data.Json == 'OK'){
+      showToast('Exito al guardar')
+    } else {
+      showToast('Error al guardar')
+    }
+  }
+
+    const showToast = (text) => {
+      ToastAndroid.show(text, ToastAndroid.SHORT);
+    };
 
  
 
@@ -116,16 +185,7 @@ function App() {
                 name='file-document-outline'
                 type='material-community'
                 color='#7552E5'
-                onPress={async () => {
-                  try {
-                    const [result] = await pick({
-                      mode: 'open',
-                    })
-                    console.log(result)
-                  } catch (err) {
-                    // see error handling
-                  }
-                }}
+                onPress={ () => getDocuments()}
               />
               <Icon
                 reverse
@@ -201,6 +261,15 @@ function App() {
               setModalVisible(true);
             }}
           />
+          <Button
+          buttonStyle={styles.button}
+          title="Lista de Archivos"
+          icon={{name:'documents-outline', type:'ionicon', color:'white'}}
+          onPress={() => {
+            setTypeModal('lista');
+            setModalVisible(true);
+          }}
+          />
   
         {/* modal inicio de button URL */}
           <Modal
@@ -215,9 +284,10 @@ function App() {
               {typeModal == 'signature'? <DigitalSignature /> : ''}
               {typeModal == 'contacts'? <ContactsComponent /> : ''}
               {typeModal == 'text'? <QuillComponent  /> : ''}
+              {typeModal == 'lista'? <FilesComponent  /> : ''}
               {typeModal == 'url'? <Input
                       label='Enter URL'
-                      leftIcon={{ type: 'font-awesome', name: 'comment' }}
+                      leftIcon={{ type: 'font-awesome', name: 'link' }}
                       onEndEditing={value => urlFunction(value.nativeEvent.text)}
                     /> : ''}
               

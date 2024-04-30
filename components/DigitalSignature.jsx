@@ -1,6 +1,6 @@
 
 import React, { useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, ToastAndroid, View } from "react-native";
 import  SignatureScreen from 'react-native-signature-canvas';
 import axios from 'axios';
 import { Button } from "react-native-elements";
@@ -10,9 +10,9 @@ const _api = 'http://20.64.97.37/api/products';
 const DigitalSignature = () => {
     
   const ref = useRef();
-  var s = "";
+  const [s, setS] = React.useState('qr');
   const handleOK = (signature) => {
-    s = signature;
+    setS(signature);
   };
   const handleEnd = () => {
     ref.current.readSignature();
@@ -21,18 +21,31 @@ const DigitalSignature = () => {
   const firmaFunction = async () => {
     console.log(s);
     
-    var reponse = await axios.get(`${_api}`,{
+    var reponse = await axios.post(`${_api}`,{
       Id:1,
-      json:'{Function:"WriteAtach",Base64:"'+s+'",Parameter:"FUDC|55PL001|Text1|png|RROJAS|20240401|122300|DISPOSITIVO1"}',
+      json: JSON.stringify({
+        Function:"WriteAtach",
+        Base64:s,
+        Parameter:"0|FUDC|55PL001|Text1|FIRMA|RROJAS|20240401|122300|DISPOSITIVO1|"
+      }),
       Category:"Utilerias"
     });
-    console.log(reponse.data)
+    console.log(reponse.data);
+    if(reponse.data.Json == 'OK'){
+      showToast('Exito al guardar')
+      ref.current.clearSignature();
+    } else {
+      showToast('Error al guardar')
+    }
 
   }
+  const showToast = (text) => {
+    ToastAndroid.show(text, ToastAndroid.SHORT);
+  };
 
 
-  const imgWidth = '98%';
-  const imgHeight = 300;
+  const imgWidth = '100%';
+  const imgHeight = 400;
   const style = `.m-signature-pad {box-shadow: none; border: none; }
               .m-signature-pad--body {border: none;}
               .m-signature-pad--footer {display: none; margin: 0px;}
@@ -63,10 +76,12 @@ const DigitalSignature = () => {
 
 const styles = StyleSheet.create({    
   signature:{
-    height:300,
+    height:450,
     width:'98%',
     borderWidth:1,
-    margin:'auto',
+    marginStart:'auto',
+    marginEnd:'auto',
+    marginBottom:10,
     marginTop:10
   }
 });

@@ -1,11 +1,15 @@
-import {useEffect, useRef, useState} from "react";
-import {Animated, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
+import React, {useEffect, useRef, useState} from "react";
+import {Animated, StyleSheet, ToastAndroid, View} from 'react-native'
 import QuillEditor, {QuillToolbar} from "react-native-cn-quill";
+import axios from "axios";
+import { Button } from "react-native-elements";
 
 const QuillComponent = () => {
 
     const _editor = useRef()
     const isIphone = true    
+    const _api = 'http://20.64.97.37/api/products';
+    const [text, setText] = React.useState(null);
 
     const animatedValues = {
         width: useRef(new Animated.Value(0)).current,
@@ -51,6 +55,31 @@ const QuillComponent = () => {
         handleAnimated();
     });
 
+  
+    const SendQuill = async () => {
+        var reponse = await axios.post(`${_api}`,{
+            Id:1,
+            json: JSON.stringify({
+              Function:"WriteAtach",
+              Base64:"",
+              Parameter:"0|FUDC|55PL001|"+text+"|TXT|RROJAS|20240401|122300|DISPOSITIVO1|"
+            }),
+            Category:"Utilerias"
+          });
+          console.log(reponse.data);
+          if(reponse.data.Json == 'OK'){
+            console.log(_editor.current.setText(''))
+            
+            showToast('Exito al guardar')
+          } else {
+            showToast('Error al guardar')
+          }
+    }
+
+    const showToast = (text) => {
+        ToastAndroid.show(text, ToastAndroid.SHORT);
+      };
+
     return(
         <View style={{height: 'auto', alignSelf: 'stretch'}}>
             <View style={{height: 175, marginTop:50, width: '100%'}}>
@@ -72,12 +101,18 @@ const QuillComponent = () => {
                         }}
                         quill={{theme: 'bubble', placeholder: '¿Qué estás pensando?'}}
                         container={isIphone ? false : true}
-                        onHtmlChange={(e) => console.log(e)}
+                        onHtmlChange={(e) => setText(e)}
                         initialHtml=""
+                        
                     />
 
                 </Animated.View>
             </View>
+
+            <Button
+                title="Enviar"
+                onPress={()=> SendQuill()}
+            ></Button>
         </View>
     )
 }

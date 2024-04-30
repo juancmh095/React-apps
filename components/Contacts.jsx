@@ -1,5 +1,5 @@
 
-import { PermissionsAndroid, StyleSheet, View, Text } from "react-native";
+import { PermissionsAndroid, StyleSheet, View, Text, ScrollView } from "react-native";
 import React, { useEffect } from "react";
 import Contacts from 'react-native-contacts';
 import { Card, Image } from "@rneui/base";
@@ -18,6 +18,8 @@ const ContactsComponent = () => {
         Contacts.getAll()
         .then((contacts) => {
             // work with contacts
+            console.log(contacts);
+            
             setUsers(contacts);
         })
         .catch((e) => {
@@ -43,24 +45,27 @@ const ContactsComponent = () => {
   });
  
   return (
-    <View>
-      <Card>
-          <Card.Title>Mis Contactos</Card.Title>
-          <Card.Divider />
-          {users.map((u, i) => {
-            return (
-              <View key={i} style={styles.user}>
-                <Image
-                  style={styles.image}
-                  resizeMode="cover"
-                  source={{ uri: 'https://ui-avatars.com/api/?name=John+Doe'+u.displayName }}
-                  onPress={ ()=> saveContact(u)}
-                />
-                <Text style={styles.name} onPress={ ()=> saveContact(u)}>{u.displayName}</Text>
-              </View>
-            );
-          })}
-        </Card>
+    <View style={{height:'90%', overflow:'scroll'}}>
+      <ScrollView>
+        <Card style={{overflow:'scroll', height:'90%'}}>
+            <Card.Title>Mis Contactos</Card.Title>
+            <Card.Divider />
+            {users.map((u, i) => {
+              return (
+                <View key={i} style={styles.user}>
+                  <Image
+                    style={styles.image}
+                    resizeMode="cover"
+                    source={{ uri: 'https://ui-avatars.com/api/?name=John+Doe'+u.displayName }}
+                    onPress={ ()=> saveContact(u)}
+                  />
+                  <Text style={styles.name} onPress={ ()=> saveContact(u)}>{u.displayName} {u.phoneNumbers.length > 0?"\n"+u.phoneNumbers[0]['number']:''}</Text>
+                </View>
+              );
+            })}
+          </Card>
+      </ScrollView>
+
 
     </View>
     
