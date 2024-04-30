@@ -105,9 +105,10 @@ function App() {
   const GetCamera = async () => {
     
     let options = {
-      mediaType:'mixed',
+      mediaType:'photo',
       cameraType:'back',
       includeBase64:true,
+      maxHeight: 1000,
       includeExtra: true
     };
     console.log(options);

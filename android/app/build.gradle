@@ -90,9 +90,17 @@ android {
             keyPassword 'android'
         }
     }
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            minifyEnabled enableProguardInReleaseBuilds
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -107,7 +115,6 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    implementation project(':react-native-fs')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
