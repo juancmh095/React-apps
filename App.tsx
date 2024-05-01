@@ -13,7 +13,12 @@ import axios from 'axios';
 import RNFS from 'react-native-fs';
 import Geolocation from '@react-native-community/geolocation';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import { pick, types } from 'react-native-document-picker'
+import { pick, types } from 'react-native-document-picker';
+import ImageResizer from '@bam.tech/react-native-image-resizer';
+import type {
+  ResizeMode,
+  Response,
+} from '@bam.tech/react-native-image-resizer';
 import { Camera } from 'react-native-vision-camera';
 
 import  DigitalSignature from './components/DigitalSignature';
@@ -107,14 +112,30 @@ function App() {
     let options = {
       mediaType:'photo',
       cameraType:'back',
+      quality:1,
       includeBase64:true,
-      maxHeight: 1000,
       includeExtra: true
     };
-    console.log(options);
 
     const result = await launchCamera(options);
-    await constHttpPost(result.assets[0].base64, result.assets[0].fileName, 'JPG');
+    console.log(result.assets[0].fileSize);
+    let resize = await ImageResizer.createResizedImage(
+      result.assets[0].uri,
+      1000,
+      1000,
+      'JPEG',
+      100,
+      0,
+      undefined,
+      false,
+      {
+        mode: 'contain',
+        onlyScaleDown: false,
+      }
+    );
+    var file = await RNFS.readFile(resize.uri, 'base64');
+    console.log(file);
+    await constHttpPost(file, result.assets[0].fileName, 'JPG');
     
   }
 
