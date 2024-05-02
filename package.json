@@ -5,7 +5,7 @@
   "scripts": {
     "android": "react-native run-android",
     "camera": "react-native link react-native-camera",
-    "build": "cd android && ./gradlew assembleDebug",
+    "build": "./gradlew assembleDebug",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",

@@ -7,7 +7,7 @@ import { Button } from "react-native-elements";
 const _api = 'http://20.64.97.37/api/products';
 
 
-const DigitalSignature = () => {
+const DigitalSignature = ({setModalVisible}) => {
     
   const ref = useRef();
   const [s, setS] = React.useState('qr');
@@ -26,14 +26,15 @@ const DigitalSignature = () => {
       json: JSON.stringify({
         Function:"WriteAtach",
         Base64:s,
-        Parameter:"0|FUDC|55PL001|Text1|FIRMA|RROJAS|20240401|122300|DISPOSITIVO1|"
+        Parameter:"0|FUDC|55PL001|Text1|PNG|RROJAS|20240401|122300|DISPOSITIVO1|"
       }),
       Category:"Utilerias"
     });
     console.log(reponse.data);
     if(reponse.data.Json == 'OK'){
-      showToast('Exito al guardar')
+      showToast('Firma guardada satisfactoriamente');
       ref.current.clearSignature();
+      setModalVisible(false);
     } else {
       showToast('Error al guardar')
     }

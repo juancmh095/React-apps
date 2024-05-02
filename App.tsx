@@ -35,8 +35,12 @@ function App() {
 
   const ref = useRef();
   const _api = 'http://20.64.97.37/api/products';
+
+  const closeModal = ()=>{
+    setModalVisible(false);
+  }
+
   const urlFunction = async (text) => {
-    console.log(text);
     var reponse = await axios.post(`${_api}`,{
       Id:1,
       json:'"{\"Function\":\"WriteAtach\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+text+'|URL|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
@@ -50,6 +54,10 @@ function App() {
       showToast('Error al guardar')
     }
 
+  }
+
+  const sendUrl = async ()=>{
+    ref.current.blur();
   }
 
   useEffect(() => {
@@ -76,7 +84,7 @@ function App() {
       });
       console.log(reponse.data);
       if(reponse.data.Json == 'OK'){
-        showToast('Exito al guardar')
+        showToast('Geoposición guardada satisfactoriamente')
       } else {
         showToast('Error al guardar')
       }
@@ -103,8 +111,24 @@ function App() {
     const result = await launchImageLibrary(options);
     var name = result.assets[0].fileName;
     name = name.split('.')
+
+    let resize = await ImageResizer.createResizedImage(
+      result.assets[0].uri,
+      1000,
+      1000,
+      'JPEG',
+      100,
+      0,
+      undefined,
+      false,
+      {
+        mode: 'contain',
+        onlyScaleDown: false,
+      }
+    );
+    var file = await RNFS.readFile(resize.uri, 'base64');
     
-    await constHttpPost(result.assets[0].base64, result.assets[0].fileName, name[1]); q
+    await constHttpPost(file, result.assets[0].fileName, 'JPEG','Imagen guardada satisfactoriamente');
   }
 
   const GetCamera = async () => {
@@ -135,7 +159,7 @@ function App() {
     );
     var file = await RNFS.readFile(resize.uri, 'base64');
     console.log(file);
-    await constHttpPost(file, result.assets[0].fileName, 'JPG');
+    await constHttpPost(file, result.assets[0].fileName, 'JPG','Foto guardada satisfactoriamente');
     
   }
 
@@ -148,17 +172,17 @@ function App() {
       })
       console.log(result)
       var file = await RNFS.readFile(result.uri, 'base64');
-      var ext = result.type;
-      ext = ext.split('/');
+      var ext = result.name;
+      ext = ext.split('.');
 
-      await constHttpPost(file, result.name, ext[0]);
+      await constHttpPost(file, result.name, ext[1],'Documento guardado satisfactoriamente');
       
     } catch (err) {
       // see error handling
     }
   }
 
-   const constHttpPost = async (file,name,ext) => {
+   const constHttpPost = async (file,name,ext, msg) => {
     var reponse = await axios.post(`${_api}`,{
       Id:1,
       json: JSON.stringify({
@@ -170,7 +194,7 @@ function App() {
     });
     console.log(reponse.data);
     if(reponse.data.Json == 'OK'){
-      showToast('Exito al guardar')
+      showToast(msg)
     } else {
       showToast('Error al guardar')
     }
@@ -301,34 +325,39 @@ function App() {
             setModalVisible(!modalVisible);
           }}>
           <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              {typeModal == 'qr'?  <QRComponent /> : ''}
-              {typeModal == 'signature'? <DigitalSignature /> : ''}
-              {typeModal == 'contacts'? <ContactsComponent /> : ''}
-              {typeModal == 'text'? <QuillComponent  /> : ''}
-              {typeModal == 'lista'? <FilesComponent  /> : ''}
-              {typeModal == 'url'? <Input
-                      label='Enter URL'
-                      leftIcon={{ type: 'font-awesome', name: 'link' }}
-                      onEndEditing={value => urlFunction(value.nativeEvent.text)}
-                    /> : ''}
-              
-
-
-              <Button
-              title={'Cerrar'}
+          <Button
+              title={'Cancelar'}
                   buttonStyle={{
                     borderColor: 'rgba(78, 116, 289, 1)',
                   }}
-                  type='clear'
+                  type='solid'
                   containerStyle={{
-                    width: 450,
                     marginEnd:'auto',
-                    marginStart:'auto',
-                    marginTop:20
+                    marginStart:10,
+                    width:150,
+                    marginTop:20,
+                    marginBottom:10
                   }}
                 onPress={() => setModalVisible(!modalVisible)}
               ></Button>
+              <Card.Divider />
+            <View style={styles.modalView}>
+              {typeModal == 'qr'?  <QRComponent setModalVisible={setModalVisible} /> : ''}
+              {typeModal == 'signature'? <DigitalSignature setModalVisible={setModalVisible} /> : ''}
+              {typeModal == 'contacts'? <ContactsComponent setModalVisible={setModalVisible} /> : ''}
+              {typeModal == 'text'? <QuillComponent   setModalVisible={setModalVisible} /> : ''}
+              {typeModal == 'lista'? <FilesComponent setModalVisible={setModalVisible}  /> : ''}
+              {typeModal == 'url'? <Input
+                      label='Enter URL'
+                      leftIcon={{ type: 'font-awesome', name: 'link' }}
+                      ref={ref}
+                      onEndEditing={value => urlFunction(value.nativeEvent.text)}
+                    />  : ''}
+              {typeModal == 'url'? <Button title={'Enviar'} onPress={()=> sendUrl()}></Button>  : ''}
+              
+
+
+              
               </View>
             </View>
           </Modal>

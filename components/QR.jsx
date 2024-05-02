@@ -6,7 +6,7 @@ import { Button, Text } from "react-native-elements";
 import axios from "axios";
 
 
-const QRComponent = () => {
+const QRComponent = ({setModalVisible}) => {
     const devices = Camera.getAvailableCameraDevices()
     const device = getCameraDevice(devices, 'back')    
     const [restult, setResult] = React.useState('')
@@ -44,8 +44,9 @@ const QRComponent = () => {
           });
           console.log(reponse.data);
           if(reponse.data.Json == 'OK'){
-            showToast('Exito al guardar')
+            showToast('Guardado satisfactoriamente')
             setResult(null)
+            setModalVisible(false);
           } else {
             showToast('Error al guardar')
           }
