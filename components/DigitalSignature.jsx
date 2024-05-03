@@ -20,12 +20,13 @@ const DigitalSignature = ({setModalVisible}) => {
 
   const firmaFunction = async () => {
     console.log(s);
-    
+    var b64 = s.replace('data:image/png;base64,','');
+    console.log(b64);
     var reponse = await axios.post(`${_api}`,{
       Id:1,
       json: JSON.stringify({
         Function:"WriteAtach",
-        Base64:s,
+        Base64:b64,
         Parameter:"0|FUDC|55PL001|Text1|PNG|RROJAS|20240401|122300|DISPOSITIVO1|"
       }),
       Category:"Utilerias"

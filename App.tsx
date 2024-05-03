@@ -8,7 +8,7 @@
 import React, { useEffect, useRef } from 'react';
 import {Alert, View, StyleSheet, Modal, ToastAndroid,} from 'react-native';
 import { Button, Icon } from '@rneui/themed';
-import { Card, Input } from 'react-native-elements';
+import { Card, Input, Text } from 'react-native-elements';
 import axios from 'axios';
 import RNFS from 'react-native-fs';
 import Geolocation from '@react-native-community/geolocation';
@@ -174,8 +174,9 @@ function App() {
       var file = await RNFS.readFile(result.uri, 'base64');
       var ext = result.name;
       ext = ext.split('.');
-
-      await constHttpPost(file, result.name, ext[1],'Documento guardado satisfactoriamente');
+      var sizeExt = ext.length;
+      console.log(ext[sizeExt-1])
+      await constHttpPost(file, result.name, ext[sizeExt-1],'Documento guardado satisfactoriamente');
       
     } catch (err) {
       // see error handling
@@ -362,6 +363,7 @@ function App() {
             </View>
           </Modal>
         {/* modal Final de button URL */}
+        <Text h5 style={{color: 'black'}}>V1.0.1</Text>
       </View>
     </>
   );
