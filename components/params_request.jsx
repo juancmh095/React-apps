@@ -43,5 +43,35 @@ module.exports = {
         }]
       }),
       Category:"Mi App"
+  },
+  buttons:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"INQBARRA",
+      Rows:[{
+        action:"I",
+        Data:"0|1|"
+      }]
+    }),
+    Category:"Mi App"
+  },
+  buttons_footer:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"BARRAPROGRAM",
+      Rows:[{
+        action:"I",
+        Data:"0|PLOTE|"
+      }]
+    }),
+    Category:"Mi App"
   }
 }

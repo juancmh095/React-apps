@@ -8,11 +8,12 @@
 import { Button, Icon, Tab, Text, ListItem } from '@rneui/base';
 import { Input } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
-import { TextInput, ToastAndroid, View } from 'react-native';
+import { ScrollView, TextInput, ToastAndroid, View } from 'react-native';
 import axios from 'axios';
 import * as rqdata from './components/params_request';
 import DatePicker from 'react-native-date-picker'
 import { Picker } from '@react-native-picker/picker';
+import { ButtonGroup } from 'react-native-elements';
 
 
 
@@ -20,14 +21,18 @@ function App() {
 
   const ref = useRef();
   const url_api = "http://20.64.97.37/api/products";
-  const [index, setIndex] = React.useState(0);
   const [inputs, setInputs] = React.useState([]);
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
   const [labelsArry, setLabelsArry] = React.useState(null);
+  const [btnHeader, setBtnHeader] = React.useState([]);
+  const [btnFooter, setBtnFooter] = React.useState([]);
+  /* VARIABLES DEL DATEPICKER */
   const [datePk, setDatePk] = React.useState(new Date())
   const [openPk, setOpenPk] = React.useState(false)
-
+  /* VARIABLES BTN GROUPS */
+  const [selectedIndex, setSelectedIndex] = React.useState(null);
+  const [selectedIndexf, setSelectedIndexf] = React.useState(null);
 
   useEffect(() => {
     if(inputs.length == 0){
@@ -38,6 +43,12 @@ function App() {
     }
     if(dataInfo.length == 0){
       data_list();
+    }
+    if(btnHeader.length == 0){
+      btn_list();
+    }
+    if(btnFooter.length == 0){
+      btn_footer();
     }
   });
 
@@ -68,7 +79,6 @@ function App() {
       }
       setLabels(lbs);
       setLabelsArry(dArr);
-      console.log(dArr);
     }
   }
 
@@ -79,8 +89,46 @@ function App() {
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       setDataInfo(d.FProgramInquiry);
-      console.log(d);
     }
+  }
+
+  const btn_list = async () => {
+    console.log('api');
+    var reponse = await axios.post(`${url_api}`,rqdata.buttons);
+    
+    if(reponse.data.Json){
+      let d = JSON.parse(reponse.data.Json);
+      var data = [];
+      var dta = d.FINQBARRA;
+      for (let i = 0; i < dta.length; i++) {
+        const element = dta[i];
+        data.push(element.Titulo)
+        
+      }
+      setBtnHeader(data)
+    }
+  }
+
+  const btn_footer = async () => {
+    console.log('api');
+    var reponse = await axios.post(`${url_api}`,rqdata.buttons_footer);
+    
+    if(reponse.data.Json){
+      let d = JSON.parse(reponse.data.Json);
+      var data = [];
+      var dta = d.FBARRAPROGRAM;
+      for (let i = 0; i < dta.length; i++) {
+        const element = dta[i];
+        data.push(element.OPTITULO)
+        
+      }
+      console.log(data);
+      setBtnFooter(data)
+    }
+  }
+
+  const open_modal_info = async (value) => {
+    console.log(value);
   }
 
 
@@ -90,42 +138,17 @@ function App() {
   
   return (
     <>
-    <View>
-     <Tab
-      value={index}
-      onChange={(e) => setIndex(e)}
-      indicatorStyle={{
-        backgroundColor: 'white',
-        height: 3,
-      }}
-      variant="primary"
-    >
-      <Tab.Item
-        title="Selec"
-        titleStyle={{ fontSize: 8 }}
-        icon={{ name: 'timer', type: 'ionicon', color: 'white' }}
+    <View style={{height:'100%', overflow:'scroll'}}>
+
+      <ButtonGroup
+        buttons={btnHeader}
+        selectedIndex={selectedIndex}
+        onPress={(value) => {
+          setSelectedIndex(value);
+        }}
+        containerStyle={{ marginBottom: 20 }}
       />
-      <Tab.Item
-        title="Buscar"
-        titleStyle={{ fontSize: 8 }}
-        icon={{ name: 'heart', type: 'ionicon', color: 'white' }}
-      />
-      <Tab.Item
-        title="Agregar"
-        titleStyle={{ fontSize: 7 }}
-        icon={{ name: 'cart', type: 'ionicon', color: 'white' }}
-      />
-      <Tab.Item
-        title="Borrar"
-        titleStyle={{ fontSize: 8 }}
-        icon={{ name: 'cart', type: 'ionicon', color: 'white' }}
-      />
-      <Tab.Item
-        title="Salir"
-        titleStyle={{ fontSize: 8 }}
-        icon={{ name: 'cart', type: 'ionicon', color: 'white' }}
-      />
-    </Tab>
+
       {inputs.map((item,i)=>{
         return(
 
@@ -199,40 +222,44 @@ function App() {
             }}
           />
         </View>
+        <ScrollView>
+          {dataInfo.map((item,i) => {
+            return(
+              <ListItem.Swipeable
+                onLongPress={()=> open_modal_info(item['LOITEM'])}
+      
+                rightContent={(reset) => (
+                  <Button
+                    title="Delete"
+                    onPress={() => reset()}
+                    icon={{ name: 'delete', color: 'white' }}
+                    buttonStyle={{ minHeight: '100%', backgroundColor: 'red' }}
+                  />
+                )}
+              >
+              
+                <ListItem.Content>
+                  {labelsArry.map((label,x) => {
+                    return(
+                      <ListItem.Title>{labels[label]}: {item[label]} </ListItem.Title>
+                    )
+                  })}
+                </ListItem.Content>
+                <ListItem.Chevron />
+              </ListItem.Swipeable>
 
-        {dataInfo.map((item,i) => {
-          return(
-            <ListItem.Swipeable
-              leftContent={(reset) => (
-                <Button
-                  title="Info"
-                  onPress={() => reset()}
-                  icon={{ name: 'info', color: 'white' }}
-                  buttonStyle={{ minHeight: '100%' }}
-                />
-              )}
-              rightContent={(reset) => (
-                <Button
-                  title="Delete"
-                  onPress={() => reset()}
-                  icon={{ name: 'delete', color: 'white' }}
-                  buttonStyle={{ minHeight: '100%', backgroundColor: 'red' }}
-                />
-              )}
-            >
-            
-              <ListItem.Content>
-                {labelsArry.map((label,x) => {
-                  return(
-                    <ListItem.Title>{labels[label]}: {item[label]} </ListItem.Title>
-                  )
-                })}
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem.Swipeable>
+            )
+          })}
 
-          )
-        })}
+        </ScrollView>
+          <ButtonGroup
+            buttons={btnFooter}
+            selectedIndex={selectedIndexf}
+            onPress={(value) => {
+              setSelectedIndexf(value);
+            }}
+            containerStyle={{ marginBottom: 0, position:''}}
+          />
     </View>
     </>
   );
