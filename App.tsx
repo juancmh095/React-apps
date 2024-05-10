@@ -74,7 +74,7 @@ function App() {
   
 
   const getGeo = async () => {
-    await Geolocation.getCurrentPosition(async(info) => {
+    Geolocation.getCurrentPosition(async(info) => {
       console.log(info);
       var geo = info.coords.latitude + ',' + info.coords.longitude;
       var reponse = await axios.post(`${_api}`,{
