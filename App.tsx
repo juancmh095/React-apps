@@ -127,6 +127,14 @@ function App() {
     }
   }
 
+  const openAction = async (value) => {
+     switch(selectedIndex){
+        case 1:
+            console.log('seleccionar',value)
+          break;
+     }
+  }
+
   const open_modal_info = async (value) => {
     console.log(value);
   }
@@ -227,7 +235,7 @@ function App() {
             return(
               <ListItem.Swipeable
                 onLongPress={()=> open_modal_info(item['LOITEM'])}
-      
+                onPress={() => openAction(item['LOITEM'])}
                 rightContent={(reset) => (
                   <Button
                     title="Delete"
