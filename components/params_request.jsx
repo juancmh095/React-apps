@@ -73,5 +73,35 @@ module.exports = {
       }]
     }),
     Category:"Mi App"
+  },
+  buttons_header_form:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"INQBARRAFIX",
+      Rows:[{
+        action:"I",
+        Data:"0|1|"
+      }]
+    }),
+    Category:"Mi App"
+  },
+  get_data:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"ProgramInquiry",
+      Rows:[{
+        action:"I",
+        Data:""
+      }]
+    }),
+    Category:"Mi App"
   }
 }

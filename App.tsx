@@ -8,13 +8,13 @@
 import { Button, Icon, Tab, Text, ListItem } from '@rneui/base';
 import { Input } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
-import { ScrollView, TextInput, ToastAndroid, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, View } from 'react-native';
 import axios from 'axios';
 import * as rqdata from './components/params_request';
 import DatePicker from 'react-native-date-picker'
 import { Picker } from '@react-native-picker/picker';
 import { ButtonGroup } from 'react-native-elements';
-
+import FormsComponents  from './components/forms.tsx';
 
 
 function App() {
@@ -25,8 +25,10 @@ function App() {
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
   const [labelsArry, setLabelsArry] = React.useState(null);
+  const [dataSelect, setDataSelect] = React.useState(null);
   const [btnHeader, setBtnHeader] = React.useState([]);
   const [btnFooter, setBtnFooter] = React.useState([]);
+  const [modalVisible, setModalVisible] = React.useState(false);
   /* VARIABLES DEL DATEPICKER */
   const [datePk, setDatePk] = React.useState(new Date())
   const [openPk, setOpenPk] = React.useState(false)
@@ -128,9 +130,12 @@ function App() {
   }
 
   const openAction = async (value) => {
+    console.log('v',value,selectedIndex);
      switch(selectedIndex){
-        case 1:
+        case 0:
             console.log('seleccionar',value)
+            setModalVisible(true);
+            setDataSelect({id: value, tipo:'U'});
           break;
      }
   }
@@ -268,6 +273,24 @@ function App() {
             }}
             containerStyle={{ marginBottom: 0, position:''}}
           />
+
+        <View>
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible}
+            onRequestClose={() => {
+              Alert.alert('Modal has been closed.');
+              setModalVisible(!modalVisible);
+            }}>
+            <View>
+              <View>
+                <FormsComponents setModalVisible={setModalVisible} data={dataSelect} />                
+              </View>
+            </View>
+          </Modal>
+        </View>
     </View>
     </>
   );
