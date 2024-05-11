@@ -24,7 +24,7 @@ function App() {
   const [inputs, setInputs] = React.useState([]);
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
-  const [labelsArry, setLabelsArry] = React.useState(null);
+  const [labelsArry, setLabelsArry] = React.useState([]);
   const [dataSelect, setDataSelect] = React.useState(null);
   const [btnHeader, setBtnHeader] = React.useState([]);
   const [btnFooter, setBtnFooter] = React.useState([]);
@@ -136,12 +136,12 @@ function App() {
             console.log('seleccionar',value)
             setModalVisible(true);
             setDataSelect({id: value, tipo:'U'});
+            break;
+        case 2:
+          setModalVisible(true);
+          setDataSelect(null);
           break;
      }
-  }
-
-  const open_modal_info = async (value) => {
-    console.log(value);
   }
 
 
@@ -158,6 +158,11 @@ function App() {
         selectedIndex={selectedIndex}
         onPress={(value) => {
           setSelectedIndex(value);
+          if(value == 2){
+            setDataSelect(null)
+            setModalVisible(true);
+          }
+          
         }}
         containerStyle={{ marginBottom: 20 }}
       />
