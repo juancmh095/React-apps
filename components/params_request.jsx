@@ -103,5 +103,47 @@ module.exports = {
       }]
     }),
     Category:"Mi App"
+  },
+  categoria1:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"PGMINQUIRY",
+      Rows:[{
+        action:"I",
+        Data:"0|FYEAR_AEYEAR|1|"
+      }]
+    }),
+    Category:"Mi App"
+  },
+  categoria2:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"PGMINQUIRY",
+      Rows:[{
+        action:"I",
+        Data:"0|GRUPO|1|"
+      }]
+    }),
+    Category:"Mi App"
+  },
+  guardar:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Function:'ValidateInfo',
+      Program:'FLOTE',
+      ID:"0",
+      Parameter:""
+    }),
+    Category:"Utilerias"
   }
 }

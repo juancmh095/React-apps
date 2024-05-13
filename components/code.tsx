@@ -5,7 +5,7 @@ import { Button, Text } from "react-native-elements";
 import axios from "axios";
 
 
-const QRComponent = ({setModalVisible}) => {
+const QRComponent = ({setModalVisible,lote,setLote}) => {
     const devices = Camera.getAvailableCameraDevices()
     const device = getCameraDevice(devices, 'back')    
     const [restult, setResult] = React.useState('')
@@ -17,26 +17,23 @@ const QRComponent = ({setModalVisible}) => {
     const checkPermission = async () => {
         const newCameraPermission = await Camera.requestCameraPermission();
         const newMicrophonePermission = await Camera.requestMicrophonePermission();
-        console.log(newCameraPermission,'permiso');
     }
-    console.log(device);
     if(device == null) return <ActivityIndicator />
     
     const codeScanner: CodeScanner = {
         codeTypes: ['qr', 'ean-13','upc-a','code-128'],
         onCodeScanned: (codes) => {
-            console.log(codes); 
             setResult(codes[0].value);
         }
       }
 
     const SendQR = async()=>{
-        
+        setModalVisible(false);
+        console.log(lote);
+        lote['LOBARCODE'] = restult;
+        setLote(lote);
     }
 
-    const showToast = (text) => {
-        ToastAndroid.show(text, ToastAndroid.SHORT);
-      };
  
   return (
     <View style={{marginTop:'auto', width:'70%', height:'80%', marginStart:'auto', marginEnd:'auto'}}>

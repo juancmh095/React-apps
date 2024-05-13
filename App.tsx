@@ -8,13 +8,16 @@
 import { Button, Icon, Tab, Text, ListItem } from '@rneui/base';
 import { Input } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
-import { Alert, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import axios from 'axios';
 import * as rqdata from './components/params_request';
 import DatePicker from 'react-native-date-picker'
 import { Picker } from '@react-native-picker/picker';
 import { ButtonGroup } from 'react-native-elements';
 import FormsComponents  from './components/forms.tsx';
+import { Formik } from 'formik';
+
+import QRComponent from './components/code.tsx' ;
 
 
 function App() {
@@ -26,12 +29,18 @@ function App() {
   const [labels, setLabels] = React.useState(null);
   const [labelsArry, setLabelsArry] = React.useState([]);
   const [dataSelect, setDataSelect] = React.useState(null);
+  const [cat1, setCat1] = React.useState([]);
+  const [cat2, setCat2] = React.useState([]);
   const [btnHeader, setBtnHeader] = React.useState([]);
   const [btnFooter, setBtnFooter] = React.useState([]);
   const [modalVisible, setModalVisible] = React.useState(false);
-  /* VARIABLES DEL DATEPICKER */
-  const [datePk, setDatePk] = React.useState(new Date())
-  const [openPk, setOpenPk] = React.useState(false)
+  const [modalVisible2, setModalVisible2] = React.useState(false);
+  const [lote, setLote] = React.useState({})
+   /* variables del picker */
+   const [datePk, setDatePk] = React.useState(new Date())
+   const [openPk, setOpenPk] = React.useState(false)
+   const [typePk, setTypePk] = React.useState('')
+   const [valuePk, setValuePk] = React.useState('')
   /* VARIABLES BTN GROUPS */
   const [selectedIndex, setSelectedIndex] = React.useState(null);
   const [selectedIndexf, setSelectedIndexf] = React.useState(null);
@@ -63,6 +72,22 @@ function App() {
       let d = JSON.parse(reponse.data.Json);
       setInputs(d.FProgramInquiry);
     }
+
+    /* CARGA LA DATA DE LOS SELECTS 1 */
+    var catR1 = await axios.post(`${url_api}`,rqdata.categoria1);
+        
+    if(catR1.data.Json){
+        let d = JSON.parse(catR1.data.Json);
+        setCat1(d.FPGMINQUIRY);
+    }
+     /* CARGA LA DATA DE LOS SELECTS 2 */
+     var catR2 = await axios.post(`${url_api}`,rqdata.categoria2);
+        
+     if(catR2.data.Json){
+         let d = JSON.parse(catR2.data.Json);
+         console.log('gruppo',d);
+         setCat2(d.FPGMINQUIRY);
+     }
   }
   const labels_list = async () => {
     var reponse = await axios.post(`${url_api}`,rqdata.labels);
@@ -92,6 +117,17 @@ function App() {
       let d = JSON.parse(reponse.data.Json);
       setDataInfo(d.FProgramInquiry);
     }
+  }
+
+  const openPicker = (campo,tipo) => {
+    setTypePk(tipo)
+    console.log(campo);
+    if(tipo == 'time'){
+        setValuePk('LOTIMEREC')
+    }else{
+        setValuePk('LODATRECEIP')
+    }
+    setOpenPk(true);
   }
 
   const btn_list = async () => {
@@ -129,20 +165,60 @@ function App() {
     }
   }
 
+  const deleteItem = async () => {
+    Alert.alert('Borrar Item','¿Está seguro de querer borrar el ítem seleccionado?', [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {text: 'Aceptar', onPress: () => console.log('OK Pressed')},
+    ]);
+  }
+
+  const closeApp = async () => {
+    Alert.alert('Salir','¿Está seguro de querer salir de la aplicación?', [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {text: 'Aceptar', onPress: () => BackHandler.exitApp()},
+    ]);
+  }
+  
+
   const openAction = async (value) => {
     console.log('v',value,selectedIndex);
      switch(selectedIndex){
         case 0:
             console.log('seleccionar',value)
-            setModalVisible(true);
-            setDataSelect({id: value, tipo:'U'});
+            var req = rqdata.get_data;
+            req.json = JSON.parse(req.json);
+            req.json.Rows[0].Data = "0|PLOTE|U|F|@0@"+value+"|";
+            req.json = JSON.stringify(req.json);
+            axios.post(`${url_api}`,req).then((reponse) => {
+              
+              let d = JSON.parse(reponse.data.Json);
+              var loteModel = d.FProgramInquiry[0];
+              console.log('lotemodel',loteModel);
+              setDataSelect({lote: loteModel, tipo:'U'})
+              setModalVisible(true);
+            });
+            
             break;
         case 2:
+          setDataSelect({lote: {}, tipo:'A'});
           setModalVisible(true);
-          setDataSelect(null);
+          break;
+        case 3:
+          deleteItem();
+          break;
+        case 4:
+          closeApp();
           break;
      }
   }
+
+  
 
 
 
@@ -162,84 +238,161 @@ function App() {
             setDataSelect(null)
             setModalVisible(true);
           }
+          if(value == 4){
+            setDataSelect(null);
+            openAction(null);
+            
+          }
           
         }}
         containerStyle={{ marginBottom: 20 }}
       />
 
-      {inputs.map((item,i)=>{
-        return(
+        <Formik
+            initialValues={{}}
+            onSubmit={values => console.log(values)}
+        >
+            {({ handleChange, setFieldValue, handleSubmit, values }) => (
+                
+                <View>
+                    {inputs.map((item,i)=>{
+                        
+                        return(
+                            (item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"  && (
+                                <Input 
+                                    placeholder={item.UDDESCRIPCION} 
+                                    maxLength={Number(item.UDLONGITUD)}
+                                    value={values[item.UDCAMPO]}
+                                    defaultValue={values[item.UDCAMPO]}
+                                    onChangeText={handleChange(item.UDCAMPO)}
+                                    onEndEditing={()=> {
+                                        lote[item.UDCAMPO] = values[item.UDCAMPO];
+                                        setLote(lote)
+                                    }}
+                                />
+                            ))                            
+                        )
+                    })}
+                    {inputs.map((item,i)=>{
+                        return(
+                            (item.UDUDC == "QR" && (
+                                <Input
+                                    placeholder={item.UDDESCRIPCION} 
+                                    rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
+                                    maxLength={Number(item.UDLONGITUD)}
+                                    onFocus={()=> setModalVisible2(true)}
+                                    value={values[item.UDCAMPO]}
+                                    onChangeText={handleChange(item.UDCAMPO)}
+                                    onEndEditing={()=> setLote(values)}
+                                />
+                    
+                            ))                           
+                        )
+                    })}
 
-          <View>
-            {(item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"  && (
-              <Input 
-                placeholder={item.UDDESCRIPCION} 
-                maxLength={Number(item.UDLONGITUD)}
-              />
-            ))}
+                    {inputs.map((item,i)=>{
+                        return(
+                            (item.UDUDC == "FYEAR_AEYEAR" && (
+                                <View style={styles.select}>
+                                    <Picker
+                                        style={{color:'black'}}
+                                        selectedValue={values[item.UDCAMPO]}
+                                        onValueChange={handleChange(item.UDCAMPO)}
+                                    >
+                                        <Picker.Item label='Categoria 1' value='' />
+                                        {cat1.map((item) => {
+                                            return(
+                                                <Picker.Item label={item.Valor} value={item.Valor} />
+                                            )
+                                        })}
+                                    </Picker> 
+                                </View>
+                
+                            ))                       
+                        )
+                    })}
+                    {inputs.map((item,i)=>{
+                        return(
+                            (item.UDUDC == "GRUPO" && (
+                                <View style={styles.select}>
+                                    <Picker
+                                        style={{color:'black'}}
+                                        selectedValue={values[item.UDCAMPO]}
+                                        onValueChange={handleChange(item.UDCAMPO)}
+                                    >
+                                        <Picker.Item label='Categoria 2' value='' />
+                                        {cat2.map((item) => {
+                                            return(
+                                                <Picker.Item label={item.Valor} value={item.Valor} />
+                                            )
+                                        })}
+                                    </Picker> 
+                                </View>
+                
+                            ))                       
+                        )
+                    })}
+                    {inputs.map((item,i)=>{
+                        return(
+                            (item.UDTIPO == "D" && (
+                                <Input 
+                                    placeholder={item.UDDESCRIPCION} 
+                                    maxLength={Number(item.UDLONGITUD)}
+                                    onFocus={()=> openPicker(item.UDCAMPO,'date')}
+                                    onChangeText={handleChange(item.UDCAMPO)}
+                                    value={values[item.UDCAMPO]}
+                                />
+                            ))                       
+                        )
+                    })}
+                    {inputs.map((item,i)=>{
+                        return(
+                            (item.UDTIPO == "T" && (
+                                <Input 
+                                    placeholder={item.UDDESCRIPCION} 
+                                    maxLength={Number(item.UDLONGITUD)}
+                                    onFocus={()=> openPicker(item.UDCAMPO,'time')}
+                                    onChangeText={handleChange(item.UDCAMPO)}
+                                    value={values[item.UDCAMPO]}
+                                />
+                            ))                       
+                        )
+                    })}
+                    
+                    <View>
+                        <DatePicker
+                            modal
+                            open={openPk}
+                            date={datePk}
+                            mode={typePk}
+                            onConfirm={(date) => {
+                                setOpenPk(false)
+                                const regex = /[:,-]/gm;
+                                date = date.toISOString();
+                                var d = date.split('T')
 
-            {(item.UDUDC == "QR" && (
-              <Input
-                placeholder={item.UDDESCRIPCION} 
-                rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
-                maxLength={Number(item.UDLONGITUD)}
-                onChangeText={value => this.setState({ comment: value })}
-              />
-  
-            ))}
-  
-            {(item.UDUDC == "FYEAR_AEYEAR" && (
-              <Picker>
-                <Picker.Item label="Java" value="java" />
-                <Picker.Item label="JavaScript" value="js" />
-              </Picker> 
-  
-            ))}
+                                if(typePk == 'time'){
+                                    d = d[1].split('.');
+                                    console.log(d);
+                                    d = d[0].replace(regex,'');
+                                }else{
+                                    d = d[0].replace(regex,'')
+                                }
+                                setFieldValue(valuePk,d)
+                                lote[valuePk] = d;
+                                setLote(lote)
+                            }}
+                            onCancel={() => {
+                              setOpenPk(false)
+                            }}
+                        />
+                    </View>
+                </View>
+                    
+                
+            )}
 
-            {(item.UDUDC == "GRUPO" && (
-              <Picker>
-                <Picker.Item label="Java" value="java" />
-                <Picker.Item label="JavaScript" value="js" />
-              </Picker> 
-  
-            ))}
-
-            {(item.UDTIPO == "D" && (
-              <Input 
-                placeholder={item.UDDESCRIPCION} 
-                maxLength={Number(item.UDLONGITUD)}
-                onFocus={()=> setOpenPk(true)}
-              />
-            ))}
-
-            {(item.UDTIPO == "T" && (
-              <Input 
-                placeholder={item.UDDESCRIPCION} 
-                maxLength={Number(item.UDLONGITUD)}
-                onFocus={()=> setOpenPk(true)}
-              />
-            ))}
-          </View>
-          
-          
-        )
-        
-      })}
-
-        <View>
-          <DatePicker
-            modal
-            open={openPk}
-            date={datePk}
-            onConfirm={(date) => {
-              setOpenPk(false)
-              setDatePk(date)
-            }}
-            onCancel={() => {
-              setOpenPk(false)
-            }}
-          />
-        </View>
+        </Formik>
         <ScrollView>
           {dataInfo.map((item,i) => {
             return(
@@ -285,13 +438,23 @@ function App() {
             animationType="slide"
             transparent={false}
             visible={modalVisible}
-            onRequestClose={() => {
-              Alert.alert('Modal has been closed.');
-              setModalVisible(!modalVisible);
-            }}>
+            >
             <View>
               <View>
                 <FormsComponents setModalVisible={setModalVisible} data={dataSelect} />                
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible2}
+          >
+            <View>
+              <View>
+                <QRComponent setModalVisible={setModalVisible2} lote={lote} setLote={setLote} />                
               </View>
             </View>
           </Modal>
@@ -301,6 +464,14 @@ function App() {
   );
 };
 
-
+const styles = StyleSheet.create({
+  select: {
+      borderBottomWidth:1,
+      borderBottomColor:'gray',
+      color:'black',
+      margin:10,
+      marginTop: 0
+  }
+})
 
 export default App;
