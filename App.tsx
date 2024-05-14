@@ -64,7 +64,7 @@ function App() {
 
   const _api_init = async () => {
     console.log('api');
-    var reponse = await axios.post(`${url_api}`,rqdata.init);
+    var reponse = await axios.post(`${url_api}`,rqdata.btn_buscar);
     
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);

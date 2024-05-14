@@ -20,13 +20,16 @@ const FormsComponents = (props) => {
   const formikRef = useRef();
   const url_api = "http://20.64.97.37/api/products";
   const [inputs, setInputs] = React.useState([]);
-  
+  const [inputsReq, setInputsReq] = React.useState([]);
+
   const [btnHeader, setBtnHeader] = React.useState([]);
   const [cat1, setCat1] = React.useState([]);
   const [cat2, setCat2] = React.useState([]);
   const [lote, setLote] = React.useState(props.data?props.data.lote:{});
   const [modalVisible, setModalVisible] = React.useState(false)
   const [code, setCode] = React.useState(false)
+  const [labels, setLabels] = React.useState(null);
+  const [labelsArry, setLabelsArry] = React.useState([]);
  
   /* variables de json error */
   const [visible, setVisible] = React.useState(false)
@@ -49,8 +52,19 @@ const FormsComponents = (props) => {
       let d = JSON.parse(reponse.data.Json);
       var inpts = d.FProgramInquiry
       setInputs(d.FProgramInquiry);
+
+      var reqre = [];
+      for (let i = 0; i < d.FProgramInquiry.length; i++) {
+        const element = d.FProgramInquiry [i];
+        console.log(element, element.REQUERIDO);
+        if(element.REQUERIDO == 'R'){
+          reqre.push(element.UDCAMPO);
+        }
+      }
+      setInputsReq(reqre);
       console.log(d);
-     
+    
+      labels_list()
       
         /* CARGAR LOS BOTONES */
         console.log('api');
@@ -91,6 +105,26 @@ const FormsComponents = (props) => {
   };
 
 
+  const labels_list = async () => {
+    var reponse = await axios.post(`${url_api}`,rqdata.labels);
+    
+    if(reponse.data.Json){
+      let d = JSON.parse(reponse.data.Json);
+      var lbs = {};
+      var dArr = [];
+      for (let i = 0; i < d.FProgramInquiry.length; i++) { 
+        const element = d.FProgramInquiry[i];
+        lbs[element.UDCAMPO] = element.UDDESCRIPCION
+        let fil = dArr.filter(item => item == element.UDCAMPO);
+        if(fil.length == 0){
+          dArr.push(element.UDCAMPO);
+        }
+      }
+      setLabels(lbs);
+      setLabelsArry(dArr);
+    }
+  }
+
   useEffect(() => {
     _api_init();
 
@@ -106,41 +140,62 @@ const FormsComponents = (props) => {
     console.log(value);
     switch (value) {
         case 0:
-            console.log(lote,props);
-            let body = rqdata.guardar;
-            let json = JSON.parse(body.json);
-            if(props.data){
-                const regex = /[:,/]/gm;
-                let dta = lote.LODATRECEIP.replace(regex,'');
-                json.Parameter = 'U|0|' + lote.LOITEM+'|'+lote.LOBARCODE+'|'+lote.LOCAT1+'|'+lote.LOCAT2+'|'+dta+'|'+lote.LOTIMEREC+'|'
-                body.json = JSON.stringify(json);
-                let guardar = await axios.post(`${url_api}`,body);
-                console.log(guardar.data);
-                if(guardar.data.Json === 'OK'){
-                    ToastAndroid.show('Actualizado correctamente', ToastAndroid.LONG);
-                    props.setModalVisible(false);
+            var lte = formikRef.current.values;
+            var validate = false;
+            var count = 0;
+            var lbls = ""
+            for (let x = 0; x < inputsReq.length; x++) {
+            const element = inputsReq[x];
+            if(lte[element] && lte[element] != ""){
+                count = count + 1;
+            }else{
+                lbls = lbls +","+ labels[element];
+            }
+            }
+
+            if(count == inputsReq.length){
+            validate = true;
+            }
+            
+            if(validate){
+                console.log(lote,props);
+                let body = rqdata.guardar;
+                let json = JSON.parse(body.json);
+                if(props.data){
+                    const regex = /[:,/]/gm;
+                    let dta = lote.LODATRECEIP.replace(regex,'');
+                    json.Parameter = 'U|0|' + lote.LOITEM+'|'+lote.LOBARCODE+'|'+lote.LOCAT1+'|'+lote.LOCAT2+'|'+dta+'|'+lote.LOTIMEREC+'|'
+                    body.json = JSON.stringify(json);
+                    let guardar = await axios.post(`${url_api}`,body);
+                    console.log(guardar.data);
+                    if(guardar.data.Json === 'OK'){
+                        ToastAndroid.show('Actualizado correctamente', ToastAndroid.LONG);
+                        props.setModalVisible(false);
+                    }else{
+                        setErrors(JSON.stringify(guardar.data.Json))
+                    }
                 }else{
-                    setErrors(JSON.stringify(guardar.data.Json))
+                    const regex = /[:,/]/gm;
+                    let dta = lote.LODATRECEIP.replace(regex,'');
+                    var lte = formikRef.current.values;
+                    json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'
+                    body.json = JSON.stringify(json);
+                    let guardar = await axios.post(`${url_api}`,body);
+                    console.log(guardar.data);
+                    if(guardar.data.Json === 'OK'){
+                        ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
+                        setLote({});
+                        console.log('current',formikRef.current.values)
+                        formikRef.current.values = {}
+                        formikRef.current.values = {}
+                        formikRef.current.resetForm({})
+                        formikRef.current.resetForm({})
+                    }else{
+                        setErrors(JSON.stringify(guardar.data.Json))
+                    }
                 }
             }else{
-                const regex = /[:,/]/gm;
-                let dta = lote.LODATRECEIP.replace(regex,'');
-                var lte = formikRef.current.values;
-                json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'
-                body.json = JSON.stringify(json);
-                let guardar = await axios.post(`${url_api}`,body);
-                console.log(guardar.data);
-                if(guardar.data.Json === 'OK'){
-                    ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
-                    setLote({});
-                    console.log('current',formikRef.current.values)
-                    formikRef.current.values = {}
-                    formikRef.current.values = {}
-                    formikRef.current.resetForm({})
-                    formikRef.current.resetForm({})
-                }else{
-                    setErrors(JSON.stringify(guardar.data.Json))
-                }
+                ToastAndroid.show((lbls.toUpperCase())+' no pueden ir vacíos', ToastAndroid.LONG);
             }
 
             /* pendeinte de guardar */

@@ -14,6 +14,21 @@ module.exports = {
         }),
         Category:"Mi App"
     },
+    btn_buscar:{
+      Id:1,
+      json:JSON.stringify({
+        user:"22",
+        psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+        Escuela:"0",
+        Tipo:"App",
+        Tabla:"ProgramInquiry",
+        Rows:[{
+          action:"I",
+          Data:"0|PLOTE|I|B||"
+        }]
+      }),
+      Category:"Mi App"
+  },
     labels:{
         Id:1,
         json:JSON.stringify({
