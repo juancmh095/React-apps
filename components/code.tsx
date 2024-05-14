@@ -5,7 +5,7 @@ import { Button, Text } from "react-native-elements";
 import axios from "axios";
 
 
-const QRComponent = ({setModalVisible,lote,setLote}) => {
+const QRComponent = ({setModalVisible,lote,setLote, form}) => {
     const devices = Camera.getAvailableCameraDevices()
     const device = getCameraDevice(devices, 'back')    
     const [restult, setResult] = React.useState('')
@@ -32,6 +32,7 @@ const QRComponent = ({setModalVisible,lote,setLote}) => {
         console.log(lote);
         lote['LOBARCODE'] = restult;
         setLote(lote);
+        form.current.setFieldValue('LOBARCODE',restult);
     }
 
  

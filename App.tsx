@@ -8,7 +8,7 @@
 import { Button, Icon, Tab, Text, ListItem } from '@rneui/base';
 import { Input } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
-import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
 import axios from 'axios';
 import * as rqdata from './components/params_request';
 import DatePicker from 'react-native-date-picker'
@@ -22,12 +22,13 @@ import QRComponent from './components/code.tsx' ;
 
 function App() {
 
-  const ref = useRef();
+  const formikRef = useRef();
   const url_api = "http://20.64.97.37/api/products";
   const [inputs, setInputs] = React.useState([]);
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
   const [labelsArry, setLabelsArry] = React.useState([]);
+  const [inputsReq, setInputsReq] = React.useState([]);
   const [dataSelect, setDataSelect] = React.useState(null);
   const [cat1, setCat1] = React.useState([]);
   const [cat2, setCat2] = React.useState([]);
@@ -52,9 +53,6 @@ function App() {
     if(!labels){
       labels_list();
     }
-    if(dataInfo.length == 0){
-      data_list();
-    }
     if(btnHeader.length == 0){
       btn_list();
     }
@@ -71,6 +69,15 @@ function App() {
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       setInputs(d.FProgramInquiry);
+      var reqre = [];
+      for (let i = 0; i < d.FProgramInquiry.length; i++) {
+        const element = d.FProgramInquiry [i];
+        console.log(element, element.REQUERIDO);
+        if(element.REQUERIDO == 'R'){
+          reqre.push(element.UDCAMPO);
+        }
+      }
+      setInputsReq(reqre);
     }
 
     /* CARGA LA DATA DE LOS SELECTS 1 */
@@ -109,15 +116,6 @@ function App() {
     }
   }
 
-  const data_list = async () => {
-    console.log('api');
-    var reponse = await axios.post(`${url_api}`,rqdata.list_data);
-    
-    if(reponse.data.Json){
-      let d = JSON.parse(reponse.data.Json);
-      setDataInfo(d.FProgramInquiry);
-    }
-  }
 
   const openPicker = (campo,tipo) => {
     setTypePk(tipo)
@@ -199,6 +197,13 @@ function App() {
               
               let d = JSON.parse(reponse.data.Json);
               var loteModel = d.FProgramInquiry[0];
+              let ndate = (loteModel.LODATRECEIP).split('/');
+              ndate = new Date(Number(ndate[2]),(Number(ndate[1])-1),Number(ndate[0])).toISOString();
+              console.log(ndate);
+              ndate = ndate.split('T')[0];
+              const regex = /[:,-]/gm;
+              ndate = ndate.replace(regex,'');
+              loteModel.LODATRECEIP = ndate;
               console.log('lotemodel',loteModel);
               setDataSelect({lote: loteModel, tipo:'U'})
               setModalVisible(true);
@@ -209,13 +214,54 @@ function App() {
           setDataSelect({lote: {}, tipo:'A'});
           setModalVisible(true);
           break;
-        case 3:
-          deleteItem();
-          break;
-        case 4:
-          closeApp();
-          break;
      }
+  }
+
+  const buscarItem = async () => {
+    console.log(labels,inputsReq);
+    var lte = formikRef.current.values;
+    var validate = false;
+    var count = 0;
+    var lbls = ""
+    for (let x = 0; x < inputsReq.length; x++) {
+      const element = inputsReq[x];
+      if(lte[element] && lte[element] != ""){
+          count = count + 1;
+      }else{
+        lbls = lbls +","+ labels[element];
+      }
+    }
+
+    if(count == inputsReq.length){
+      validate = true;
+    }
+    
+    if(validate){
+      console.log('Buscar');
+      let body = rqdata.buscar;
+      let json = JSON.parse(body.json);
+      let row = json.Rows;
+      let r = "0|PLOTE|F|B|@0@" + (lte.LOITEM?lte.LOITEM:"") +'@'+(lte.LOBARCODE?lte.LOBARCODE:"")+'@'+(lte.LOCAT1?lte.LOCAT1:"")+'@'+(lte.LOCAT2?lte.LOCAT2:"")+'@'+(lte.LODATRECEIP?lte.LODATRECEIP:"")+'@'+(lte.LOTIMEREC?lte.LOTIMEREC:"")+'@@|';
+      row[0]['Data'] = r;
+      console.log(r,lte)
+      json.Rows = row;
+      body.json = JSON.stringify(json);
+      console.log(body);
+      let response = await axios.post(`${url_api}`,body);
+      console.log("x",response.data);
+      if(response.data.Json != ""){
+        var dat = JSON.parse(response.data.Json);
+        dat = dat.FProgramInquiry;
+        if(dat.length > 0){
+          setDataInfo(dat);
+        }
+        
+      }else{
+        setDataInfo([]);
+      }
+    }else{
+      ToastAndroid.show((lbls.toUpperCase())+' no pueden ir vacíos', ToastAndroid.LONG);
+    }
   }
 
   
@@ -239,9 +285,15 @@ function App() {
             setModalVisible(true);
           }
           if(value == 4){
-            setDataSelect(null);
-            openAction(null);
+            closeApp()
             
+          }
+          if(value == 1){
+            buscarItem();
+          }
+
+          if(value == 3){
+            deleteItem();
           }
           
         }}
@@ -250,7 +302,10 @@ function App() {
 
         <Formik
             initialValues={{}}
+            key={'form1'}
             onSubmit={values => console.log(values)}
+            innerRef={formikRef}
+            
         >
             {({ handleChange, setFieldValue, handleSubmit, values }) => (
                 
@@ -260,6 +315,7 @@ function App() {
                         return(
                             (item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"  && (
                                 <Input 
+                                    key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
@@ -277,6 +333,7 @@ function App() {
                         return(
                             (item.UDUDC == "QR" && (
                                 <Input
+                                    key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
                                     rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
                                     maxLength={Number(item.UDLONGITUD)}
@@ -298,11 +355,12 @@ function App() {
                                         style={{color:'black'}}
                                         selectedValue={values[item.UDCAMPO]}
                                         onValueChange={handleChange(item.UDCAMPO)}
+                                        key={item.UDCAMPO}
                                     >
                                         <Picker.Item label='Categoria 1' value='' />
                                         {cat1.map((item) => {
                                             return(
-                                                <Picker.Item label={item.Valor} value={item.Valor} />
+                                                <Picker.Item key={item.Valor} label={item.Valor} value={item.Valor} />
                                             )
                                         })}
                                     </Picker> 
@@ -316,6 +374,7 @@ function App() {
                             (item.UDUDC == "GRUPO" && (
                                 <View style={styles.select}>
                                     <Picker
+                                        key={item.UDCAMPO}
                                         style={{color:'black'}}
                                         selectedValue={values[item.UDCAMPO]}
                                         onValueChange={handleChange(item.UDCAMPO)}
@@ -323,7 +382,7 @@ function App() {
                                         <Picker.Item label='Categoria 2' value='' />
                                         {cat2.map((item) => {
                                             return(
-                                                <Picker.Item label={item.Valor} value={item.Valor} />
+                                                <Picker.Item key={item.Valor} label={item.Valor} value={item.Valor} />
                                             )
                                         })}
                                     </Picker> 
@@ -336,6 +395,7 @@ function App() {
                         return(
                             (item.UDTIPO == "D" && (
                                 <Input 
+                                    key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     onFocus={()=> openPicker(item.UDCAMPO,'date')}
@@ -349,6 +409,7 @@ function App() {
                         return(
                             (item.UDTIPO == "T" && (
                                 <Input 
+                                    key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     onFocus={()=> openPicker(item.UDCAMPO,'time')}
@@ -397,6 +458,7 @@ function App() {
           {dataInfo.map((item,i) => {
             return(
               <ListItem.Swipeable
+                key={i + '-LIST'}
                 onLongPress={()=> open_modal_info(item['LOITEM'])}
                 onPress={() => openAction(item['LOITEM'])}
                 rightContent={(reset) => (
@@ -412,7 +474,7 @@ function App() {
                 <ListItem.Content>
                   {labelsArry.map((label,x) => {
                     return(
-                      <ListItem.Title>{labels[label]}: {item[label]} </ListItem.Title>
+                      <ListItem.Title key={label+x+i}>{labels[label]}: {item[label]} </ListItem.Title>
                     )
                   })}
                 </ListItem.Content>
@@ -454,7 +516,7 @@ function App() {
           >
             <View>
               <View>
-                <QRComponent setModalVisible={setModalVisible2} lote={lote} setLote={setLote} />                
+                <QRComponent setModalVisible={setModalVisible2} lote={lote} setLote={setLote} form={formikRef} />                
               </View>
             </View>
           </Modal>

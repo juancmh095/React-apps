@@ -137,13 +137,28 @@ module.exports = {
   guardar:{
     Id:1,
     json:JSON.stringify({
-      user:"22",
-      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
       Function:'ValidateInfo',
       Program:'FLOTE',
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
       ID:"0",
       Parameter:""
     }),
     Category:"Utilerias"
+  },
+  buscar: {
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"ProgramInquiry",
+      Rows:[{
+        action:"I",
+        Data:""
+      }]
+    }),
+    Category:"Mi App"
   }
 }

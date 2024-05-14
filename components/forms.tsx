@@ -17,6 +17,7 @@ import { TextInput } from 'react-native';
 const FormsComponents = (props) => {
     console.log(props);
   const ref = useRef();
+  const formikRef = useRef();
   const url_api = "http://20.64.97.37/api/products";
   const [inputs, setInputs] = React.useState([]);
   
@@ -105,14 +106,43 @@ const FormsComponents = (props) => {
     console.log(value);
     switch (value) {
         case 0:
-            console.log(lote);
+            console.log(lote,props);
             let body = rqdata.guardar;
             let json = JSON.parse(body.json);
-            json.Parameter = lote.LOITEM+'|'+lote.LOBARCODE+'|'+lote.LOCAT1+'|'+lote.LOCAT2+'|'+lote.LODATRECEIP+'|'+lote.LOTIMEREC+'|'
-            body.json = JSON.stringify(json);
-            console.log(body);
-            var guardar = await axios.post(`${url_api}`,body);
-            console.log(guardar.data);
+            if(props.data){
+                const regex = /[:,/]/gm;
+                let dta = lote.LODATRECEIP.replace(regex,'');
+                json.Parameter = 'U|0|' + lote.LOITEM+'|'+lote.LOBARCODE+'|'+lote.LOCAT1+'|'+lote.LOCAT2+'|'+dta+'|'+lote.LOTIMEREC+'|'
+                body.json = JSON.stringify(json);
+                let guardar = await axios.post(`${url_api}`,body);
+                console.log(guardar.data);
+                if(guardar.data.Json === 'OK'){
+                    ToastAndroid.show('Actualizado correctamente', ToastAndroid.LONG);
+                    props.setModalVisible(false);
+                }else{
+                    setErrors(JSON.stringify(guardar.data.Json))
+                }
+            }else{
+                const regex = /[:,/]/gm;
+                let dta = lote.LODATRECEIP.replace(regex,'');
+                var lte = formikRef.current.values;
+                json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'
+                body.json = JSON.stringify(json);
+                let guardar = await axios.post(`${url_api}`,body);
+                console.log(guardar.data);
+                if(guardar.data.Json === 'OK'){
+                    ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
+                    setLote({});
+                    console.log('current',formikRef.current.values)
+                    formikRef.current.values = {}
+                    formikRef.current.values = {}
+                    formikRef.current.resetForm({})
+                    formikRef.current.resetForm({})
+                }else{
+                    setErrors(JSON.stringify(guardar.data.Json))
+                }
+            }
+
             /* pendeinte de guardar */
 
             break;
@@ -160,6 +190,7 @@ const FormsComponents = (props) => {
 
         <Formik
             initialValues={lote}
+            innerRef={formikRef}
             onSubmit={values => console.log(values)}
         >
             {({ handleChange, setFieldValue, handleSubmit, values }) => (
@@ -173,12 +204,7 @@ const FormsComponents = (props) => {
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
-                                    defaultValue={values[item.UDCAMPO]}
                                     onChangeText={handleChange(item.UDCAMPO)}
-                                    onEndEditing={()=> {
-                                        lote[item.UDCAMPO] = values[item.UDCAMPO];
-                                        setLote(lote)
-                                    }}
                                 />
                             ))                            
                         )
@@ -193,7 +219,6 @@ const FormsComponents = (props) => {
                                     onFocus={()=> setModalVisible(true)}
                                     value={values[item.UDCAMPO]}
                                     onChangeText={handleChange(item.UDCAMPO)}
-                                    onEndEditing={()=> setLote(values)}
                                 />
                     
                             ))                           
@@ -247,7 +272,6 @@ const FormsComponents = (props) => {
                             (item.UDTIPO == "D" && (
                                 <Input 
                                     placeholder={item.UDDESCRIPCION} 
-                                    maxLength={Number(item.UDLONGITUD)}
                                     onFocus={()=> openPicker(item.UDCAMPO,'date')}
                                     onChangeText={handleChange(item.UDCAMPO)}
                                     value={values[item.UDCAMPO]}
@@ -260,7 +284,6 @@ const FormsComponents = (props) => {
                             (item.UDTIPO == "T" && (
                                 <Input 
                                     placeholder={item.UDDESCRIPCION} 
-                                    maxLength={Number(item.UDLONGITUD)}
                                     onFocus={()=> openPicker(item.UDCAMPO,'time')}
                                     onChangeText={handleChange(item.UDCAMPO)}
                                     value={values[item.UDCAMPO]}
@@ -311,7 +334,7 @@ const FormsComponents = (props) => {
         >
             <View>
               <View>
-                <QRComponent setModalVisible={setModalVisible} lote={lote} setLote={setLote} />                
+                <QRComponent setModalVisible={setModalVisible} lote={lote} setLote={setLote} form={formikRef} />                
               </View>
             </View>
           </Modal>
