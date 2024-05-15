@@ -1,5 +1,5 @@
 
-import { Input } from '@rneui/themed';
+import { Input, Icon } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
 import { Alert, Modal, StyleSheet, ToastAndroid, View } from 'react-native';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import { Formik } from 'formik';
 /* ---------------------------------- */
 import QRComponent from './code'  ;
 import { TextInput } from 'react-native';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 
 
@@ -74,9 +75,11 @@ const FormsComponents = (props) => {
             let d = JSON.parse(reponse.data.Json);
             var data = [];
             var dta = d.FINQBARRAFIX;
+            let icons = {OK:'done',Cancelar:'close',Errores:'search'}
+            let iconsColor = {Errores:'blue',OK:'green',Cancelar:'red'}
             for (let i = 0; i < dta.length; i++) {
                 const element = dta[i];
-                data.push(element.Titulo)
+                data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Titulo]} color={iconsColor[element.Titulo]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)  
                 
             }
             setBtnHeader(data)
@@ -103,6 +106,21 @@ const FormsComponents = (props) => {
   const toggleDialog = () => {
     setVisible(!visible);
   };
+
+  const changeDateTime = (setFieldValue,campo, value) => {
+    if(campo == 'LODATRECEIP'){
+      let dt = new Date(value);
+      dt = (dt.toISOString()).split('T')[0];
+      let regex = /[:,-]/gm;
+      dt = dt.replace(regex,'/');
+      setFieldValue(campo,dt);
+    }else{
+      let dt = new Date(value);
+      let hora = (dt.getHours())+':'+dt.getMinutes()+':0'+dt.getSeconds()
+      setFieldValue(campo,hora);
+      console.log(hora);
+    }
+  }
 
 
   const labels_list = async () => {
@@ -326,8 +344,10 @@ const FormsComponents = (props) => {
                         return(
                             (item.UDTIPO == "D" && (
                                 <Input 
+                                    key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
-                                    onFocus={()=> openPicker(item.UDCAMPO,'date')}
+                                    maxLength={Number(item.UDLONGITUD)}
+                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
                                     onChangeText={handleChange(item.UDCAMPO)}
                                     value={values[item.UDCAMPO]}
                                 />
@@ -338,8 +358,10 @@ const FormsComponents = (props) => {
                         return(
                             (item.UDTIPO == "T" && (
                                 <Input 
+                                    key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
-                                    onFocus={()=> openPicker(item.UDCAMPO,'time')}
+                                    maxLength={Number(item.UDLONGITUD)}
+                                    onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
                                     onChangeText={handleChange(item.UDCAMPO)}
                                     value={values[item.UDCAMPO]}
                                 />
@@ -415,6 +437,15 @@ const styles = StyleSheet.create({
         color:'black',
         margin:10,
         marginTop: 0
+    },
+    navBarLeftButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    buttonText: {
+        flex: 1,
+        paddingRight: '40px',
+        textAlign: 'center',
     }
 })
 

@@ -11,13 +11,15 @@ import React, { useEffect, useRef } from 'react';
 import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
 import axios from 'axios';
 import * as rqdata from './components/params_request';
-import DatePicker from 'react-native-date-picker'
+//import DatePicker from 'react-native-date-picker'
+import { TimeDatePicker, Modes } from "react-native-time-date-picker";
 import { Picker } from '@react-native-picker/picker';
 import { ButtonGroup } from 'react-native-elements';
 import FormsComponents  from './components/forms.tsx';
 import { Formik } from 'formik';
 
 import QRComponent from './components/code.tsx' ;
+import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 
 function App() {
@@ -116,16 +118,19 @@ function App() {
     }
   }
 
-
-  const openPicker = (campo,tipo) => {
-    setTypePk(tipo)
-    console.log(campo);
-    if(tipo == 'time'){
-        setValuePk('LOTIMEREC')
+  const changeDateTime = (setFieldValue,campo, value) => {
+    if(campo == 'LODATRECEIP'){
+      let dt = new Date(value);
+      dt = (dt.toISOString()).split('T')[0];
+      let regex = /[:,-]/gm;
+      dt = dt.replace(regex,'/');
+      setFieldValue(campo,dt);
     }else{
-        setValuePk('LODATRECEIP')
+      let dt = new Date(value);
+      let hora = (dt.getHours())+':'+dt.getMinutes()+':0'+dt.getSeconds()
+      setFieldValue(campo,hora);
+      console.log(hora);
     }
-    setOpenPk(true);
   }
 
   const btn_list = async () => {
@@ -136,10 +141,11 @@ function App() {
       let d = JSON.parse(reponse.data.Json);
       var data = [];
       var dta = d.FINQBARRA;
+      let icons = {Buscar:'search',Agregar:'add',Salir:'close'}
+      let iconsColor = {Buscar:'blue',Agregar:'green',Salir:'red'}
       for (let i = 0; i < dta.length; i++) {
         const element = dta[i];
-        data.push(element.Titulo)
-        
+        data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Titulo]} color={iconsColor[element.Titulo]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
       }
       setBtnHeader(data)
     }
@@ -155,21 +161,39 @@ function App() {
       var dta = d.FBARRAPROGRAM;
       for (let i = 0; i < dta.length; i++) {
         const element = dta[i];
-        data.push(element.OPTITULO)
+        let icons = {Items:'playlist-add',Branchs:'business',Udc:'filter-alt'}
         
+        data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.OPTITULO]} color='green' /><Text style={styles.buttonText}>{element.OPTITULO}</Text></View>) 
+
       }
       console.log(data);
       setBtnFooter(data)
     }
   }
 
-  const deleteItem = async () => {
+  const deleteItem = async (value) => {
     Alert.alert('Borrar Item','¿Está seguro de querer borrar el ítem seleccionado?', [
         {
           text: 'Cancelar',
           style: 'cancel'
         },
-        {text: 'Aceptar', onPress: () => console.log('OK Pressed')},
+        {text: 'Aceptar', onPress: async () => {
+          console.log('Buscar');
+          let body = rqdata.delete;
+          let json = JSON.parse(body.json);
+          let row = json.Rows;
+          let r = "D|0|"+value+"|";
+          row[0]['Data'] = r;
+          console.log(r)
+          json.Rows = row;
+          body.json = JSON.stringify(json);
+          console.log(body);
+          let response = await axios.post(`${url_api}`,body);
+          console.log("x",response.data);
+          if(response.data.Json == ""){
+            buscarItem();
+          }
+        }},
     ]);
   }
 
@@ -184,9 +208,8 @@ function App() {
   }
   
 
-  const openAction = async (value) => {
-    console.log('v',value,selectedIndex);
-     switch(selectedIndex){
+  const openAction = async (value, action) => {
+     switch(action){
         case 0:
             console.log('seleccionar',value)
             var req = rqdata.get_data;
@@ -197,13 +220,6 @@ function App() {
               
               let d = JSON.parse(reponse.data.Json);
               var loteModel = d.FProgramInquiry[0];
-              let ndate = (loteModel.LODATRECEIP).split('/');
-              ndate = new Date(Number(ndate[2]),(Number(ndate[1])-1),Number(ndate[0])).toISOString();
-              console.log(ndate);
-              ndate = ndate.split('T')[0];
-              const regex = /[:,-]/gm;
-              ndate = ndate.replace(regex,'');
-              loteModel.LODATRECEIP = ndate;
               console.log('lotemodel',loteModel);
               setDataSelect({lote: loteModel, tipo:'U'})
               setModalVisible(true);
@@ -280,20 +296,16 @@ function App() {
         selectedIndex={selectedIndex}
         onPress={(value) => {
           setSelectedIndex(value);
-          if(value == 2){
+          if(value == 1){
             setDataSelect(null)
             setModalVisible(true);
           }
-          if(value == 4){
+          if(value == 2){
             closeApp()
             
           }
-          if(value == 1){
+          if(value == 0){
             buscarItem();
-          }
-
-          if(value == 3){
-            deleteItem();
           }
           
         }}
@@ -398,7 +410,7 @@ function App() {
                                     key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> openPicker(item.UDCAMPO,'date')}
+                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
                                     onChangeText={handleChange(item.UDCAMPO)}
                                     value={values[item.UDCAMPO]}
                                 />
@@ -412,7 +424,7 @@ function App() {
                                     key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> openPicker(item.UDCAMPO,'time')}
+                                    onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
                                     onChangeText={handleChange(item.UDCAMPO)}
                                     value={values[item.UDCAMPO]}
                                 />
@@ -421,32 +433,6 @@ function App() {
                     })}
                     
                     <View>
-                        <DatePicker
-                            modal
-                            open={openPk}
-                            date={datePk}
-                            mode={typePk}
-                            onConfirm={(date) => {
-                                setOpenPk(false)
-                                const regex = /[:,-]/gm;
-                                date = date.toISOString();
-                                var d = date.split('T')
-
-                                if(typePk == 'time'){
-                                    d = d[1].split('.');
-                                    console.log(d);
-                                    d = d[0].replace(regex,'');
-                                }else{
-                                    d = d[0].replace(regex,'')
-                                }
-                                setFieldValue(valuePk,d)
-                                lote[valuePk] = d;
-                                setLote(lote)
-                            }}
-                            onCancel={() => {
-                              setOpenPk(false)
-                            }}
-                        />
                     </View>
                 </View>
                     
@@ -459,12 +445,12 @@ function App() {
             return(
               <ListItem.Swipeable
                 key={i + '-LIST'}
-                onLongPress={()=> open_modal_info(item['LOITEM'])}
-                onPress={() => openAction(item['LOITEM'])}
+                onLongPress={()=> openAction(item['LOITEM'],0)}
+                onPress={() => openAction(item['LOITEM'],0)}
                 rightContent={(reset) => (
                   <Button
-                    title="Delete"
-                    onPress={() => reset()}
+                    title="Borrar"
+                    onPress={() => deleteItem(item['LOITEM'])}
                     icon={{ name: 'delete', color: 'white' }}
                     buttonStyle={{ minHeight: '100%', backgroundColor: 'red' }}
                   />
@@ -533,6 +519,15 @@ const styles = StyleSheet.create({
       color:'black',
       margin:10,
       marginTop: 0
+  },
+  navBarLeftButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  buttonText: {
+    flex: 1,
+    paddingRight: '40px',
+    textAlign: 'center',
   }
 })
 

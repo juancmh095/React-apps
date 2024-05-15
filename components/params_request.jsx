@@ -175,5 +175,20 @@ module.exports = {
       }]
     }),
     Category:"Mi App"
+  },
+  delete: {
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"PLOTE",
+      Rows:[{
+        action:"D",
+        Data:""
+      }]
+    }),
+    Category:"Mi App"
   }
 }
