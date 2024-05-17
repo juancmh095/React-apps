@@ -16,7 +16,6 @@ import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 
 const FormsComponents = (props) => {
-    console.log(props);
   const ref = useRef();
   const formikRef = useRef();
   const url_api = "http://20.64.97.37/api/products";
@@ -46,40 +45,43 @@ const FormsComponents = (props) => {
   const _api_init = async () => {
 
     /* CARGAR LOS INPUTS */
-    console.log('api');
     var reponse = await axios.post(`${url_api}`,rqdata.init);
     
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
+      d.FProgramInquiry = d.FProgramInquiry.sort(function(a, b){
+        if(a.SEQUENCIA < b.SEQUENCIA) { return -1; }
+        if(a.SEQUENCIA > b.SEQUENCIA) { return 1; }
+        return 0;
+      });
       var inpts = d.FProgramInquiry
       setInputs(d.FProgramInquiry);
 
       var reqre = [];
       for (let i = 0; i < d.FProgramInquiry.length; i++) {
         const element = d.FProgramInquiry [i];
-        console.log(element, element.REQUERIDO);
         if(element.REQUERIDO == 'R'){
           reqre.push(element.UDCAMPO);
         }
       }
       setInputsReq(reqre);
-      console.log(d);
     
       labels_list()
       
         /* CARGAR LOS BOTONES */
-        console.log('api');
         var reponse = await axios.post(`${url_api}`,rqdata.buttons_header_form);
         
         if(reponse.data.Json){
             let d = JSON.parse(reponse.data.Json);
             var data = [];
             var dta = d.FINQBARRAFIX;
-            let icons = {OK:'done',Cancelar:'close',Errores:'search'}
-            let iconsColor = {Errores:'blue',OK:'green',Cancelar:'red'}
+            console.log(d);
+            let icons = {'1':'done','2':'close','3':'search'}
+            let iconsColor = {'1':'blue','2':'green','3':'red'}
             for (let i = 0; i < dta.length; i++) {
                 const element = dta[i];
-                data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Titulo]} color={iconsColor[element.Titulo]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)  
+                console.log(element);
+                data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)  
                 
             }
             setBtnHeader(data)
@@ -98,7 +100,6 @@ const FormsComponents = (props) => {
         
      if(catR2.data.Json){
          let d = JSON.parse(catR2.data.Json);
-         console.log('gruppo',d);
          setCat2(d.FPGMINQUIRY);
      }
   }
@@ -110,17 +111,17 @@ const FormsComponents = (props) => {
   const changeDateTime = (setFieldValue,campo, value) => {
     if(campo == 'LODATRECEIP'){
       let dt = new Date(value);
-      dt = (dt.toISOString()).split('T')[0];
-      let regex = /[:,-]/gm;
-      dt = dt.replace(regex,'/');
+      console.log('x',dt.toLocaleDateString('es-MX').split(' '));
+      dt = dt.toLocaleDateString('es-MX').split('/');
+      dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
       setFieldValue(campo,dt);
     }else{
       let dt = new Date(value);
-      let hora = (dt.getHours())+':'+dt.getMinutes()+':0'+dt.getSeconds()
+      let hora = dt.toLocaleTimeString('es-MX').split(' ')[0];
       setFieldValue(campo,hora);
-      console.log(hora);
     }
   }
+
 
 
   const labels_list = async () => {
@@ -147,15 +148,12 @@ const FormsComponents = (props) => {
     _api_init();
 
     return () => {
-      console.log('El componente se ha desmontado')
       setLote(lote);
-      console.log(lote);
     }
   }, [])
 
 
   const actions = async (value) => {
-    console.log(value);
     switch (value) {
         case 0:
             var lte = formikRef.current.values;
@@ -176,7 +174,6 @@ const FormsComponents = (props) => {
             }
             
             if(validate){
-                console.log(lote,props);
                 let body = rqdata.guardar;
                 let json = JSON.parse(body.json);
                 if(props.data){
@@ -185,7 +182,6 @@ const FormsComponents = (props) => {
                     json.Parameter = 'U|0|' + lote.LOITEM+'|'+lote.LOBARCODE+'|'+lote.LOCAT1+'|'+lote.LOCAT2+'|'+dta+'|'+lote.LOTIMEREC+'|'
                     body.json = JSON.stringify(json);
                     let guardar = await axios.post(`${url_api}`,body);
-                    console.log(guardar.data);
                     if(guardar.data.Json === 'OK'){
                         ToastAndroid.show('Actualizado correctamente', ToastAndroid.LONG);
                         props.setModalVisible(false);
@@ -199,11 +195,9 @@ const FormsComponents = (props) => {
                     json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'
                     body.json = JSON.stringify(json);
                     let guardar = await axios.post(`${url_api}`,body);
-                    console.log(guardar.data);
                     if(guardar.data.Json === 'OK'){
                         ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
                         setLote({});
-                        console.log('current',formikRef.current.values)
                         formikRef.current.values = {}
                         formikRef.current.values = {}
                         formikRef.current.resetForm({})
@@ -232,7 +226,6 @@ const FormsComponents = (props) => {
 
   const openPicker = (campo,tipo) => {
     setTypePk(tipo)
-    console.log(campo);
     if(tipo == 'time'){
         setValuePk('LOTIMEREC')
     }else{
@@ -255,6 +248,8 @@ const FormsComponents = (props) => {
       <ButtonGroup
         buttons={btnHeader}
         selectedIndex={selectedIndex}
+        buttonStyle={{backgroundColor:'#E1E1E1'}}
+        buttonContainerStyle={{borderColor:'gray'}}
         onPress={(value) => {
           actions(value);
         }}
@@ -270,132 +265,110 @@ const FormsComponents = (props) => {
                 
                 <View>
                     {inputs.map((item,i)=>{
-                        
-                        return(
-                            (item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"  && (
+                        if(item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"){
+                            return(
                                 <Input 
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
+                                    style={styles.formControl}
+                                    containerStyle={{margin:0, padding:0, height:50}}
+                                    inputContainerStyle={{borderBottomWidth:0}}
                                     onChangeText={handleChange(item.UDCAMPO)}
                                 />
-                            ))                            
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDUDC == "QR" && (
-                                <Input
-                                    placeholder={item.UDDESCRIPCION} 
-                                    rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
-                                    maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> setModalVisible(true)}
-                                    value={values[item.UDCAMPO]}
-                                    onChangeText={handleChange(item.UDCAMPO)}
-                                />
-                    
-                            ))                           
-                        )
-                    })}
-
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDUDC == "FYEAR_AEYEAR" && (
-                                <View style={styles.select}>
-                                    <Picker
-                                        style={{color:'black'}}
-                                        selectedValue={values[item.UDCAMPO]}
-                                        onValueChange={handleChange(item.UDCAMPO)}
-                                    >
-                                        <Picker.Item label='Categoria 1' value='' />
-                                        {cat1.map((item) => {
+                            )
+                        }else{
+                            if(item.UDUDC == "QR"){
+                                return(
+                                    <Input
+                                        placeholder={item.UDDESCRIPCION} 
+                                        style={styles.formControl}
+                                        containerStyle={{margin:0, padding:0, height:50}}
+                                        inputContainerStyle={{borderBottomWidth:0}}
+                                        rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
+                                        maxLength={Number(item.UDLONGITUD)}
+                                        onFocus={()=> setModalVisible(true)}
+                                        value={values[item.UDCAMPO]}
+                                        onChangeText={handleChange(item.UDCAMPO)}
+                                    />
+                                )
+                            }else{
+                                if(item.UDUDC == "FYEAR_AEYEAR"){
+                                    return(
+                                        <View style={styles.select}>
+                                            <Picker
+                                                style={{color:'black'}}
+                                                selectedValue={values[item.UDCAMPO]}
+                                                style={styles.formControlSelect}
+                                                onValueChange={handleChange(item.UDCAMPO)}
+                                            >
+                                                <Picker.Item label='Categoria 1' value='' />
+                                                {cat1.map((item) => {
+                                                    return(
+                                                        <Picker.Item label={item.Valor} value={item.Valor} />
+                                                    )
+                                                })}
+                                            </Picker> 
+                                        </View>
+                                    )
+                                }else{
+                                    if(item.UDUDC == "GRUPO"){
+                                        return(
+                                            <View style={styles.select}>
+                                                <Picker
+                                                    style={{color:'black'}}
+                                                    selectedValue={values[item.UDCAMPO]}
+                                                    style={styles.formControlSelect}
+                                                    onValueChange={handleChange(item.UDCAMPO)}
+                                                >
+                                                    <Picker.Item label='Categoria 2' value='' />
+                                                    {cat2.map((item) => {
+                                                        return(
+                                                            <Picker.Item label={item.Valor} value={item.Valor} />
+                                                        )
+                                                    })}
+                                                </Picker> 
+                                            </View>
+                                        )
+                                    }else{
+                                        if(item.UDTIPO == "D"){
                                             return(
-                                                <Picker.Item label={item.Valor} value={item.Valor} />
+                                                <Input 
+                                                    key={item.UDCAMPO}
+                                                    placeholder={item.UDDESCRIPCION} 
+                                                    style={styles.formControl}
+                                                    containerStyle={{margin:0, padding:0, height:50}}
+                                                    inputContainerStyle={{borderBottomWidth:0}}
+                                                    maxLength={Number(item.UDLONGITUD)}
+                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                    onChangeText={handleChange(item.UDCAMPO)}
+                                                    value={values[item.UDCAMPO]}
+                                                />
                                             )
-                                        })}
-                                    </Picker> 
-                                </View>
-                
-                            ))                       
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDUDC == "GRUPO" && (
-                                <View style={styles.select}>
-                                    <Picker
-                                        style={{color:'black'}}
-                                        selectedValue={values[item.UDCAMPO]}
-                                        onValueChange={handleChange(item.UDCAMPO)}
-                                    >
-                                        <Picker.Item label='Categoria 2' value='' />
-                                        {cat2.map((item) => {
-                                            return(
-                                                <Picker.Item label={item.Valor} value={item.Valor} />
-                                            )
-                                        })}
-                                    </Picker> 
-                                </View>
-                
-                            ))                       
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDTIPO == "D" && (
-                                <Input 
-                                    key={item.UDCAMPO}
-                                    placeholder={item.UDDESCRIPCION} 
-                                    maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
-                                    onChangeText={handleChange(item.UDCAMPO)}
-                                    value={values[item.UDCAMPO]}
-                                />
-                            ))                       
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDTIPO == "T" && (
-                                <Input 
-                                    key={item.UDCAMPO}
-                                    placeholder={item.UDDESCRIPCION} 
-                                    maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
-                                    onChangeText={handleChange(item.UDCAMPO)}
-                                    value={values[item.UDCAMPO]}
-                                />
-                            ))                       
-                        )
+                                        }else{
+                                            if(item.UDTIPO == "T"){
+                                                return(
+                                                    <Input 
+                                                        key={item.UDCAMPO}
+                                                        placeholder={item.UDDESCRIPCION} 
+                                                        style={styles.formControl}
+                                                        containerStyle={{margin:0, padding:0, height:50}}
+                                                        inputContainerStyle={{borderBottomWidth:0}}
+                                                        maxLength={Number(item.UDLONGITUD)}
+                                                        onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                        onChangeText={handleChange(item.UDCAMPO)}
+                                                        value={values[item.UDCAMPO]}
+                                                    /> 
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     })}
                     
                     <View>
-                        <DatePicker
-                            modal
-                            open={openPk}
-                            date={datePk}
-                            mode={typePk}
-                            onConfirm={(date) => {
-                                setOpenPk(false)
-                                const regex = /[:,-]/gm;
-                                date = date.toISOString();
-                                var d = date.split('T')
-
-                                if(typePk == 'time'){
-                                    d = d[1].split('.');
-                                    console.log(d);
-                                    d = d[0].replace(regex,'');
-                                }else{
-                                    d = d[0].replace(regex,'')
-                                }
-                                setFieldValue(valuePk,d)
-                                lote[valuePk] = d;
-                                setLote(lote)
-                            }}
-                            onCancel={() => {
-                            setOpenPk(false)
-                            }}
-                        />
                     </View>
                 </View>
                     
@@ -446,7 +419,28 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingRight: '40px',
         textAlign: 'center',
-    }
+    },
+    headerTitulo:{
+        textAlign: 'center',
+        padding: 10,
+        width:'100%',
+      },
+      formControl:{
+        margin:0,
+        padding:7,
+        borderColor:'gray',
+        borderRadius:5,
+        borderWidth:1
+      },
+      formControlSelect:{
+        margin:0,
+        padding:7,
+        color:'black',
+        borderColor:'gray',
+        borderRadius:5,
+        borderWidth:1,
+        backgroundColor:'#E1E1E1'
+      }
 })
 
 export default FormsComponents;

@@ -6,7 +6,7 @@
  */
 
 import { Button, Icon, Tab, Text, ListItem } from '@rneui/base';
-import { Input } from '@rneui/themed';
+import { Input,  Header } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
 import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
 import axios from 'axios';
@@ -65,16 +65,21 @@ function App() {
 
 
   const _api_init = async () => {
-    console.log('api');
     var reponse = await axios.post(`${url_api}`,rqdata.btn_buscar);
     
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       setInputs(d.FProgramInquiry);
       var reqre = [];
+      
+      d.FProgramInquiry = d.FProgramInquiry.sort(function(a, b){
+        if(a.SEQUENCIA < b.SEQUENCIA) { return -1; }
+        if(a.SEQUENCIA > b.SEQUENCIA) { return 1; }
+        return 0;
+      });
+      console.log(d);
       for (let i = 0; i < d.FProgramInquiry.length; i++) {
         const element = d.FProgramInquiry [i];
-        console.log(element, element.REQUERIDO);
         if(element.REQUERIDO == 'R'){
           reqre.push(element.UDCAMPO);
         }
@@ -94,7 +99,6 @@ function App() {
         
      if(catR2.data.Json){
          let d = JSON.parse(catR2.data.Json);
-         console.log('gruppo',d);
          setCat2(d.FPGMINQUIRY);
      }
   }
@@ -121,38 +125,35 @@ function App() {
   const changeDateTime = (setFieldValue,campo, value) => {
     if(campo == 'LODATRECEIP'){
       let dt = new Date(value);
-      dt = (dt.toISOString()).split('T')[0];
-      let regex = /[:,-]/gm;
-      dt = dt.replace(regex,'/');
+      console.log('x',dt.toLocaleDateString('es-MX').split(' '));
+      dt = dt.toLocaleDateString('es-MX').split('/');
+      dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
       setFieldValue(campo,dt);
     }else{
       let dt = new Date(value);
-      let hora = (dt.getHours())+':'+dt.getMinutes()+':0'+dt.getSeconds()
+      let hora = dt.toLocaleTimeString('es-MX').split(' ')[0];
       setFieldValue(campo,hora);
-      console.log(hora);
     }
   }
 
   const btn_list = async () => {
-    console.log('api');
     var reponse = await axios.post(`${url_api}`,rqdata.buttons);
     
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       var data = [];
       var dta = d.FINQBARRA;
-      let icons = {Buscar:'search',Agregar:'add',Salir:'close'}
-      let iconsColor = {Buscar:'blue',Agregar:'green',Salir:'red'}
+      let icons = {1:'search',2:'add',3:'close'}
+      let iconsColor = {1:'blue',2:'green',3:'red'}
       for (let i = 0; i < dta.length; i++) {
         const element = dta[i];
-        data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Titulo]} color={iconsColor[element.Titulo]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
+        data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
       }
       setBtnHeader(data)
     }
   }
 
   const btn_footer = async () => {
-    console.log('api');
     var reponse = await axios.post(`${url_api}`,rqdata.buttons_footer);
     
     if(reponse.data.Json){
@@ -161,12 +162,11 @@ function App() {
       var dta = d.FBARRAPROGRAM;
       for (let i = 0; i < dta.length; i++) {
         const element = dta[i];
-        let icons = {Items:'playlist-add',Branchs:'business',Udc:'filter-alt'}
+        let icons = {PITEM:'playlist-add',PBRANCH:'business',PREPORTS:'filter-alt'}
         
-        data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.OPTITULO]} color='green' /><Text style={styles.buttonText}>{element.OPTITULO}</Text></View>) 
+        data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.OPOBNMOPC]} color='green' /><Text style={styles.buttonText}>{element.OPTITULO}</Text></View>) 
 
       }
-      console.log(data);
       setBtnFooter(data)
     }
   }
@@ -178,18 +178,14 @@ function App() {
           style: 'cancel'
         },
         {text: 'Aceptar', onPress: async () => {
-          console.log('Buscar');
           let body = rqdata.delete;
           let json = JSON.parse(body.json);
           let row = json.Rows;
           let r = "D|0|"+value+"|";
           row[0]['Data'] = r;
-          console.log(r)
           json.Rows = row;
           body.json = JSON.stringify(json);
-          console.log(body);
           let response = await axios.post(`${url_api}`,body);
-          console.log("x",response.data);
           if(response.data.Json == ""){
             buscarItem();
           }
@@ -211,7 +207,6 @@ function App() {
   const openAction = async (value, action) => {
      switch(action){
         case 0:
-            console.log('seleccionar',value)
             var req = rqdata.get_data;
             req.json = JSON.parse(req.json);
             req.json.Rows[0].Data = "0|PLOTE|U|F|@0@"+value+"|";
@@ -220,7 +215,6 @@ function App() {
               
               let d = JSON.parse(reponse.data.Json);
               var loteModel = d.FProgramInquiry[0];
-              console.log('lotemodel',loteModel);
               setDataSelect({lote: loteModel, tipo:'U'})
               setModalVisible(true);
             });
@@ -234,7 +228,6 @@ function App() {
   }
 
   const buscarItem = async () => {
-    console.log(labels,inputsReq);
     var lte = formikRef.current.values;
     var validate = false;
     var count = 0;
@@ -253,18 +246,14 @@ function App() {
     }
     
     if(validate){
-      console.log('Buscar');
       let body = rqdata.buscar;
       let json = JSON.parse(body.json);
       let row = json.Rows;
       let r = "0|PLOTE|F|B|@0@" + (lte.LOITEM?lte.LOITEM:"") +'@'+(lte.LOBARCODE?lte.LOBARCODE:"")+'@'+(lte.LOCAT1?lte.LOCAT1:"")+'@'+(lte.LOCAT2?lte.LOCAT2:"")+'@'+(lte.LODATRECEIP?lte.LODATRECEIP:"")+'@'+(lte.LOTIMEREC?lte.LOTIMEREC:"")+'@@|';
       row[0]['Data'] = r;
-      console.log(r,lte)
       json.Rows = row;
       body.json = JSON.stringify(json);
-      console.log(body);
       let response = await axios.post(`${url_api}`,body);
-      console.log("x",response.data);
       if(response.data.Json != ""){
         var dat = JSON.parse(response.data.Json);
         dat = dat.FProgramInquiry;
@@ -289,13 +278,17 @@ function App() {
   
   return (
     <>
-    <View style={{height:'100%', overflow:'scroll'}}>
-
+    <View style={{height:'100%', overflow:'scroll', backgroundColor:'white'}}>
+      
+      <View style={styles.headerTitulo}>
+        <Text style={{textAlign:'center', fontSize:20}}>Maestro de Lotes</Text>
+      </View>
       <ButtonGroup
         buttons={btnHeader}
         selectedIndex={selectedIndex}
+        buttonStyle={{backgroundColor:'#E1E1E1'}}
+        buttonContainerStyle={{borderColor:'gray'}}
         onPress={(value) => {
-          setSelectedIndex(value);
           if(value == 1){
             setDataSelect(null)
             setModalVisible(true);
@@ -323,113 +316,107 @@ function App() {
                 
                 <View>
                     {inputs.map((item,i)=>{
-                        
-                        return(
-                            (item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"  && (
+                        if(item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"){
+                            return(
                                 <Input 
-                                    key={item.UDCAMPO}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
-                                    defaultValue={values[item.UDCAMPO]}
+                                    style={styles.formControl}
+                                    containerStyle={{margin:0, padding:0, height:50}}
+                                    inputContainerStyle={{borderBottomWidth:0}}
                                     onChangeText={handleChange(item.UDCAMPO)}
-                                    onEndEditing={()=> {
-                                        lote[item.UDCAMPO] = values[item.UDCAMPO];
-                                        setLote(lote)
-                                    }}
                                 />
-                            ))                            
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDUDC == "QR" && (
-                                <Input
-                                    key={item.UDCAMPO}
-                                    placeholder={item.UDDESCRIPCION} 
-                                    rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
-                                    maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> setModalVisible2(true)}
-                                    value={values[item.UDCAMPO]}
-                                    onChangeText={handleChange(item.UDCAMPO)}
-                                    onEndEditing={()=> setLote(values)}
-                                />
-                    
-                            ))                           
-                        )
-                    })}
-
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDUDC == "FYEAR_AEYEAR" && (
-                                <View style={styles.select}>
-                                    <Picker
-                                        style={{color:'black'}}
-                                        selectedValue={values[item.UDCAMPO]}
-                                        onValueChange={handleChange(item.UDCAMPO)}
-                                        key={item.UDCAMPO}
-                                    >
-                                        <Picker.Item label='Categoria 1' value='' />
-                                        {cat1.map((item) => {
+                            )
+                        }else{
+                            if(item.UDUDC == "QR"){
+                                return(
+                                    <Input
+                                        placeholder={item.UDDESCRIPCION} 
+                                        style={styles.formControl}
+                                        containerStyle={{margin:0, padding:0, height:50}}
+                                        inputContainerStyle={{borderBottomWidth:0}}
+                                        rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
+                                        maxLength={Number(item.UDLONGITUD)}
+                                        onFocus={()=> setModalVisible(true)}
+                                        value={values[item.UDCAMPO]}
+                                        onChangeText={handleChange(item.UDCAMPO)}
+                                    />
+                                )
+                            }else{
+                                if(item.UDUDC == "FYEAR_AEYEAR"){
+                                    return(
+                                        <View style={styles.select}>
+                                            <Picker
+                                                style={{color:'black'}}
+                                                selectedValue={values[item.UDCAMPO]}
+                                                style={styles.formControlSelect}
+                                                onValueChange={handleChange(item.UDCAMPO)}
+                                            >
+                                                <Picker.Item label='Categoria 1' value='' />
+                                                {cat1.map((item) => {
+                                                    return(
+                                                        <Picker.Item label={item.Valor} value={item.Valor} />
+                                                    )
+                                                })}
+                                            </Picker> 
+                                        </View>
+                                    )
+                                }else{
+                                    if(item.UDUDC == "GRUPO"){
+                                        return(
+                                            <View style={styles.select}>
+                                                <Picker
+                                                    style={{color:'black'}}
+                                                    selectedValue={values[item.UDCAMPO]}
+                                                    style={styles.formControlSelect}
+                                                    onValueChange={handleChange(item.UDCAMPO)}
+                                                >
+                                                    <Picker.Item label='Categoria 2' value='' />
+                                                    {cat2.map((item) => {
+                                                        return(
+                                                            <Picker.Item label={item.Valor} value={item.Valor} />
+                                                        )
+                                                    })}
+                                                </Picker> 
+                                            </View>
+                                        )
+                                    }else{
+                                        if(item.UDTIPO == "D"){
                                             return(
-                                                <Picker.Item key={item.Valor} label={item.Valor} value={item.Valor} />
+                                                <Input 
+                                                    key={item.UDCAMPO}
+                                                    placeholder={item.UDDESCRIPCION} 
+                                                    style={styles.formControl}
+                                                    containerStyle={{margin:0, padding:0, height:50}}
+                                                    inputContainerStyle={{borderBottomWidth:0}}
+                                                    maxLength={Number(item.UDLONGITUD)}
+                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                    onChangeText={handleChange(item.UDCAMPO)}
+                                                    value={values[item.UDCAMPO]}
+                                                />
                                             )
-                                        })}
-                                    </Picker> 
-                                </View>
-                
-                            ))                       
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDUDC == "GRUPO" && (
-                                <View style={styles.select}>
-                                    <Picker
-                                        key={item.UDCAMPO}
-                                        style={{color:'black'}}
-                                        selectedValue={values[item.UDCAMPO]}
-                                        onValueChange={handleChange(item.UDCAMPO)}
-                                    >
-                                        <Picker.Item label='Categoria 2' value='' />
-                                        {cat2.map((item) => {
-                                            return(
-                                                <Picker.Item key={item.Valor} label={item.Valor} value={item.Valor} />
-                                            )
-                                        })}
-                                    </Picker> 
-                                </View>
-                
-                            ))                       
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDTIPO == "D" && (
-                                <Input 
-                                    key={item.UDCAMPO}
-                                    placeholder={item.UDDESCRIPCION} 
-                                    maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
-                                    onChangeText={handleChange(item.UDCAMPO)}
-                                    value={values[item.UDCAMPO]}
-                                />
-                            ))                       
-                        )
-                    })}
-                    {inputs.map((item,i)=>{
-                        return(
-                            (item.UDTIPO == "T" && (
-                                <Input 
-                                    key={item.UDCAMPO}
-                                    placeholder={item.UDDESCRIPCION} 
-                                    maxLength={Number(item.UDLONGITUD)}
-                                    onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
-                                    onChangeText={handleChange(item.UDCAMPO)}
-                                    value={values[item.UDCAMPO]}
-                                />
-                            ))                       
-                        )
+                                        }else{
+                                            if(item.UDTIPO == "T"){
+                                                return(
+                                                    <Input 
+                                                        key={item.UDCAMPO}
+                                                        placeholder={item.UDDESCRIPCION} 
+                                                        style={styles.formControl}
+                                                        containerStyle={{margin:0, padding:0, height:50}}
+                                                        inputContainerStyle={{borderBottomWidth:0}}
+                                                        maxLength={Number(item.UDLONGITUD)}
+                                                        onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                        onChangeText={handleChange(item.UDCAMPO)}
+                                                        value={values[item.UDCAMPO]}
+                                                    /> 
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     })}
                     
                     <View>
@@ -447,12 +434,13 @@ function App() {
                 key={i + '-LIST'}
                 onLongPress={()=> openAction(item['LOITEM'],0)}
                 onPress={() => openAction(item['LOITEM'],0)}
+                style={{borderWidth:3, borderColor:'#E1E1E1', margin:5, borderRadius:5}}
                 rightContent={(reset) => (
                   <Button
                     title="Borrar"
                     onPress={() => deleteItem(item['LOITEM'])}
                     icon={{ name: 'delete', color: 'white' }}
-                    buttonStyle={{ minHeight: '100%', backgroundColor: 'red' }}
+                    buttonStyle={{ minHeight: '85%', backgroundColor: 'red', margin:5 }}
                   />
                 )}
               >
@@ -528,6 +516,27 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: '40px',
     textAlign: 'center',
+  },
+  headerTitulo:{
+    textAlign: 'center',
+    padding: 10,
+    width:'100%',
+  },
+  formControl:{
+    margin:0,
+    padding:7,
+    borderColor:'gray',
+    borderRadius:5,
+    borderWidth:1
+  },
+  formControlSelect:{
+    margin:0,
+    padding:7,
+    color:'black',
+    borderColor:'gray',
+    borderRadius:5,
+    borderWidth:1,
+    backgroundColor:'#E1E1E1'
   }
 })
 
