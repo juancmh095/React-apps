@@ -48,7 +48,7 @@ const QRComponent = ({setModalVisible,lote,setLote, form}) => {
                 style={{marginTop:10, fontSize:20, fontWeight:900, textAlign:'center'}}
             >Resultado: <Text style={{fontSize:15}}>{restult}</Text></Text>
             
-            <Button title='Enviar' onPress={()=> SendQR()}></Button>
+            <Button title='Enviar' disabled={restult != ''?false:true} onPress={()=> SendQR()}></Button>
             <Button title='Cancelar' type="clear" onPress={()=> setModalVisible(false)}></Button>
     </View>
     

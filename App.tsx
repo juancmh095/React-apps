@@ -14,7 +14,7 @@ import * as rqdata from './components/params_request';
 //import DatePicker from 'react-native-date-picker'
 import { TimeDatePicker, Modes } from "react-native-time-date-picker";
 import { Picker } from '@react-native-picker/picker';
-import { ButtonGroup } from 'react-native-elements';
+import { ButtonGroup, CheckBox } from 'react-native-elements';
 import FormsComponents  from './components/forms.tsx';
 import { Formik } from 'formik';
 
@@ -22,11 +22,13 @@ import QRComponent from './components/code.tsx' ;
 import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 
-function App() {
+function App(props) {
 
   const formikRef = useRef();
   const url_api = "http://20.64.97.37/api/products";
   const [inputs, setInputs] = React.useState([]);
+  const [titulo, setTitulo] = React.useState('Maestro de Lotes');
+  const [checked, setChecked] = React.useState(null);
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
   const [labelsArry, setLabelsArry] = React.useState([]);
@@ -36,6 +38,7 @@ function App() {
   const [cat2, setCat2] = React.useState([]);
   const [btnHeader, setBtnHeader] = React.useState([]);
   const [btnFooter, setBtnFooter] = React.useState([]);
+  const [btnFooterData, setBtnFooterData] = React.useState([]);
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalVisible2, setModalVisible2] = React.useState(false);
   const [lote, setLote] = React.useState({})
@@ -65,6 +68,9 @@ function App() {
 
 
   const _api_init = async () => {
+
+
+    
     var reponse = await axios.post(`${url_api}`,rqdata.btn_buscar);
     
     if(reponse.data.Json){
@@ -80,6 +86,7 @@ function App() {
       console.log(d);
       for (let i = 0; i < d.FProgramInquiry.length; i++) {
         const element = d.FProgramInquiry [i];
+        formikRef.current.values[element.UDCAMPO] = element.VALOR;
         if(element.REQUERIDO == 'R'){
           reqre.push(element.UDCAMPO);
         }
@@ -122,17 +129,18 @@ function App() {
     }
   }
 
-  const changeDateTime = (setFieldValue,campo, value) => {
-    if(campo == 'LODATRECEIP'){
-      let dt = new Date(value);
-      console.log('x',dt.toLocaleDateString('es-MX').split(' '));
-      dt = dt.toLocaleDateString('es-MX').split('/');
-      dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
-      setFieldValue(campo,dt);
-    }else{
-      let dt = new Date(value);
-      let hora = dt.toLocaleTimeString('es-MX').split(' ')[0];
-      setFieldValue(campo,hora);
+  const changeDateTime = (setFieldValue,campo, value, event) => {
+    if(event.type == 'set'){
+      if(campo == 'LODATRECEIP'){
+        let dt = new Date(value);
+        dt = dt.toLocaleDateString('es-MX').split('/');
+        dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
+        setFieldValue(campo,dt);
+      }else{
+        let dt = new Date(value);
+        let hora = dt.toLocaleTimeString('es-MX').split(' ')[0];
+        setFieldValue(campo,hora);
+      }
     }
   }
 
@@ -155,11 +163,12 @@ function App() {
 
   const btn_footer = async () => {
     var reponse = await axios.post(`${url_api}`,rqdata.buttons_footer);
-    
+    console.log(reponse.data.Json)
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       var data = [];
       var dta = d.FBARRAPROGRAM;
+      setBtnFooterData(dta);
       for (let i = 0; i < dta.length; i++) {
         const element = dta[i];
         let icons = {PITEM:'playlist-add',PBRANCH:'business',PREPORTS:'filter-alt'}
@@ -229,6 +238,7 @@ function App() {
 
   const buscarItem = async () => {
     var lte = formikRef.current.values;
+    console.log(lte);
     var validate = false;
     var count = 0;
     var lbls = ""
@@ -245,7 +255,7 @@ function App() {
       validate = true;
     }
     
-    if(validate){
+    if(!validate){
       let body = rqdata.buscar;
       let json = JSON.parse(body.json);
       let row = json.Rows;
@@ -269,6 +279,22 @@ function App() {
     }
   }
 
+  const openFooterAction = (value) => {
+    console.log(value, checked, dataInfo[value], btnFooterData[value]);
+    let params = btnFooterData[value].PARAMS;
+    let titul = btnFooterData[value].NOMBREPGM;
+    let data = dataInfo[value];
+    params = params.split('|');
+
+    let model = {};
+
+    params.forEach(element => {
+      model[element] = data[element]
+    });
+
+    console.log(model);
+  }
+
   
 
 
@@ -281,7 +307,7 @@ function App() {
     <View style={{height:'100%', overflow:'scroll', backgroundColor:'white'}}>
       
       <View style={styles.headerTitulo}>
-        <Text style={{textAlign:'center', fontSize:20}}>Maestro de Lotes</Text>
+        <Text style={{textAlign:'center', fontSize:20}}>{titulo}</Text>
       </View>
       <ButtonGroup
         buttons={btnHeader}
@@ -319,6 +345,7 @@ function App() {
                         if(item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"){
                             return(
                                 <Input 
+                                    autoCapitalize={"characters"}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
@@ -336,9 +363,9 @@ function App() {
                                         style={styles.formControl}
                                         containerStyle={{margin:0, padding:0, height:50}}
                                         inputContainerStyle={{borderBottomWidth:0}}
-                                        rightIcon={{ type: 'ionicon', name: 'barcode-outline' }}
+                                        rightIcon={{ type: 'ionicon', name: 'barcode-outline', size:40 }}
                                         maxLength={Number(item.UDLONGITUD)}
-                                        onFocus={()=> setModalVisible(true)}
+                                        onFocus={()=> setModalVisible2(true)}
                                         value={values[item.UDCAMPO]}
                                         onChangeText={handleChange(item.UDCAMPO)}
                                     />
@@ -391,7 +418,7 @@ function App() {
                                                     containerStyle={{margin:0, padding:0, height:50}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}
-                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value,event)} })}
                                                     onChangeText={handleChange(item.UDCAMPO)}
                                                     value={values[item.UDCAMPO]}
                                                 />
@@ -406,7 +433,7 @@ function App() {
                                                         containerStyle={{margin:0, padding:0, height:50}}
                                                         inputContainerStyle={{borderBottomWidth:0}}
                                                         maxLength={Number(item.UDLONGITUD)}
-                                                        onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                        onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value,event)} })}
                                                         onChangeText={handleChange(item.UDCAMPO)}
                                                         value={values[item.UDCAMPO]}
                                                     /> 
@@ -433,7 +460,6 @@ function App() {
               <ListItem.Swipeable
                 key={i + '-LIST'}
                 onLongPress={()=> openAction(item['LOITEM'],0)}
-                onPress={() => openAction(item['LOITEM'],0)}
                 style={{borderWidth:3, borderColor:'#E1E1E1', margin:5, borderRadius:5}}
                 rightContent={(reset) => (
                   <Button
@@ -445,10 +471,16 @@ function App() {
                 )}
               >
               
+                  <CheckBox
+                    checked={checked === i}
+                    onPress={() => setChecked(i)}
+                  />
                 <ListItem.Content>
                   {labelsArry.map((label,x) => {
                     return(
-                      <ListItem.Title key={label+x+i}>{labels[label]}: {item[label]} </ListItem.Title>
+                      <ListItem.Title key={label+x+i}>
+                        <Text style={{fontWeight:900}}>{labels[label]}: </Text> {item[label]} 
+                      </ListItem.Title>
                     )
                   })}
                 </ListItem.Content>
@@ -463,7 +495,7 @@ function App() {
             buttons={btnFooter}
             selectedIndex={selectedIndexf}
             onPress={(value) => {
-              setSelectedIndexf(value);
+              openFooterAction(value);
             }}
             containerStyle={{ marginBottom: 0, position:''}}
           />

@@ -8,6 +8,7 @@ import DatePicker from 'react-native-date-picker'
 import { Picker } from '@react-native-picker/picker';
 import { ButtonGroup, Dialog, Text } from 'react-native-elements';
 import { Formik } from 'formik';
+import DeviceInfo from 'react-native-device-info';
 /* ---------------------------------- */
 import QRComponent from './code'  ;
 import { TextInput } from 'react-native';
@@ -56,6 +57,7 @@ const FormsComponents = (props) => {
       });
       var inpts = d.FProgramInquiry
       setInputs(d.FProgramInquiry);
+      console.log(d,props.data?.tipo);
 
       var reqre = [];
       for (let i = 0; i < d.FProgramInquiry.length; i++) {
@@ -75,12 +77,10 @@ const FormsComponents = (props) => {
             let d = JSON.parse(reponse.data.Json);
             var data = [];
             var dta = d.FINQBARRAFIX;
-            console.log(d);
             let icons = {'1':'done','2':'close','3':'search'}
             let iconsColor = {'1':'blue','2':'green','3':'red'}
             for (let i = 0; i < dta.length; i++) {
                 const element = dta[i];
-                console.log(element);
                 data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)  
                 
             }
@@ -108,17 +108,18 @@ const FormsComponents = (props) => {
     setVisible(!visible);
   };
 
-  const changeDateTime = (setFieldValue,campo, value) => {
-    if(campo == 'LODATRECEIP'){
-      let dt = new Date(value);
-      console.log('x',dt.toLocaleDateString('es-MX').split(' '));
-      dt = dt.toLocaleDateString('es-MX').split('/');
-      dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
-      setFieldValue(campo,dt);
-    }else{
-      let dt = new Date(value);
-      let hora = dt.toLocaleTimeString('es-MX').split(' ')[0];
-      setFieldValue(campo,hora);
+  const changeDateTime = (setFieldValue,campo, value, event) => {
+    if(event.type == 'set'){
+        if(campo == 'LODATRECEIP'){
+          let dt = new Date(value);
+          dt = dt.toLocaleDateString('es-MX').split('/');
+          dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
+          setFieldValue(campo,dt);
+        }else{
+          let dt = new Date(value);
+          let hora = dt.toLocaleTimeString('es-MX').split(' ')[0];
+          setFieldValue(campo,hora);
+        }
     }
   }
 
@@ -176,11 +177,19 @@ const FormsComponents = (props) => {
             if(validate){
                 let body = rqdata.guardar;
                 let json = JSON.parse(body.json);
+                let dispositivo = DeviceInfo.getDeviceNameSync();
+                let dateDevice = new Date().toLocaleDateString('es-MX').split('/');
+                let timeDevice = new Date().toLocaleTimeString('es-MX').split(' ')[0];
+                let fechaD = dateDevice[0]+'/'+((Number(dateDevice[1])<9)?'0'+dateDevice[1]:dateDevice[1])+'/'+dateDevice[2];
+                let rgx = /[:,/]/gm;
+                let horaD = timeDevice.replace(rgx,'');
+                console.log(dateDevice,fechaD,horaD);
                 if(props.data){
                     const regex = /[:,/]/gm;
-                    let dta = lote.LODATRECEIP.replace(regex,'');
-                    json.Parameter = 'U|0|' + lote.LOITEM+'|'+lote.LOBARCODE+'|'+lote.LOCAT1+'|'+lote.LOCAT2+'|'+dta+'|'+lote.LOTIMEREC+'|'
+                    let dta = lte.LODATRECEIP.replace(regex,'');
+                    json.Parameter = 'U|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|22|'+dispositivo+'|PLOTE|'+fechaD+'|'+horaD
                     body.json = JSON.stringify(json);
+                    console.log(body)
                     let guardar = await axios.post(`${url_api}`,body);
                     if(guardar.data.Json === 'OK'){
                         ToastAndroid.show('Actualizado correctamente', ToastAndroid.LONG);
@@ -192,9 +201,11 @@ const FormsComponents = (props) => {
                     const regex = /[:,/]/gm;
                     let dta = lote.LODATRECEIP.replace(regex,'');
                     var lte = formikRef.current.values;
-                    json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'
+                    json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|22|'+dispositivo+'|PLOTE|'+fechaD+'|'+horaD
                     body.json = JSON.stringify(json);
-                    let guardar = await axios.post(`${url_api}`,body);
+                    //let guardar = await axios.post(`${url_api}`,body);
+                    console.log(body)
+                    let guardar = {};
                     if(guardar.data.Json === 'OK'){
                         ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
                         setLote({});
@@ -271,6 +282,8 @@ const FormsComponents = (props) => {
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
+                                    autoCapitalize={"characters"}
+                                    disabled={(item.UDINDICE && props.data)?true:false}
                                     style={styles.formControl}
                                     containerStyle={{margin:0, padding:0, height:50}}
                                     inputContainerStyle={{borderBottomWidth:0}}
@@ -340,7 +353,7 @@ const FormsComponents = (props) => {
                                                     containerStyle={{margin:0, padding:0, height:50}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}
-                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value, event)} })}
                                                     onChangeText={handleChange(item.UDCAMPO)}
                                                     value={values[item.UDCAMPO]}
                                                 />
@@ -355,7 +368,7 @@ const FormsComponents = (props) => {
                                                         containerStyle={{margin:0, padding:0, height:50}}
                                                         inputContainerStyle={{borderBottomWidth:0}}
                                                         maxLength={Number(item.UDLONGITUD)}
-                                                        onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value)} })}
+                                                        onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value, event)} })}
                                                         onChangeText={handleChange(item.UDCAMPO)}
                                                         value={values[item.UDCAMPO]}
                                                     /> 
