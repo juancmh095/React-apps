@@ -107,7 +107,16 @@ function HomeComponent(props) {
     
   }
   const labels_list = async () => {
-    var reponse = await axios.post(`${url_api}`,rqdata.labels);
+
+    let body = rqdata.labels;
+    let json = JSON.parse(body.json);
+    let row = json.Rows;
+    let r = "0|"+props.data.program+"|E|B|@0@@@@@20240430@@|"
+    row[0]['Data'] = r;
+    json.Rows = row;
+    body.json = JSON.stringify(json);
+    console.log(body)
+    var reponse = await axios.post(`${url_api}`,body);
     
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
@@ -261,10 +270,11 @@ function HomeComponent(props) {
       let body = rqdata.buscar;
       let json = JSON.parse(body.json);
       let row = json.Rows;
-      let r = "0|PLOTE|F|B|@0@" + (lte.LOITEM?lte.LOITEM:"") +'@'+(lte.LOBARCODE?lte.LOBARCODE:"")+'@'+(lte.LOCAT1?lte.LOCAT1:"")+'@'+(lte.LOCAT2?lte.LOCAT2:"")+'@'+(lte.LODATRECEIP?lte.LODATRECEIP:"")+'@'+(lte.LOTIMEREC?lte.LOTIMEREC:"")+'@@|';
+      let r = "0|"+props.data.program+"|F|B|@0@" + (lte.LOITEM?lte.LOITEM:"") +'@'+(lte.LOBARCODE?lte.LOBARCODE:"")+'@'+(lte.LOCAT1?lte.LOCAT1:"")+'@'+(lte.LOCAT2?lte.LOCAT2:"")+'@'+(lte.LODATRECEIP?lte.LODATRECEIP:"")+'@'+(lte.LOTIMEREC?lte.LOTIMEREC:"")+'@@|';
       row[0]['Data'] = r;
       json.Rows = row;
       body.json = JSON.stringify(json);
+      console.log(body)
       let response = await axios.post(`${url_api}`,body);
       if(response.data.Json != ""){
         var dat = JSON.parse(response.data.Json);
