@@ -32,8 +32,10 @@ function HomeComponent(props) {
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
   const [labelsArry, setLabelsArry] = React.useState([]);
+  const [tiposSelectsArry, setTiposSelectArry] = React.useState([]);
   const [inputsReq, setInputsReq] = React.useState([]);
   const [dataSelect, setDataSelect] = React.useState(null);
+  const [dataSelects, setDataSelects] = React.useState(props.data.cat);
   const [cat1, setCat1] = React.useState([]);
   const [cat2, setCat2] = React.useState([]);
   const [btnHeader, setBtnHeader] = React.useState([]);
@@ -102,24 +104,7 @@ function HomeComponent(props) {
       setInputsReq(reqre);
     }
 
-    /* validar los campos de los parametros */
     
-
-
-    /* CARGA LA DATA DE LOS SELECTS 1 */
-    var catR1 = await axios.post(`${url_api}`,rqdata.categoria1);
-        
-    if(catR1.data.Json){
-        let d = JSON.parse(catR1.data.Json);
-        setCat1(d.FPGMINQUIRY);
-    }
-     /* CARGA LA DATA DE LOS SELECTS 2 */
-     var catR2 = await axios.post(`${url_api}`,rqdata.categoria2);
-        
-     if(catR2.data.Json){
-         let d = JSON.parse(catR2.data.Json);
-         setCat2(d.FPGMINQUIRY);
-     }
   }
   const labels_list = async () => {
     var reponse = await axios.post(`${url_api}`,rqdata.labels);
@@ -362,7 +347,7 @@ function HomeComponent(props) {
                 
                 <View>
                     {inputs.map((item,i)=>{
-                        if(item.UDTIPO != "T" && item.UDTIPO != "D"){
+                        if(item.UDTIPO == "" && item.UDTIPO != "T" && item.UDTIPO != "D"){
                             return(
                                 <Input 
                                     autoCapitalize={ (item.UPPERCASE == 'U')?"characters":"none"}
@@ -391,7 +376,7 @@ function HomeComponent(props) {
                                     />
                                 )
                             }else{
-                                if(item.UDUDC == "FYEAR_AEYEAR"){
+                                if(item.UDTIPO == "S"){
                                     return(
                                         <View style={styles.select}>
                                             <Picker
@@ -400,8 +385,8 @@ function HomeComponent(props) {
                                                 style={styles.formControlSelect}
                                                 onValueChange={handleChange(item.UDCAMPO)}
                                             >
-                                                <Picker.Item label='Categoria 1' value='' />
-                                                {cat1.map((item) => {
+                                                <Picker.Item label={item.UDDESCRIPCION} value='' />
+                                                {dataSelects[item.UDUDC].map((item) => {
                                                     return(
                                                         <Picker.Item label={item.Valor} value={item.Valor} />
                                                     )

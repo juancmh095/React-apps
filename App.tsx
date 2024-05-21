@@ -283,7 +283,7 @@ function App(props) {
     }
   }
 
-  const openFooterAction = (value) => {
+  const openFooterAction = async (value) => {
     console.log(value, checked, dataInfo[checked], btnFooterData[value]);
     let params = btnFooterData[value].PARAMS;
     let titulo = btnFooterData[value].NOMBREPGM;
@@ -291,6 +291,42 @@ function App(props) {
     params = params.split('|');
 
     let model = {};
+    let modelSelect = {};
+    
+    if(btnFooterData[value]['OPOBNMOPC'] == 'PREPORTS'){
+      var reponse = await axios.post(`${url_api}`,rqdata.inputs_preport);
+    
+      var dtaSelect = [];
+      if(reponse.data.Json){
+        let d = JSON.parse(reponse.data.Json);
+        console.log(d);  
+        for (let i = 0; i < d.FProgramInquiry.length; i++) {
+          const element = d.FProgramInquiry [i];
+          if(element.UDUDC != ""){
+            dtaSelect.push(element.UDUDC);
+          }
+        }
+      }
+
+      /* CARGA LA DATA DE LOS SELECTS 1 */
+      for (let y = 0; y < dtaSelect.length; y++) {
+        const element = dtaSelect[y];
+        let body = rqdata.get_data_selects;
+        let json = JSON.parse(body.json);
+        let row = json.Rows;
+        let r = "0|"+element+"|1|";
+        row[0]['Data'] = r;
+        json.Rows = row;
+        body.json = JSON.stringify(json);
+        var catR1 = await axios.post(`${url_api}`,body);
+            
+        if(catR1.data.Json){
+            let d = JSON.parse(catR1.data.Json);
+            modelSelect[element] = d.FPGMINQUIRY;
+          }
+          
+      }
+    }
 
     if(params.length > 0 && params[0] != ""){
       params.forEach(element => {
@@ -301,8 +337,11 @@ function App(props) {
     let datax = {
       titulo: titulo,
       data: model,
-      program: btnFooterData[value]['OPOBNMOPC']
+      program: btnFooterData[value]['OPOBNMOPC'],
+      cat: modelSelect
     };
+
+    console.log(datax)
 
     setParams_view(datax);
     setModalVisible3(true);

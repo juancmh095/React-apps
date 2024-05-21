@@ -220,5 +220,20 @@ module.exports = {
       }]
     }),
     Category:"Mi App"
+  },
+  get_data_selects:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"PGMINQUIRY",
+      Rows:[{
+        action:"I",
+        Data:""
+      }]
+    }),
+    Category:"Mi App"
   }
 }
