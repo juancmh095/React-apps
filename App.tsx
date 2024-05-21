@@ -151,8 +151,9 @@ function App(props) {
       let d = JSON.parse(reponse.data.Json);
       var data = [];
       var dta = d.FINQBARRA;
-      let icons = {1:'search',2:'add',3:'close'}
-      let iconsColor = {1:'blue',2:'green',3:'red'}
+      console.log(d)
+      let icons = {1:'check',2:'search',3:'add',4:'close'}
+      let iconsColor = {1:'green',2:'blue',3:'green',4:'red'}
       for (let i = 0; i < dta.length; i++) {
         const element = dta[i];
         data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
@@ -255,7 +256,7 @@ function App(props) {
       validate = true;
     }
     
-    if(!validate){
+    if(validate){
       let body = rqdata.buscar;
       let json = JSON.parse(body.json);
       let row = json.Rows;
@@ -280,10 +281,10 @@ function App(props) {
   }
 
   const openFooterAction = (value) => {
-    console.log(value, checked, dataInfo[value], btnFooterData[value]);
+    console.log(value, checked, dataInfo[checked], btnFooterData[value]);
     let params = btnFooterData[value].PARAMS;
     let titul = btnFooterData[value].NOMBREPGM;
-    let data = dataInfo[value];
+    let data = dataInfo[checked];
     params = params.split('|');
 
     let model = {};
@@ -315,16 +316,20 @@ function App(props) {
         buttonStyle={{backgroundColor:'#E1E1E1'}}
         buttonContainerStyle={{borderColor:'gray'}}
         onPress={(value) => {
-          if(value == 1){
+          if(value == 2){
             setDataSelect(null)
             setModalVisible(true);
           }
-          if(value == 2){
+          if(value == 3){
             closeApp()
             
           }
-          if(value == 0){
+          if(value == 1){
             buscarItem();
+          }
+
+          if(value == 0){
+            openAction(dataInfo[checked]['LOITEM'],0)
           }
           
         }}
@@ -345,7 +350,7 @@ function App(props) {
                         if(item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"){
                             return(
                                 <Input 
-                                    autoCapitalize={"characters"}
+                                    autoCapitalize={ (item.UPPERCASE == 'U')?"characters":"none"}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}

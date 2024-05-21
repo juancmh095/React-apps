@@ -180,14 +180,14 @@ const FormsComponents = (props) => {
                 let dispositivo = DeviceInfo.getDeviceNameSync();
                 let dateDevice = new Date().toLocaleDateString('es-MX').split('/');
                 let timeDevice = new Date().toLocaleTimeString('es-MX').split(' ')[0];
-                let fechaD = dateDevice[0]+'/'+((Number(dateDevice[1])<9)?'0'+dateDevice[1]:dateDevice[1])+'/'+dateDevice[2];
+                let fechaD = dateDevice[0]+((Number(dateDevice[1])<9)?'0'+dateDevice[1]:dateDevice[1])+dateDevice[2];
                 let rgx = /[:,/]/gm;
                 let horaD = timeDevice.replace(rgx,'');
                 console.log(dateDevice,fechaD,horaD);
                 if(props.data){
                     const regex = /[:,/]/gm;
                     let dta = lte.LODATRECEIP.replace(regex,'');
-                    json.Parameter = 'U|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|22|'+dispositivo+'|PLOTE|'+fechaD+'|'+horaD
+                    json.Parameter = 'U|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|22|'+dispositivo+'|PLOTE|'+fechaD+'|'+horaD+'|'
                     body.json = JSON.stringify(json);
                     console.log(body)
                     let guardar = await axios.post(`${url_api}`,body);
@@ -199,13 +199,12 @@ const FormsComponents = (props) => {
                     }
                 }else{
                     const regex = /[:,/]/gm;
-                    let dta = lote.LODATRECEIP.replace(regex,'');
+                    let dta = lte.LODATRECEIP.replace(regex,'');
                     var lte = formikRef.current.values;
-                    json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|22|'+dispositivo+'|PLOTE|'+fechaD+'|'+horaD
+                    json.Parameter = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|22|'+dispositivo+'|PLOTE|'+fechaD+'|'+horaD+'|'
                     body.json = JSON.stringify(json);
-                    //let guardar = await axios.post(`${url_api}`,body);
+                    let guardar = await axios.post(`${url_api}`,body);
                     console.log(body)
-                    let guardar = {};
                     if(guardar.data.Json === 'OK'){
                         ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
                         setLote({});
@@ -282,7 +281,7 @@ const FormsComponents = (props) => {
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
-                                    autoCapitalize={"characters"}
+                                    autoCapitalize={ (item.UPPERCASE == 'U')?"characters":"none"}
                                     disabled={(item.UDINDICE && props.data)?true:false}
                                     style={styles.formControl}
                                     containerStyle={{margin:0, padding:0, height:50}}
