@@ -10,20 +10,19 @@ import { Input,  Header } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
 import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
 import axios from 'axios';
-import * as rqdata from './components/params_request';
+import * as rqdata from './params_request';
 //import DatePicker from 'react-native-date-picker'
 import { TimeDatePicker, Modes } from "react-native-time-date-picker";
 import { Picker } from '@react-native-picker/picker';
 import { ButtonGroup, CheckBox } from 'react-native-elements';
-import FormsComponents  from './components/forms.tsx';
+import FormsComponents  from './forms.tsx';
 import { Formik } from 'formik';
 
-import QRComponent from './components/code.tsx' ;
-import HomeComponent from './components/App.tsx' ;
+import QRComponent from './code.tsx' ;
 import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 
-function App(props) {
+function HomeComponent(props) {
 
   const formikRef = useRef();
   const url_api = "http://20.64.97.37/api/products";
@@ -35,7 +34,6 @@ function App(props) {
   const [labelsArry, setLabelsArry] = React.useState([]);
   const [inputsReq, setInputsReq] = React.useState([]);
   const [dataSelect, setDataSelect] = React.useState(null);
-  const [params_view, setParams_view] = React.useState(null);
   const [cat1, setCat1] = React.useState([]);
   const [cat2, setCat2] = React.useState([]);
   const [btnHeader, setBtnHeader] = React.useState([]);
@@ -72,21 +70,28 @@ function App(props) {
 
   const _api_init = async () => {
 
+    var inp_header;
+    if(props){
+      console.log('props',props);
+      setTitulo(props.data.titulo);
+      if(props.data.program == 'PREPORTS'){
+        inp_header = rqdata.inputs_preport;
+      }
+    }
 
     
-    var reponse = await axios.post(`${url_api}`,rqdata.btn_buscar);
+    var reponse = await axios.post(`${url_api}`,inp_header);
     
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       setInputs(d.FProgramInquiry);
       var reqre = [];
-      
+      console.log(d);  
       d.FProgramInquiry = d.FProgramInquiry.sort(function(a, b){
         if(a.SEQUENCIA < b.SEQUENCIA) { return -1; }
         if(a.SEQUENCIA > b.SEQUENCIA) { return 1; }
         return 0;
       });
-      console.log(d);
       for (let i = 0; i < d.FProgramInquiry.length; i++) {
         const element = d.FProgramInquiry [i];
         formikRef.current.values[element.UDCAMPO] = element.VALOR;
@@ -96,6 +101,10 @@ function App(props) {
       }
       setInputsReq(reqre);
     }
+
+    /* validar los campos de los parametros */
+    
+
 
     /* CARGA LA DATA DE LOS SELECTS 1 */
     var catR1 = await axios.post(`${url_api}`,rqdata.categoria1);
@@ -154,7 +163,6 @@ function App(props) {
       let d = JSON.parse(reponse.data.Json);
       var data = [];
       var dta = d.FINQBARRA;
-      console.log(d)
       let icons = {1:'check',2:'search',3:'add',4:'close'}
       let iconsColor = {1:'green',2:'blue',3:'green',4:'red'}
       for (let i = 0; i < dta.length; i++) {
@@ -166,8 +174,14 @@ function App(props) {
   }
 
   const btn_footer = async () => {
-    var reponse = await axios.post(`${url_api}`,rqdata.buttons_footer);
-    console.log(reponse.data.Json)
+    var bHeader = rqdata.buttons_footer;
+    if(props){
+      if(props.data.program == 'PREPORTS'){
+        bHeader = rqdata.btn_preport_header;
+      }
+    }
+
+    var reponse = await axios.post(`${url_api}`,bHeader);
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       var data = [];
@@ -242,7 +256,6 @@ function App(props) {
 
   const buscarItem = async () => {
     var lte = formikRef.current.values;
-    console.log(lte);
     var validate = false;
     var count = 0;
     var lbls = ""
@@ -284,30 +297,18 @@ function App(props) {
   }
 
   const openFooterAction = (value) => {
-    console.log(value, checked, dataInfo[checked], btnFooterData[value]);
     let params = btnFooterData[value].PARAMS;
-    let titulo = btnFooterData[value].NOMBREPGM;
+    let titul = btnFooterData[value].NOMBREPGM;
     let data = dataInfo[checked];
     params = params.split('|');
 
     let model = {};
 
-    if(params.length > 0 && params[0] != ""){
-      params.forEach(element => {
-        model[element] = data[element]
-      });
-    }
+    params.forEach(element => {
+      model[element] = data[element]
+    });
 
-    let datax = {
-      titulo: titulo,
-      data: model,
-      program: btnFooterData[value]['OPOBNMOPC']
-    };
-
-    setParams_view(datax);
-    setModalVisible3(true);
-
-    console.log(model,datax,params);
+    console.log(model);
   }
 
   
@@ -335,7 +336,7 @@ function App(props) {
             setModalVisible(true);
           }
           if(value == 3){
-            closeApp()
+            props.setModalVisible3(false)
             
           }
           if(value == 1){
@@ -361,9 +362,10 @@ function App(props) {
                 
                 <View>
                     {inputs.map((item,i)=>{
-                        if(item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"){
+                        if(item.UDTIPO != "T" && item.UDTIPO != "D"){
                             return(
                                 <Input 
+                                    autoCapitalize={ (item.UPPERCASE == 'U')?"characters":"none"}
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={values[item.UDCAMPO]}
@@ -544,19 +546,6 @@ function App(props) {
               </View>
             </View>
           </Modal>
-
-          <Modal
-            style={{width:'100%',height:'100%'}}
-            animationType="slide"
-            transparent={false}
-            visible={modalVisible3}
-            >
-            <View>
-              <View>
-                <HomeComponent setModalVisible3={setModalVisible3} data={params_view} />                
-              </View>
-            </View>
-          </Modal>
         </View>
     </View>
     </>
@@ -603,4 +592,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default App;
+export default HomeComponent;

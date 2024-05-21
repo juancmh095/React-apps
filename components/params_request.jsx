@@ -190,5 +190,35 @@ module.exports = {
       }]
     }),
     Category:"Mi App"
+  },
+  inputs_preport:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"ProgramInquiry",
+      Rows:[{
+        action:"I",
+        Data:"0|PREPORTS|I|B||"
+      }]
+    }),
+    Category:"Mi App"
+  },
+  btn_preport_header:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"BARRAPROGRAM",
+      Rows:[{
+        action:"I",
+        Data:"0|PREPORTS|"
+      }]
+    }),
+    Category:"Mi App"
   }
 }
