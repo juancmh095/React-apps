@@ -235,5 +235,28 @@ module.exports = {
       }]
     }),
     Category:"Mi App"
+  },
+  login:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"USERSLOGIN",
+      Rows:[{
+        action:"I",
+        Data:""
+      }]
+    }),
+    Category:"Mi App"
+  },
+  encrypPass:{
+    Id:1,
+    json:JSON.stringify({
+      Function:"Encrypt",
+      Data:""
+    }),
+    Category:"Utilerias"
   }
 }
