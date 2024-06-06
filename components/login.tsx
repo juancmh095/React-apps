@@ -21,7 +21,7 @@ const LoginComponent = ({navigation}) => {
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             console.log('aqui el usuario',res);
             if(res.length > 0){
-                navigation.navigate('Home')
+                navigation.navigate('Init')
             }
         });
     }
