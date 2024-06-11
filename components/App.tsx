@@ -21,6 +21,8 @@ import { Formik } from 'formik';
 import QRComponent from './code.tsx' ;
 import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
+import ModuleComponent from './Module.tsx';
+
 
 function HomeComponent(props) {
 
@@ -40,10 +42,12 @@ function HomeComponent(props) {
   const [cat2, setCat2] = React.useState([]);
   const [btnHeader, setBtnHeader] = React.useState([]);
   const [btnFooter, setBtnFooter] = React.useState([]);
+  const [params_view, setParams_view] = React.useState([]);
   const [btnFooterData, setBtnFooterData] = React.useState([]);
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalVisible2, setModalVisible2] = React.useState(false);
   const [modalVisible3, setModalVisible3] = React.useState(false);
+  const [modalVisible4, setModalVisible4] = React.useState(false);
   const [lote, setLote] = React.useState({})
    /* variables del picker */
    const [datePk, setDatePk] = React.useState(new Date())
@@ -71,7 +75,7 @@ function HomeComponent(props) {
 
 
   const _api_init = async () => {
-
+    console.log('_____________________________________ inicia ________________________')
     var inp_header;
     if(props){
       console.log('props',props);
@@ -230,15 +234,36 @@ function HomeComponent(props) {
         case 0:
             var req = rqdata.get_data;
             req.json = JSON.parse(req.json);
-            req.json.Rows[0].Data = "0|PLOTE|U|F|@0@"+value+"|";
+            console.log(value)
+            req.json.Rows[0].Data = "0|"+props.data.program+"|U|F|@0@"+value+"|";
+            if(props.data.program === 'PREPORTS'){
+              req.json.Rows[0].Data = "2|"+props.data.program+"|U|F|@2@"+value+"@|";
+            }
             req.json = JSON.stringify(req.json);
+            console.log(req);
             axios.post(`${url_api}`,req).then((reponse) => {
-              
+              console.log('aqui',reponse.data);
               let d = JSON.parse(reponse.data.Json);
               var loteModel = d.FProgramInquiry[0];
-              setDataSelect({lote: loteModel, tipo:'U'})
-              setModalVisible(true);
+              
+              if(props.data.program === 'PREPORTS'){
+                let datax = {
+                  titulo: '',
+                  data: d.FProgramInquiry,
+                  program: props.data.program,
+                  cat: null,
+                  report: value
+                };  
+                setParams_view(datax)
+                setModalVisible4(true);
+              }else{
+                setDataSelect({lote: loteModel, tipo:'U'})
+                setModalVisible(true);
+              }
+            
+            
             });
+
             
             break;
         case 2:
@@ -267,14 +292,18 @@ function HomeComponent(props) {
     }
     
     if(validate){
+      console.log(lte,props.data.program)
       let body = rqdata.buscar;
       let json = JSON.parse(body.json);
       let row = json.Rows;
-      let r = "0|"+props.data.program+"|F|B|@0@" + (lte.LOITEM?lte.LOITEM:"") +'@'+(lte.LOBARCODE?lte.LOBARCODE:"")+'@'+(lte.LOCAT1?lte.LOCAT1:"")+'@'+(lte.LOCAT2?lte.LOCAT2:"")+'@'+(lte.LODATRECEIP?lte.LODATRECEIP:"")+'@'+(lte.LOTIMEREC?lte.LOTIMEREC:"")+'@@|';
+      var r = "0|"+props.data.program+"|F|B|@0@" + (lte.LOITEM?lte.LOITEM:"") +'@'+(lte.LOBARCODE?lte.LOBARCODE:"")+'@'+(lte.LOCAT1?lte.LOCAT1:"")+'@'+(lte.LOCAT2?lte.LOCAT2:"")+'@'+(lte.LODATRECEIP?lte.LODATRECEIP:"")+'@'+(lte.LOTIMEREC?lte.LOTIMEREC:"")+'@@|';
+      if(props.data.program === 'PREPORTS'){
+        var r = "0|"+props.data.program+"|F|B|@2@" + (lte.RPCATEGORIA?lte.RPCATEGORIA:"")+'@|';
+        
+      }
       row[0]['Data'] = r;
       json.Rows = row;
       body.json = JSON.stringify(json);
-      console.log(body)
       let response = await axios.post(`${url_api}`,body);
       if(response.data.Json != ""){
         var dat = JSON.parse(response.data.Json);
@@ -339,7 +368,7 @@ function HomeComponent(props) {
           }
 
           if(value == 0){
-            openAction(dataInfo[checked]['LOITEM'],0)
+            openAction(dataInfo[checked]['LOITEM']?dataInfo[checked]['LOITEM']:dataInfo[checked]['RPREPORTID'],0)
           }
           
         }}
@@ -524,7 +553,20 @@ function HomeComponent(props) {
             >
             <View>
               <View>
-                <FormsComponents setModalVisible={setModalVisible} data={dataSelect} />                
+                <FormsComponents setModalVisible={setModalVisible} data={dataSelect} program={props.data.program} />                
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible4}
+            >
+            <View>
+              <View>
+                <ModuleComponent setModalVisible={setModalVisible4} data={params_view}/>                
               </View>
             </View>
           </Modal>

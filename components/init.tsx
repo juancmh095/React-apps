@@ -48,7 +48,7 @@ const InitComponent = ({navigation}) => {
                 {/* <Image
                     source={{ uri: (usuario?usuario['Icono']:'https://templates.iqonic.design/instadash/intro/dist/assets/images/logo.png') }}
                 /> */}
-                <Text>{JSON.stringify(usuario)} </Text>
+                {/* <Text>{JSON.stringify(usuario)} </Text> */}
                 <Image
                     style={{
                         width:200,
