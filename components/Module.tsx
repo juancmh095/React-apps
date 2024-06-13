@@ -647,6 +647,28 @@ function ModuleComponent(props) {
 
 function formsBuildingConfig(setModal,formikRef2,dataSelects2) {
     console.log('este son la data de los selects',dataSelects2);
+    const [arryData, setArrData] = React.useState([]);
+    const input1 = useRef();
+    const input2 = useRef();
+
+    const loadForm = ()=>{
+      console.log(formikRef2.current.values);
+      var totalValor = '';
+      var form = formikRef2.current.values;
+      if(form.type.includes('Rango de valores')){
+        totalValor = form['input1']+'-'+form['input2'];
+      }
+      if(form.type.includes('Valor unico')){
+        totalValor = form['input1']
+      }
+      if(form.type.includes('Lista de valores')){
+        for (let i = 0; i < arryData.length; i++) {
+          const element = arryData[i];
+          totalValor += element + ',';
+        }
+      }
+      console.log(totalValor);
+    }
     return(
         <View>
             <Formik
@@ -668,6 +690,7 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2) {
                                     setFieldValue('type', itemValue)
                                 }}
                             >
+                              <Picker.Item label={'Seleccionar Valor'} value={''} />
                                 {
                                     dataSelects2.map((item) => {
                                         return(
@@ -681,20 +704,59 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2) {
                                     
                                         <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                                             <View style={{width:'48%', marginRight:'auto', marginLeft:0}}>
-                                                <Input style={styles.formControl} label="Valor 1" />
+                                                <Input value={values.input1} style={styles.formControl} label="Valor 1" onChangeText={(text)=> setFieldValue('input1', text)} />
                                             </View>
                                             <Text>-</Text>
                                             <View style={{width:'48%',  marginLeft:'auto', marginRight:0}}>
-                                                <Input style={styles.formControl}  label="Valor 2"/>
+                                                <Input value={values.input2} style={styles.formControl}  label="Valor 2" onChangeText={(text)=> setFieldValue('input2', text)}/>
                                             </View>
                                         </View>
                                     
                                 ))}
 
-                                {(!values.type.includes('Rango de valores') && (
+                                {(values.type.includes('Valor unico') && (
                                     
                                     <View>
-                                        <Input style={styles.formControl} label="Valor 1" />
+                                        <Input value={values.input1} style={styles.formControl} label="Valor 1" onChangeText={(text)=> setFieldValue('input1', text)} />
+                                    </View>
+                                
+                                ))}
+
+                                {(values.type.includes('Lista de valores') && (
+                                    
+                                    <View>
+                                        <Input style={styles.formControl} label="Valor 1" 
+                                          ref={input1}
+                                          onEndEditing={(e)=> {
+                                            arryData.push(e.nativeEvent.text)
+                                            console.log(arryData)
+                                            setArrData([...arryData]);
+                                          }}
+                                          rightIcon={
+                                            <Icon 
+                                              name='add'
+                                              onPress={()=> input1.current.blur()}
+                                            />
+                                          } />
+                                          <View>
+                                            {
+                                              arryData.map((item, index) => {
+                                                return(
+                                                  <ListItem>
+                                                    <Icon name="close" type="material-community" color="grey"
+                                                      onPress={()=> {
+                                                        arryData.splice(index,1);
+                                                        setArrData([...arryData]);
+                                                      }}
+                                                    />
+                                                    <ListItem.Content>
+                                                      <ListItem.Title>{item}</ListItem.Title>
+                                                    </ListItem.Content>
+                                                  </ListItem>
+                                                )
+                                              })
+                                            }
+                                          </View>
                                     </View>
                                 
                                 ))}
@@ -707,6 +769,7 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2) {
                 )}
 
             </Formik>
+            <Button onPress={()=> loadForm()}/>
         </View>
     )
 }
