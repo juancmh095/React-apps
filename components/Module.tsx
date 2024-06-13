@@ -52,6 +52,9 @@ function ModuleComponent(props) {
   const [dataSelects, setDataSelects] = React.useState(props.data.cat);
   const [dataSelects2, setDataSelects2] = React.useState(props.data.cat);
   const [initialValues, setinitialValues] = React.useState({});
+  const [resultData, setResultData] = React.useState();
+  const [setFieldValueFunction, setSetFieldValueFunction] = React.useState();
+  const [campoSelect, setCampoSelect] = React.useState();
   
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalVisible2, setModalVisible2] = React.useState(false);
@@ -241,7 +244,7 @@ function ModuleComponent(props) {
   }
 
 
-  const loadConfig = async ()=> {
+  const loadConfig = async (setFieldValue,campo)=> {
     let body = rqdata.init;
     let json = JSON.parse(body.json);
     json.Tabla = 'PGMINQUIRY';
@@ -258,6 +261,9 @@ function ModuleComponent(props) {
         let data = jsond[kys[0]];
         console.log(data);
         setDataSelects2(data);
+        console.log(setFieldValue, campo)
+        setSetFieldValueFunction(setFieldValue)
+        setCampoSelect(campo);
         setModalVisible5(true)
     }
   }
@@ -379,6 +385,11 @@ function ModuleComponent(props) {
     });
 
     console.log(model);
+  }
+
+  const LoadDataConfig = (text)=>{
+    var form = formikRef2.current.values;
+    form[campoSelect] = text;
   }
 
   
@@ -636,7 +647,7 @@ function ModuleComponent(props) {
             visible={modalVisible5}
           >
             <View>
-                {formsBuildingConfig(setModalVisible5,formikRef3,dataSelects2)}               
+                {formsBuildingConfig(setModalVisible5,formikRef3,dataSelects2,LoadDataConfig)}               
             </View>
           </Modal>
         </View>
@@ -645,7 +656,7 @@ function ModuleComponent(props) {
   );
 };
 
-function formsBuildingConfig(setModal,formikRef2,dataSelects2) {
+function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig) {
     console.log('este son la data de los selects',dataSelects2);
     const [arryData, setArrData] = React.useState([]);
     const input1 = useRef();
@@ -668,6 +679,9 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2) {
         }
       }
       console.log(totalValor);
+      LoadDataConfig(totalValor);
+      
+      setModal(false);
     }
     return(
         <View>
@@ -818,7 +832,7 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
                                                     rightIcon={
                                                         <Icon 
                                                             name='add'
-                                                            onPress={()=> loadConfig()}
+                                                            onPress={()=> loadConfig(setFieldValue,item.SRCAMPO)}
                                                         />
                                                     } 
                                                 />:''}
