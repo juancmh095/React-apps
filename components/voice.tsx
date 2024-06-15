@@ -1,127 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, PermissionsAndroid, Platform, TextInput } from 'react-native';
-import Voice from '@react-native-voice/voice';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import axios from 'axios';
+import * as rqdata from './params_request';
+import Tts from 'react-native-tts';
+import { ButtonGroup, Icon } from 'react-native-elements';
 
-const VoiceToText = () => {
-  const [recognized, setRecognized] = useState('');
-  const [started, setStarted] = useState('');
-  const [results, setResults] = useState('');
+const TextToSpeech = (props) => {
+  const [text, setText] = useState('');
+  const [userVocie, setUserVoice] = useState('');
+  const [iVoice, setiVoice] = useState([]);
 
-  useEffect(() => {
-    Voice.onSpeechStart = onSpeechStart;
-    Voice.onSpeechEnd = onSpeechEnd;
-    Voice.onSpeechRecognized = onSpeechRecognized;
-    Voice.onSpeechResults = onSpeechResults;
-    Voice.onSpeechError = onSpeechError;
-    console.log('inicia voice')
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
-  }, []);
+  const url_api = "http://20.64.97.37/api/products";
 
-  const onSpeechStart = (e) => {
-    setStarted('Cargando...');
-  };
 
-  const onSpeechEnd = (e) => {
-    setStarted('');
-  };
+  const get_data = async() => {
+    var login = await axios.post(url_api,rqdata.loginVoice);
+    if(login.data.Json != ''){
+        loginres = JSON.parse(login.data.Json);
+        var user = loginres['FUSERSLOGIN'][0];
+        setUserVoice(user);
+        var textVoices = await axios.post(url_api,rqdata.textVoice);
 
-  const onSpeechRecognized = (e) => {
-    setRecognized('Grabando...');
-  };
-
-  const onSpeechResults = (e) => {
-    console.log(e);
-    const regex = /[\[,",\]]/gm;
-    var data = JSON.stringify(e.value);
-    const result = data.replace(regex, '');
-    setResults(result);
-  };
-
-  const onSpeechError = (e) => {
-    console.error(e);
-  };
-
-  const startRecognizing = async () => {
-    try {
-      await Voice.start('es-MX');
-      setRecognized('');
-      setStarted('');
-      setResults([]);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const stopRecognizing = async () => {
-    try {
-      await Voice.stop();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const destroyRecognizer = async () => {
-    try {
-      await Voice.destroy();
-      setRecognized('');
-      setStarted('');
-      setResults([]);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      requestMicrophonePermission();
-    }
-  }, []);
-
-  const requestMicrophonePermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        {
-          title: 'Microphone Permission',
-          message: 'This app needs access to your microphone to recognize your speech.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
+        if(textVoices.data.Json != ''){
+            var txtVoices = JSON.parse(textVoices.data.Json);
+            var arrTxt = txtVoices['FHABLARBOCINQ'];
+            var idi = setInterval(async() => {
+                for (let y = 0; y < arrTxt.length; y++) {
+                    const element = arrTxt[y];
+                    setTimeout(() => {
+                        setText(element['HAPATHPLAY'])
+                        speak(element['HAPATHPLAY']);
+                    }, 1000);
+                    
+                }
+            }, Number(user['Tiempo'])*1000);
+            iVoice.push(idi);
+            setiVoice([...iVoice]);
         }
-      );
-      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Microphone permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
     }
+
+        
+  }
+
+  useEffect(()=>{
+        get_data();
+      Tts.voices().then(voices => {
+        Tts.setDefaultVoice(voices[0].id)
+        console.log(voices);
+        Tts.setDefaultLanguage(voices[0].language);
+    });
+
+      return () => {
+        return false;
+      };
+  },[])
+
+  const speak = (txt) => { 
+    console.log(txt);
+    Tts.setDucking(true);
+    Tts.stop();
+    Tts.setIgnoreSilentSwitch("ignore");
+    Tts.speak(txt);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.stat}>{started}</Text>
-      <Text style={styles.stat}>{recognized}</Text>
-      <Text style={styles.stat}>Resultado:</Text>
-      <View style={{borderWidth:1, borderBlockColor:'gray', marginBottom:30}}>
-        <TextInput
-            style={styles.textArea}
-            underlineColorAndroid="transparent"
-            placeholder="Resultado"
-            placeholderTextColor="grey"
-            numberOfLines={10}
-            multiline={true}
-            value={results}
-            />
+        <ButtonGroup
+        buttons={[
+            <View style={styles.navBarLeftButton}><Icon name='close' color={'red'} /><Text style={styles.buttonText}>Salir</Text></View>
+        ]}
+        selectedIndex={null}
+        buttonStyle={{backgroundColor:'#E1E1E1'}}
+        buttonContainerStyle={{borderColor:'gray'}}
+        onPress={(value) => {
+            console.log(value,props);
+            for (let id of iVoice) {
+                clearInterval(id);
+                console.log(id);
+            };
 
-      </View>
-      <View style={{marginBottom:10}}>
-        <Button title="Iniciar" onPress={startRecognizing} />
-      </View>
-      <View style={{marginBottom:10}}>
-        <Button title="Detener" onPress={stopRecognizing} />
-      </View>
+            props.setModalVisible(false)
+
+        }}
+        containerStyle={{ marginBottom: 20 }}
+      />
+      <Text style={styles.title}>Text to Speech</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter text to speak"
+        onChangeText={setText}
+        value={text}
+      />
     </View>
   );
 };
@@ -129,34 +98,33 @@ const VoiceToText = () => {
 const styles = StyleSheet.create({
   container: {
     height:500,
-    color:'black',
-    width:'80%',
-    marginLeft:'auto',
-    marginRight:'auto'
-  },
-  stat: {
-    textAlign: 'center',
-    marginBottom: 8,
+    alignItems: 'center',
     color:'black'
   },
-  resultText: {
-    textAlign: 'center',
-    marginTop: 8,
+  title: {
+    fontSize: 24,
+    marginBottom: 16,
     color:'black'
   },
-  btn:{
-    margin:10
+  input: {
+    width: '100%',
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+    color:'black'
   },
-  textAreaContainer: {
-    borderColor: 'black',
-    borderWidth: 4,
-    padding: 5
+  navBarLeftButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  textArea: {
-    height: 150,
-    color:'black',
-    justifyContent: "flex-start"
-  }
+  buttonText: {
+    flex: 1,
+    paddingRight: '40px',
+    textAlign: 'center',
+    color:'black'
+  },
 });
 
-export default VoiceToText;
+export default TextToSpeech;

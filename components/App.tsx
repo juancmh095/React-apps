@@ -19,7 +19,7 @@ import FormsComponents  from './forms.tsx';
 import { Formik } from 'formik';
 
 import QRComponent from './code.tsx' ;
-import VoiceToText from './voice.tsx' ;
+import TextToSpeech from './voice.tsx' ;
 import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 import ModuleComponent from './Module.tsx';
@@ -83,6 +83,8 @@ function HomeComponent(props) {
       setTitulo(props.data.titulo);
       if(props.data.program == 'PREPORTS'){
         inp_header = rqdata.inputs_preport;
+      }else{
+        console.log(props.data.program)
       }
     }
 
@@ -322,12 +324,24 @@ function HomeComponent(props) {
   }
 
   const openFooterAction = (value) => {
-    console.log(value);
+    console.log(value,btnFooterData,btnFooter);
     var program = props.data.program;
     if(program == 'PREPORTS'){
 
       if(value == 1){
         setModalVisible3(true);
+      }else{
+        if(value == 0){
+          let datax = {
+            titulo: btnFooterData[value].OPTITULO,
+            data: [],
+            program: 'PJOBS',
+            cat: [],
+            report: value
+          };  
+          setParams_view(datax);
+          setModalVisible4(true);
+        }
       }
 
     }else{
@@ -604,7 +618,7 @@ function HomeComponent(props) {
           >
             <View>
               <View>
-                <VoiceToText />               
+                <TextToSpeech setModalVisible={setModalVisible3} />               
               </View>
             </View>
           </Modal>

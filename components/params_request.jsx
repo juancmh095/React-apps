@@ -288,5 +288,50 @@ module.exports = {
       }]
     }),
     Category:"Mi App"
+  },
+  loginVoice:{
+    Id:1,
+    json:JSON.stringify({
+      user:"2BOCINA1",
+      psw:"cdlBYQ3Eo78CLa1DKAkAHg==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"USERSLOGIN",
+      Rows:[{
+        action:"I",
+        Data:"2BOCINA1|cdlBYQ3Eo78CLa1DKAkAHg==|"
+      }]
+    }),
+    Category:"Mi App"
+  },
+  textVoice:{
+    Id:1,
+    json:JSON.stringify({
+      user:"2BOCINA1",
+      psw:"cdlBYQ3Eo78CLa1DKAkAHg==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"HABLARBOCINQ",
+      Rows:[{
+        action:"I",
+        Data:"2|BOCINA1|"
+      }]
+    }),
+    Category:"Mi App"
+  },
+  borraVoice:{
+    Id:1,
+    json:JSON.stringify({
+      user:"22",
+      psw:"cdlBYQ3Eo78CLa1DKAkAHg==",
+      Escuela:"0",
+      Tipo:"App",
+      Tabla:"HABLARBOCAPP",
+      Rows:[{
+        action:"I",
+        Data:"D|0|BOCINA1|2|"
+      }]
+    }),
+    Category:"Mi App"
   }
 }

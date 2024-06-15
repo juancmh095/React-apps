@@ -55,6 +55,7 @@ function ModuleComponent(props) {
   const [resultData, setResultData] = React.useState();
   const [setFieldValueFunction, setSetFieldValueFunction] = React.useState();
   const [campoSelect, setCampoSelect] = React.useState();
+  const [btnHeaderConfig, setBtnHC] = React.useState([]);
   
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalVisible2, setModalVisible2] = React.useState(false);
@@ -97,6 +98,18 @@ function ModuleComponent(props) {
       if(props.data.program == 'PREPORTS'){
         inp_header = rqdata.inputs_preport;
         setDataInfo(props.data.data);        
+      }else{
+        if(props.data.program == 'PJOBS'){
+          let body = rqdata.labels;
+          let json = JSON.parse(body.json);
+          let row = json.Rows;
+          let r = "0|"+props.data.program+"|I|B||";
+          row[0]['Data'] = r;
+          json.Rows = row;
+          body.json = JSON.stringify(json);
+          console.log(body)
+          inp_header = body;
+        }
       }
     }
 
@@ -130,11 +143,14 @@ function ModuleComponent(props) {
     let body = rqdata.labels;
     let json = JSON.parse(body.json);
     let row = json.Rows;
-    let r = "0|"+props.data.program+"|E|B|@0@@@@@20240430@@|"
+    let r = '';
+    r = "0|"+props.data.program+"|E|B|@0@@@@@20240430@@|";
+    if(props.data.program == 'PJOBS'){
+      r = "0|"+props.data.program+"|E|B||";
+    }
     row[0]['Data'] = r;
     json.Rows = row;
     body.json = JSON.stringify(json);
-    console.log(body)
     var reponse = await axios.post(`${url_api}`,body);
     
     if(reponse.data.Json){
@@ -180,7 +196,13 @@ function ModuleComponent(props) {
       let iconsColor = {1:'green',2:'blue',3:'green',4:'red'}
       for (let i = 0; i < dta.length; i++) {
         const element = dta[i];
-        data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
+        if(props.data.program == 'PJOBS' && element.Titulo != 'Selec' && element.Titulo != 'Agregar'){
+          data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
+          }else{
+            if(props.data.program != 'PJOBS'){
+              data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
+            }
+          }
       }
       setBtnHeader(data)
     }
@@ -207,7 +229,9 @@ function ModuleComponent(props) {
         data.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.OPOBNMOPC]} color='green' /><Text style={styles.buttonText}>{element.OPTITULO}</Text></View>) 
 
       }
-      setBtnFooter(data)
+      if(props.data.program != 'PJOBS'){
+        setBtnFooter(data)
+      }
     }
   }
 
@@ -256,15 +280,15 @@ function ModuleComponent(props) {
     var res = await axios.post(`${url_api}`,body);
     console.log(res.data);
     if(res.data.Json != ''){
-        let jsond = JSON.parse(res.data.Json);
-        let kys = Object.keys(jsond)
-        let data = jsond[kys[0]];
-        console.log(data);
-        setDataSelects2(data);
-        console.log(setFieldValue, campo)
-        setSetFieldValueFunction(setFieldValue)
-        setCampoSelect(campo);
-        setModalVisible5(true)
+      let jsond = JSON.parse(res.data.Json);
+      let kys = Object.keys(jsond)
+      let data = jsond[kys[0]];
+      console.log(data);
+      setDataSelects2(data);
+      console.log(setFieldValue, campo)
+      setSetFieldValueFunction(setFieldValue)
+      setCampoSelect(campo);
+       setModalVisible5(true)
     }
   }
   
@@ -276,8 +300,12 @@ function ModuleComponent(props) {
             console.log(value,body);
             let json = JSON.parse(body.json);
             json.Tabla = 'REPORTSDATASELINQ';
+            
             let row = json.Rows;
-            let r = "0|"+props.data.report+'|'+value+"|1|";
+            
+            let r = "";
+            r = "0|"+props.data.report+'|'+value+"|1|";
+            
             row[0]['Data'] = r;
             json.Rows = row;
             body.json = JSON.stringify(json);
@@ -312,6 +340,19 @@ function ModuleComponent(props) {
                     let ky = Object.keys(itemsSelectJson);
                     setDataSelects({TIPOSEL: itemsSelectJson[ky[0]]});
                 }
+                var res = await axios.post(`${url_api}`,rqdata.buttons_header_form);
+                console.log(res.data);
+
+                if(res.data.Json != ''){
+                  var datah = (JSON.parse(res.data.Json))['FINQBARRAFIX'];
+                  console.log('buttons  ',datah);
+                  var fdata = [];
+                  for (let i = 0; i < datah.length; i++) {
+                    const element = datah[i];
+                    fdata.push(element.Titulo);                    
+                  }
+                  setBtnHC(fdata);
+                }
 
                 setModalVisible3(true);
             }
@@ -342,6 +383,10 @@ function ModuleComponent(props) {
     if(count == inputsReq.length){
       validate = true;
     }
+
+    if(props.data.program == 'PJOBS'){
+      validate = true;
+    }
     
     if(validate){
       console.log(lte,props.data.program)
@@ -350,8 +395,11 @@ function ModuleComponent(props) {
       let row = json.Rows;
       var r = "0|"+props.data.program+"|F|B|@0@" + (lte.LOITEM?lte.LOITEM:"") +'@'+(lte.LOBARCODE?lte.LOBARCODE:"")+'@'+(lte.LOCAT1?lte.LOCAT1:"")+'@'+(lte.LOCAT2?lte.LOCAT2:"")+'@'+(lte.LODATRECEIP?lte.LODATRECEIP:"")+'@'+(lte.LOTIMEREC?lte.LOTIMEREC:"")+'@@|';
       if(props.data.program === 'PREPORTS'){
-        var r = "0|"+props.data.program+"|F|B|@2@" + (lte.RPCATEGORIA?lte.RPCATEGORIA:"")+'@|';
+        r = "0|"+props.data.program+"|F|B|@2@" + (lte.RPCATEGORIA?lte.RPCATEGORIA:"")+'@|';
         
+      }
+      if(props.data.program === 'PJOBS'){
+        r = "0|"+props.data.program+'|F|B|@2@RROJAS@|';    
       }
       row[0]['Data'] = r;
       json.Rows = row;
@@ -360,6 +408,7 @@ function ModuleComponent(props) {
       if(response.data.Json != ""){
         var dat = JSON.parse(response.data.Json);
         dat = dat.FProgramInquiry;
+        console.log(dat);
         if(dat.length > 0){
           setDataInfo(dat);
         }
@@ -412,20 +461,33 @@ function ModuleComponent(props) {
         buttonStyle={{backgroundColor:'#E1E1E1'}}
         buttonContainerStyle={{borderColor:'gray'}}
         onPress={(value) => {
-          if(value == 2){
-            setDataSelect(null)
-            setModalVisible(true);
-          }
-          if(value == 3){
-            props.setModalVisible(false)
+          if(props.data.program != 'PJOBS'){
+            if(value == 2){
+              setDataSelect(null)
+              setModalVisible(true);
+            }
+            if(value == 3){
+              props.setModalVisible(false)
+              
+            }
+            if(value == 1){
+              buscarItem();
+            }
             
-          }
-          if(value == 1){
-            buscarItem();
-          }
-
-          if(value == 0){
-            openAction(dataInfo[checked]['LOITEM']?dataInfo[checked]['LOITEM']:dataInfo[checked]['RVVERSION'],0)
+            if(value == 0){
+              openAction(dataInfo[checked]['LOITEM']?dataInfo[checked]['LOITEM']:dataInfo[checked]['RVVERSION'],0)
+            }
+                
+          }else{
+            if(props.data.program == 'PJOBS'){
+                  
+                  if(value == 0){
+                    buscarItem();
+                  }
+                  if(value == 1){
+                    props.setModalVisible(false)
+                  }
+            }
           }
           
         }}
@@ -636,7 +698,7 @@ function ModuleComponent(props) {
             visible={modalVisible3}
           >
             <View>
-                {formsBuilding(setModalVisible3,dataBuildInputs,formikRef2,dataSelects,initialValues, loadConfig)}               
+                {formsBuilding(setModalVisible3,dataBuildInputs,formikRef2,dataSelects,initialValues, loadConfig,btnHeaderConfig)}               
             </View>
           </Modal>
 
@@ -647,7 +709,7 @@ function ModuleComponent(props) {
             visible={modalVisible5}
           >
             <View>
-                {formsBuildingConfig(setModalVisible5,formikRef3,dataSelects2,LoadDataConfig)}               
+                {formsBuildingConfig(setModalVisible5,formikRef3,dataSelects2,LoadDataConfig,btnHeaderConfig)}               
             </View>
           </Modal>
         </View>
@@ -656,7 +718,7 @@ function ModuleComponent(props) {
   );
 };
 
-function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig) {
+function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, btnHeaderConfig) {
     console.log('este son la data de los selects',dataSelects2);
     const [arryData, setArrData] = React.useState([]);
     const input1 = useRef();
@@ -685,6 +747,22 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig) {
     }
     return(
         <View>
+          <ButtonGroup
+            buttons={btnHeaderConfig}
+            selectedIndex={null}
+            buttonStyle={{backgroundColor:'#E1E1E1'}}
+            buttonContainerStyle={{borderColor:'gray'}}
+            onPress={(value) => {
+              
+              if(value == 1){
+                setModal(false);
+              }
+              if(value == 0){
+                loadForm();
+              }
+            }}
+            containerStyle={{ marginBottom: 20 }}
+          />
             <Formik
                 initialValues={{type:'',input1:'',input2:''}}
                 key={'form2'}
@@ -783,16 +861,33 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig) {
                 )}
 
             </Formik>
-            <Button onPress={()=> loadForm()}/>
+            
         </View>
     )
 }
 
-function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, loadConfig) {
+function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, loadConfig,btnHeaderConfig) {
 
     console.log(initialValues);
     return(
         <View>
+          <ButtonGroup
+            buttons={btnHeaderConfig}
+            selectedIndex={null}
+            buttonStyle={{backgroundColor:'#E1E1E1'}}
+            buttonContainerStyle={{borderColor:'gray'}}
+            onPress={(value) => {
+              
+              if(value == 1){
+                setModal(false);
+              }
+              
+              if(value == 0){
+                setModal(false);
+              }
+            }}
+            containerStyle={{ marginBottom: 20 }}
+          />
             <Formik
                 initialValues={initialValues}
                 key={'form2'}
