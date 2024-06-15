@@ -19,6 +19,7 @@ import FormsComponents  from './forms.tsx';
 import { Formik } from 'formik';
 
 import QRComponent from './code.tsx' ;
+import VoiceToText from './voice.tsx' ;
 import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 import ModuleComponent from './Module.tsx';
@@ -321,19 +322,30 @@ function HomeComponent(props) {
   }
 
   const openFooterAction = (value) => {
-    let params = btnFooterData[value].PARAMS;
-    let titul = btnFooterData[value].NOMBREPGM;
-    let data = dataInfo[checked];
-    params = params.split('|');
+    console.log(value);
+    var program = props.data.program;
+    if(program == 'PREPORTS'){
 
-    let model = {};
+      if(value == 1){
+        setModalVisible3(true);
+      }
 
-    params.forEach(element => {
-      model[element] = data[element]
-    });
-
-    console.log(model);
+    }else{
+      let params = btnFooterData[value].PARAMS;
+      let titul = btnFooterData[value].NOMBREPGM;
+      let data = dataInfo[checked];
+      params = params.split('|');
+  
+      let model = {};
+  
+      params.forEach(element => {
+        model[element] = data[element]
+      });
+  
+      console.log(model);
+    }
   }
+
 
   
 
@@ -583,11 +595,27 @@ function HomeComponent(props) {
               </View>
             </View>
           </Modal>
+
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible3}
+          >
+            <View>
+              <View>
+                <VoiceToText />               
+              </View>
+            </View>
+          </Modal>
         </View>
     </View>
     </>
   );
 };
+
+
+
 
 const styles = StyleSheet.create({
   select: {
