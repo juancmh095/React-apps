@@ -11,6 +11,7 @@ import storage from "../Storage";
 const LoginComponent = ({navigation}) => {
     const formikRef = useRef();
     const [textinit, setExtInit] = React.useState('Bienvenido');
+    const [passView, setPasswordView] = React.useState(true);
     const url_api = "http://20.64.97.37/api/products";
    
     useEffect(() => {
@@ -36,8 +37,8 @@ const LoginComponent = ({navigation}) => {
         body.json = JSON.stringify(json);
         var reponse = await axios.post(`${url_api}`,body);
         if(reponse.data.Json){
-            /* let pass = reponse.data.Json; */
-            let pass = "JrVZl/C6Gr/dLBQMKJXJVA==";
+            let pass = reponse.data.Json;
+            //let pass = "JrVZl/C6Gr/dLBQMKJXJVA==";
             let body = rqdata.login;
             let json = JSON.parse(body.json);
             let row = json.Rows;
@@ -85,12 +86,19 @@ const LoginComponent = ({navigation}) => {
                             />
                         <Input 
                             placeholder='Password'
-                            secureTextEntry={true}
+                            secureTextEntry={passView}
                             leftIcon={
                                 <Icon
                                 name='https'
                                 color='black'
                                 />
+                            }
+                            rightIcon={
+                                <Icon
+                                    name='remove-red-eye'
+                                    color='black'
+                                    onPress={()=> setPasswordView(!passView)}
+                                    />
                             }
                             value={values.password}
                             onChangeText={handleChange('password')}

@@ -65,6 +65,11 @@ const TextToSpeech = (props) => {
 
   return (
     <View style={styles.container}>
+
+        <View style={styles.headerTitulo}>
+            <Text style={{textAlign:'center', fontSize:20, color:'black'}}>{'Voice'}</Text>
+        </View>
+
         <ButtonGroup
         buttons={[
             <View style={styles.navBarLeftButton}><Icon name='close' color={'red'} /><Text style={styles.buttonText}>Salir</Text></View>
@@ -84,7 +89,6 @@ const TextToSpeech = (props) => {
         }}
         containerStyle={{ marginBottom: 20 }}
       />
-      <Text style={styles.title}>Text to Speech</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter text to speak"
@@ -125,6 +129,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color:'black'
   },
+  headerTitulo:{
+    textAlign: 'center',
+    padding: 10,
+    width:'100%',
+  }
 });
 
 export default TextToSpeech;
