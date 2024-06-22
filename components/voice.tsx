@@ -4,39 +4,55 @@ import axios from 'axios';
 import * as rqdata from './params_request';
 import Tts from 'react-native-tts';
 import { ButtonGroup, Icon } from 'react-native-elements';
+import storage from "../Storage";
 
 const TextToSpeech = (props) => {
   const [text, setText] = useState('');
-  const [userVocie, setUserVoice] = useState('');
+  const [userVoice, setUserVoice] = useState('');
+  const [status, setStatus] = useState('');
   const [iVoice, setiVoice] = useState([]);
+  const [timer, setTimer] = useState(0);
 
   const url_api = "http://20.64.97.37/api/products";
 
 
   const get_data = async() => {
     var login = await axios.post(url_api,rqdata.loginVoice);
+
+    let userLogin = await storage.getAllDataForKey('FUSERSLOGIN');
+    
     if(login.data.Json != ''){
-        loginres = JSON.parse(login.data.Json);
-        var user = loginres['FUSERSLOGIN'][0];
+      loginres = JSON.parse(login.data.Json);
+      var user = loginres['FUSERSLOGIN'][0];
         setUserVoice(user);
+        
+
         var textVoices = await axios.post(url_api,rqdata.textVoice);
+        console.log(textVoices.data.Json);
 
         if(textVoices.data.Json != ''){
             var txtVoices = JSON.parse(textVoices.data.Json);
+
             var arrTxt = txtVoices['FHABLARBOCINQ'];
-            var idi = setInterval(async() => {
-                for (let y = 0; y < arrTxt.length; y++) {
-                    const element = arrTxt[y];
-                    setTimeout(() => {
-                        setText(element['HAPATHPLAY'])
-                        speak(element['HAPATHPLAY']);
-                    }, 1000);
-                    
-                }
-            }, Number(user['Tiempo'])*1000);
-            iVoice.push(idi);
-            setiVoice([...iVoice]);
+            var textVoice = ""
+            for (let i = 0; i < arrTxt.length; i++) {
+                const element = arrTxt[i];
+                console.log('---->',element)
+                
+                var rqBody = await rqdata.borraVoice(element['HAUKIDALUMNO'],element['HAUKIDES']);
+                var rqBodyAx = await axios.post(url_api,rqBody);
+                console.log(rqBodyAx.data,rqBody)
+                
+                textVoice += element['HAPATHPLAY'] + ' ';
+            }
+            setText(textVoice)
+
+            speak(textVoice);
+
+            setTimer(user['Tiempo']);
         }
+
+        
     }
 
         
@@ -44,14 +60,23 @@ const TextToSpeech = (props) => {
 
   useEffect(()=>{
         get_data();
-      Tts.voices().then(voices => {
-        Tts.setDefaultVoice(voices[0].id)
-        console.log(voices);
-        Tts.setDefaultLanguage(voices[0].language);
-    });
+        Tts.voices().then(voices => {
+            Tts.setDefaultVoice(voices[0].id)          
+            console.log(voices);
+            Tts.setDefaultLanguage(voices[0].language);
+        });
+        Tts.addEventListener('tts-finish', (event) => {
+
+        console.log(event);
+        get_data();
+      });
+
+      
 
       return () => {
+        Tts.removeEventListener('tts-finish');
         return false;
+
       };
   },[])
 
@@ -79,10 +104,7 @@ const TextToSpeech = (props) => {
         buttonContainerStyle={{borderColor:'gray'}}
         onPress={(value) => {
             console.log(value,props);
-            for (let id of iVoice) {
-                clearInterval(id);
-                console.log(id);
-            };
+            Tts.stop()
 
             props.setModalVisible(false)
 

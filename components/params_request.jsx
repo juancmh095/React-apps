@@ -319,19 +319,21 @@ module.exports = {
     }),
     Category:"Mi App"
   },
-  borraVoice:{
-    Id:1,
-    json:JSON.stringify({
-      user:"22",
-      psw:"cdlBYQ3Eo78CLa1DKAkAHg==",
-      Escuela:"0",
-      Tipo:"App",
-      Tabla:"HABLARBOCAPP",
-      Rows:[{
-        action:"I",
-        Data:"D|0|BOCINA1|2|"
-      }]
-    }),
-    Category:"Mi App"
+  borraVoice: (id,idu)=> {
+    return {
+      Id:1,
+      json:JSON.stringify({
+        user:"2BOCINA1",
+        psw:"cdlBYQ3Eo78CLa1DKAkAHg==",
+        Escuela:"0",
+        Tipo:"App",
+        Tabla:"HABLARBOCAPP",
+        Rows:[{
+          action:"D",
+          Data:"D|"+idu+"|BOCINA1|"+id+"||"
+        }]
+      }),
+      Category:"Mi App"
+    }
   }
 }
