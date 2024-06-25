@@ -322,6 +322,8 @@ function ModuleComponent(props) {
                     modelx[elementy.SRCAMPO] = elementy.SRVALOR                    
                     modelx[elementy.SRCAMPO+'_INPUT'] = elementy.SRTIPOSEL                    
                 }
+                modelx['REPORT'] = props.data.report;
+                modelx['REPORTV'] = value;
                 console.log('initialvalues->',modelx,data);
                 setinitialValues(modelx);
 
@@ -894,6 +896,57 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
 function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, loadConfig,btnHeaderConfig) {
 
     console.log(initialValues);
+    const url_api = "http://20.64.97.37/api/products";
+
+    const ejecutar = async () => {
+      //setModal(false);
+      var arry =Object.keys(formikRef2.current.values);
+      var formData = formikRef2.current.values;
+      console.log(arry)
+      var paramx = ''
+      for (let x = 0; x < arry.length; x++) {
+        const element = arry[x];
+        if(!element.includes('_INPUT') && element != 'REPORT' && element != 'REPORTV'){
+          console.log(element);
+          let param1 = (formData[element+'_INPUT']).split('_');
+          let param2 = 1;
+
+          if(((formData[element]).split(',')).length > 1){
+            param2 = 3
+          }
+
+          if(((formData[element]).split('-')).length > 1){
+            param2 = 2
+          }
+
+          console.log((formData[element]).split(','),(formData[element]).split('-'));
+          paramx = paramx + '@'+element+'|'+param1[0]+'|'+param2+'|'+formData[element]+'|';
+        }
+        
+      }
+      var requestParam = {
+        Id:1,
+        json:JSON.stringify({
+          Function: 'ExecuteReport',
+          Program:initialValues['REPORT'],
+          Version:initialValues['REPORTV'],
+          user:22,
+          psw:'JrVZl/C6Gr/dLBQMKJXJVA==',
+          ID:2,
+          Parameter: paramx
+        }),
+        Category:"Utilerias"
+      };
+
+      var res = await axios.post(`${url_api}`,requestParam);
+      console.log(requestParam,res.data)
+      if(res.data.Json == 'OK'){
+        setModal(false);
+      }
+
+      console.log(requestParam);
+    }
+
     return(
         <View>
           <ButtonGroup
@@ -908,32 +961,7 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
               }
               
               if(value == 0){
-                //setModal(false);
-                var arry =Object.keys(formikRef2.current.values);
-                var formData = formikRef2.current.values;
-                console.log(arry)
-                var paramx = ''
-                for (let x = 0; x < arry.length; x++) {
-                  const element = arry[x];
-                  if(!element.includes('_INPUT')){
-                    console.log(element);
-                    let param1 = (formData[element+'_INPUT']).split('_');
-                    let param2 = 1;
-
-                    if(((formData[element]).split(',')).length > 1){
-                      param2 = 3
-                    }
-
-                    if(((formData[element]).split('-')).length > 1){
-                      param2 = 2
-                    }
-
-                    console.log((formData[element]).split(','),(formData[element]).split('-'));
-                    paramx = paramx + '@'+element+'|'+param1[0]+'|'+param2+'|'+formData[element]+'|';
-                  }
-                  
-                }
-                console.log(paramx);
+                ejecutar()
               }
             }}
             containerStyle={{ marginBottom: 20 }}

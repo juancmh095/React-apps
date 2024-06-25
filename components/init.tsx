@@ -81,7 +81,7 @@ const InitComponent = ({navigation}) => {
                         marginLeft:"auto",
                         marginRight:"auto"
                     }}
-                    onPress={()=> navigation.navigate('Banners')}
+                    onPress={()=> navigation.navigate('Home')}
                     />
                 <Button
                 containerStyle={{

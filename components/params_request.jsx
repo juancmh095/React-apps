@@ -335,5 +335,18 @@ module.exports = {
       }),
       Category:"Mi App"
     }
-  }
+  },
+  ejecutarReporte:{
+    Id:1,
+    json:JSON.stringify({
+      Function: 'ExecuteReport',
+      Program:'RALUMNO',
+      Version:'MC0001',
+      user:22,
+      psw:'JrVZl/C6Gr/dLBQMKJXJVA==',
+      ID:2,
+      Parameter:''
+    }),
+    Category:"Utilerias"
+  },
 }

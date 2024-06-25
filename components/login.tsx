@@ -6,6 +6,7 @@ import { Formik } from "formik";
 
 import * as rqdata from './params_request';
 import storage from "../Storage";
+import DeviceInfo from "react-native-device-info";
 
 
 const LoginComponent = ({navigation}) => {
@@ -30,6 +31,7 @@ const LoginComponent = ({navigation}) => {
     
     const loginFunc = async () => {
         var forms = formikRef.current.values;
+        let dispositivo = DeviceInfo.getDeviceNameSync();
         
         let body = rqdata.encrypPass;
         let json = JSON.parse(body.json);
@@ -42,7 +44,7 @@ const LoginComponent = ({navigation}) => {
             let body = rqdata.login;
             let json = JSON.parse(body.json);
             let row = json.Rows;
-            let r = forms['user'] + "|"+pass+"|"
+            let r = forms['user'] + "|"+pass+"|"+dispositivo+'|';
             row[0]['Data'] = r;
             json.Rows = row;
             body.json = JSON.stringify(json);
