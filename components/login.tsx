@@ -56,7 +56,7 @@ const LoginComponent = ({navigation}) => {
                     id:'1',
                     data: data['FUSERSLOGIN'][0]
                 });
-                navigation.navigate('Home')
+                navigation.navigate('Banners')
             }
         }
     }

@@ -279,12 +279,12 @@ module.exports = {
     json:JSON.stringify({
       user:"22",
       psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
-      Escuela:"0",
+      Escuela:"2",
       Tipo:"App",
       Tabla:"ProgramInquiry",
       Rows:[{
         action:"I",
-        Data:"0|22|PPOSTLOGIN|I|B|21/05/2024|"
+        Data:"2|PPOSTLOGIN|F|B|@21/05/2024|"
       }]
     }),
     Category:"Mi App"

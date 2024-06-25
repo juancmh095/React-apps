@@ -320,8 +320,9 @@ function ModuleComponent(props) {
                 for (let x = 0; x < data.length; x++) {
                     const elementy = data[x];
                     modelx[elementy.SRCAMPO] = elementy.SRVALOR                    
+                    modelx[elementy.SRCAMPO+'_INPUT'] = elementy.SRTIPOSEL                    
                 }
-                console.log(modelx);
+                console.log('initialvalues->',modelx,data);
                 setinitialValues(modelx);
 
                 let body2 = rqdata.init;
@@ -644,7 +645,7 @@ function ModuleComponent(props) {
                   {labelsArry.map((label,x) => {
                     return(
                       <ListItem.Title key={label+x+i}>
-                        <Text style={{fontWeight:900}}>{labels[label]}: </Text> {item[label]?item[label]:item['RVVERSION']} 
+                        <Text style={{fontWeight:900}}>{labels[label]}: </Text> {item[label]?item[label]:(x==0)?item['RVVERSION']:item['RVVERSIONNAME']} 
                       </ListItem.Title>
                     )
                   })}
@@ -709,7 +710,7 @@ function ModuleComponent(props) {
             visible={modalVisible5}
           >
             <View>
-                {formsBuildingConfig(setModalVisible5,formikRef3,dataSelects2,LoadDataConfig,btnHeaderConfig)}               
+                {formsBuildingConfig(setModalVisible5,formikRef3,dataSelects2,LoadDataConfig,btnHeaderConfig,campoSelect)}               
             </View>
           </Modal>
         </View>
@@ -718,8 +719,8 @@ function ModuleComponent(props) {
   );
 };
 
-function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, btnHeaderConfig) {
-    console.log('este son la data de los selects',dataSelects2);
+function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, btnHeaderConfig,campoSelect) {
+    console.log('este son la data de los selects',dataSelects2,campoSelect);
     const [arryData, setArrData] = React.useState([]);
     const input1 = useRef();
     const input2 = useRef();
@@ -780,6 +781,8 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
                                 style={styles.formControlSelect}
                                 onValueChange={(itemValue,itemIndex)=> {
                                     setFieldValue('type', itemValue)
+                                    var arryData = [];
+                                    setArrData([...arryData]);
                                 }}
                             >
                               <Picker.Item label={'Seleccionar Valor'} value={''} />
@@ -792,32 +795,54 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
                                 }
                             </Picker> 
                             <View>
-                                {(values.type.includes('Rango de valores') && (
+                                {(values.type.includes('Rango de valores') && campoSelect != 'ALSEXO' && (
                                     
                                         <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                                             <View style={{width:'48%', marginRight:'auto', marginLeft:0}}>
-                                                <Input value={values.input1} style={styles.formControl} label="Valor 1" onChangeText={(text)=> setFieldValue('input1', text)} />
+                                                <Input value={values.input1} style={styles.formControl} label="Del Valor" onChangeText={(text)=> setFieldValue('input1', text)} />
                                             </View>
                                             <Text>-</Text>
                                             <View style={{width:'48%',  marginLeft:'auto', marginRight:0}}>
-                                                <Input value={values.input2} style={styles.formControl}  label="Valor 2" onChangeText={(text)=> setFieldValue('input2', text)}/>
+                                                <Input value={values.input2} style={styles.formControl}  label="Al Valor" onChangeText={(text)=> setFieldValue('input2', text)}/>
                                             </View>
                                         </View>
                                     
                                 ))}
 
-                                {(values.type.includes('Valor unico') && (
+                                {(values.type.includes('Valor unico') && campoSelect != 'ALSEXO' && (
                                     
                                     <View>
-                                        <Input value={values.input1} style={styles.formControl} label="Valor 1" onChangeText={(text)=> setFieldValue('input1', text)} />
+                                        <Input value={values.input1} style={styles.formControl} label="Valor" onChangeText={(text)=> setFieldValue('input1', text)} />
                                     </View>
                                 
                                 ))}
 
-                                {(values.type.includes('Lista de valores') && (
+                                {(values.type.includes('Valor unico') && campoSelect == 'ALSEXO' && (
                                     
                                     <View>
-                                        <Input style={styles.formControl} label="Valor 1" 
+                                        {/* <Input value={values.input1} style={styles.formControl} label="Valor" onChangeText={(text)=> setFieldValue('input1', text)} /> */}
+                                        <Picker
+                                          style={{color:'black'}}
+                                          selectedValue={values.input1}
+                                          style={styles.formControlSelect}
+                                          onValueChange={(itemValue,itemIndex)=> {
+                                            console.log(itemValue);
+                                            setFieldValue('input1', itemValue)
+                                          }}
+                                      >
+                                        <Picker.Item label={'Seleccionar Valor'} value={''} />
+                                          
+                                              <Picker.Item label={'Masculino'} value={'Masculino'} />
+                                              <Picker.Item label={'Femenino'} value={'Femenino'} />
+                                        </Picker> 
+                                    </View>
+                                
+                                ))}
+
+                                {(values.type.includes('Lista de valores') && campoSelect != 'ALSEXO' && (
+                                    
+                                    <View>
+                                        <Input style={styles.formControl} label="Valor" 
                                           ref={input1}
                                           onEndEditing={(e)=> {
                                             arryData.push(e.nativeEvent.text)
@@ -872,7 +897,7 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
     return(
         <View>
           <ButtonGroup
-            buttons={btnHeaderConfig}
+            buttons={['Ejecutar','Cancelar']}
             selectedIndex={null}
             buttonStyle={{backgroundColor:'#E1E1E1'}}
             buttonContainerStyle={{borderColor:'gray'}}
@@ -883,7 +908,32 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
               }
               
               if(value == 0){
-                setModal(false);
+                //setModal(false);
+                var arry =Object.keys(formikRef2.current.values);
+                var formData = formikRef2.current.values;
+                console.log(arry)
+                var paramx = ''
+                for (let x = 0; x < arry.length; x++) {
+                  const element = arry[x];
+                  if(!element.includes('_INPUT')){
+                    console.log(element);
+                    let param1 = (formData[element+'_INPUT']).split('_');
+                    let param2 = 1;
+
+                    if(((formData[element]).split(',')).length > 1){
+                      param2 = 3
+                    }
+
+                    if(((formData[element]).split('-')).length > 1){
+                      param2 = 2
+                    }
+
+                    console.log((formData[element]).split(','),(formData[element]).split('-'));
+                    paramx = paramx + '@'+element+'|'+param1[0]+'|'+param2+'|'+formData[element]+'|';
+                  }
+                  
+                }
+                console.log(paramx);
               }
             }}
             containerStyle={{ marginBottom: 20 }}
@@ -903,15 +953,16 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
                                 if(item.UDTIPO == "S"){
                                     return(
                                         <View style={styles.select}>
+                                            <Text style={{fontSize:17,fontWeight:900,margin:5}}>{item.SRNOMCAMPO}</Text>
                                             <Picker
                                                 style={{color:'black'}}
-                                                selectedValue={values[item.SRCAMPO]}
+                                                selectedValue={values[item.SRCAMPO+'_INPUT']}
                                                 style={styles.formControlSelect}
                                                 onValueChange={(itemValue,itemIndex)=> {
-                                                    setFieldValue(item.SRCAMPO, itemValue)
-                                                    console.log(values, item.SRCAMPO, values[item.SRCAMPO],itemValue,itemIndex)}}
+                                                    setFieldValue((item.SRCAMPO+'_INPUT'), itemValue)
+                                                    console.log(values, (item.SRCAMPO+'_INPUT'), values[item.SRCAMPO],itemValue,itemIndex)}}
                                             >
-                                                <Picker.Item label={item.SRNOMCAMPO} value='' />
+                                                <Picker.Item label={''} value='' />
                                                 {
                                                     dataSelects['TIPOSEL'].map((item) => {
                                                         return(
@@ -920,10 +971,11 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
                                                     })
                                                 }
                                             </Picker> 
-                                            {(values[item.SRCAMPO] != '')?
+                                            {(true)?
                                                 <Input 
                                                     style={styles.formControl} 
                                                     value={values[item.SRCAMPO]} 
+                                                    disabled={item.SRREQPROT == 'P'?true:false}
                                                     rightIcon={
                                                         <Icon 
                                                             name='add'
