@@ -1,4 +1,5 @@
 {
   "name": "myApp2",
-  "displayName": "myApp2"
+  "displayName": "myApp2",
+  "googleServicesFile": "./google-services.json"
 }

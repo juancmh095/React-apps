@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "445606355747",
+    "project_id": "mi-app-escolar",
+    "storage_bucket": "mi-app-escolar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445606355747:android:58a6da74763e5f5384a296",
+        "android_client_info": {
+          "package_name": "com.miapp.miappescolar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUT4SJ4hhOI6bBij7rqbiVyx3cFNRvcY4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

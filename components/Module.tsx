@@ -478,7 +478,11 @@ function ModuleComponent(props) {
             }
             
             if(value == 0){
-              openAction(dataInfo[checked]['LOITEM']?dataInfo[checked]['LOITEM']:dataInfo[checked]['RVVERSION'],0)
+              if(checked){
+                openAction(dataInfo[checked]['LOITEM']?dataInfo[checked]['LOITEM']:dataInfo[checked]['RVVERSION'],0)
+              }else{
+                ToastAndroid.show('Seleccione un elemento', ToastAndroid.LONG);
+              }
             }
                 
           }else{
@@ -724,6 +728,7 @@ function ModuleComponent(props) {
 function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, btnHeaderConfig,campoSelect) {
     console.log('este son la data de los selects',dataSelects2,campoSelect);
     const [arryData, setArrData] = React.useState([]);
+    const [datePk, setDatePk] = React.useState(new Date())
     const input1 = useRef();
     const input2 = useRef();
 
@@ -748,6 +753,17 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
       
       setModal(false);
     }
+
+    const changeDateTime = (setFieldValue,campo, value, event) => {
+      if(event.type == 'set'){
+          let dt = new Date(value);
+          dt = dt.toLocaleDateString('es-MX').split('/');
+          dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
+          setFieldValue(campo,dt);
+        
+      }
+    }
+
     return(
         <View>
           <ButtonGroup
@@ -797,7 +813,7 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
                                 }
                             </Picker> 
                             <View>
-                                {(values.type.includes('Rango de valores') && campoSelect != 'ALSEXO' && (
+                                {(values.type.includes('Rango de valores') && campoSelect != 'ALSEXO' && campoSelect != 'ALDATN' && (
                                     
                                         <View style={{flexDirection:'row', flexWrap:'wrap'}}>
                                             <View style={{width:'48%', marginRight:'auto', marginLeft:0}}>
@@ -811,10 +827,86 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
                                     
                                 ))}
 
-                                {(values.type.includes('Valor unico') && campoSelect != 'ALSEXO' && (
+                                {(values.type.includes('Rango de valores') && campoSelect == 'ALSEXO' && (
+                                    
+                                    <View style={{flexDirection:'row', flexWrap:'wrap'}}>
+                                        <View style={{width:'48%', marginRight:'auto', marginLeft:0}}>
+                                            <Picker
+                                                style={{color:'black'}}
+                                                selectedValue={values.input1}
+                                                style={styles.formControlSelect}
+                                                onValueChange={(itemValue,itemIndex)=> {
+                                                  console.log(itemValue);
+                                                  setFieldValue('input1', itemValue)
+                                                }}
+                                            >
+                                              <Picker.Item label={'Del Valor'} value={''} />
+                                                
+                                                    <Picker.Item label={'Masculino'} value={'Masculino'} />
+                                                    <Picker.Item label={'Femenino'} value={'Femenino'} />
+                                              </Picker>
+                                        </View>
+                                        <Text>-</Text>
+                                        <View style={{width:'48%',  marginLeft:'auto', marginRight:0}}>
+                                          <Picker
+                                            style={{color:'black'}}
+                                            selectedValue={values.input2}
+                                            style={styles.formControlSelect}
+                                            onValueChange={(itemValue,itemIndex)=> {
+                                              console.log(itemValue);
+                                              setFieldValue('input2', itemValue)
+                                            }}
+                                        >
+                                          <Picker.Item label={'Al Valor'} value={''} />
+                                            
+                                                <Picker.Item label={'Masculino'} value={'Masculino'} />
+                                                <Picker.Item label={'Femenino'} value={'Femenino'} />
+                                          </Picker>
+                                        </View>
+                                    </View>
+                                
+                                ))}
+                                
+                                {(values.type.includes('Rango de valores') && campoSelect == 'ALDATN' && (
+                                    
+                                    <View style={{flexDirection:'row', flexWrap:'wrap'}}>
+                                        <View style={{width:'48%', marginRight:'auto', marginLeft:0}}>
+                                            <Input value={values.input1}
+                                             style={styles.formControl} label="Del Valor"
+                                             onChangeText={(text)=> setFieldValue('input1', text)}
+                                             onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,'input1',value,event)} })}
+                                            />
+                                        </View>
+                                        <Text>-</Text>
+                                        <View style={{width:'48%',  marginLeft:'auto', marginRight:0}}>
+                                            <Input value={values.input2} 
+                                              style={styles.formControl}  
+                                              label="Al Valor" 
+                                              onChangeText={(text)=> setFieldValue('input2', text)}
+                                              onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,'input2',value,event)} })}
+                                            />
+                                        </View>
+                                    </View>
+                                
+                                ))}
+
+                                {(values.type.includes('Valor unico') && campoSelect != 'ALSEXO' && campoSelect != 'ALDATN' && (
                                     
                                     <View>
                                         <Input value={values.input1} style={styles.formControl} label="Valor" onChangeText={(text)=> setFieldValue('input1', text)} />
+                                    </View>
+                                
+                                ))}
+
+                                {(values.type.includes('Valor unico') && campoSelect == 'ALDATN' && (
+                                    
+                                    <View>
+                                        <Input value={values.input1} 
+                                          style={styles.formControl} 
+                                          label="Valor" 
+                                          onChangeText={(text)=> setFieldValue('input1', text)} 
+                                          onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,'input1',value,event)} })}
+                                        />
                                     </View>
                                 
                                 ))}
@@ -841,7 +933,7 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
                                 
                                 ))}
 
-                                {(values.type.includes('Lista de valores') && campoSelect != 'ALSEXO' && (
+                                {(values.type.includes('Lista de valores') && campoSelect != 'ALSEXO' && campoSelect != 'ALDATN' && (
                                     
                                     <View>
                                         <Input style={styles.formControl} label="Valor" 
@@ -851,6 +943,88 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
                                             console.log(arryData)
                                             setArrData([...arryData]);
                                           }}
+                                          rightIcon={
+                                            <Icon 
+                                              name='add'
+                                              onPress={()=> input1.current.blur()}
+                                            />
+                                          } />
+                                          <View>
+                                            {
+                                              arryData.map((item, index) => {
+                                                return(
+                                                  <ListItem>
+                                                    <Icon name="close" type="material-community" color="grey"
+                                                      onPress={()=> {
+                                                        arryData.splice(index,1);
+                                                        setArrData([...arryData]);
+                                                      }}
+                                                    />
+                                                    <ListItem.Content>
+                                                      <ListItem.Title>{item}</ListItem.Title>
+                                                    </ListItem.Content>
+                                                  </ListItem>
+                                                )
+                                              })
+                                            }
+                                          </View>
+                                    </View>
+                                
+                                ))}
+
+                                {(values.type.includes('Lista de valores') && campoSelect == 'ALSEXO' && (
+                                    
+                                          <View>
+                                            <Picker
+                                                style={{color:'black'}}
+                                                selectedValue={values.input1}
+                                                style={styles.formControlSelect}
+                                                onValueChange={(itemValue,itemIndex)=> {
+                                                  console.log(itemValue);
+                                                  arryData.push(itemValue);
+                                                  setArrData([...arryData]);
+                                                }}
+                                            >
+                                              <Picker.Item label={'Seleccionar Valor'} value={''} />
+                                                
+                                                    <Picker.Item label={'Masculino'} value={'Masculino'} />
+                                                    <Picker.Item label={'Femenino'} value={'Femenino'} />
+                                              </Picker>
+                                          <View>
+                                            {
+                                              arryData.map((item, index) => {
+                                                return(
+                                                  <ListItem>
+                                                    <Icon name="close" type="material-community" color="grey"
+                                                      onPress={()=> {
+                                                        arryData.splice(index,1);
+                                                        setArrData([...arryData]);
+                                                      }}
+                                                    />
+                                                    <ListItem.Content>
+                                                      <ListItem.Title>{item}</ListItem.Title>
+                                                    </ListItem.Content>
+                                                  </ListItem>
+                                                )
+                                              })
+                                            }
+                                          </View>
+                                    </View>
+                                
+                                ))}
+
+                                {(values.type.includes('Lista de valores') && campoSelect == 'ALDATN' && (
+                                    
+                                    <View>
+                                        <Input style={styles.formControl} label="Valor" 
+                                          ref={input1}
+                                          value={values['input1']}
+                                          onEndEditing={(e)=> {
+                                            arryData.push(e.nativeEvent.text)
+                                            console.log(arryData)
+                                            setArrData([...arryData]);
+                                          }}
+                                          onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,'input1',value,event)} })}
                                           rightIcon={
                                             <Icon 
                                               name='add'
@@ -895,56 +1069,73 @@ function formsBuildingConfig(setModal,formikRef2,dataSelects2, LoadDataConfig, b
 
 function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, loadConfig,btnHeaderConfig) {
 
-    console.log(initialValues);
+    console.log(inputs);
     const url_api = "http://20.64.97.37/api/products";
 
     const ejecutar = async () => {
       //setModal(false);
       var arry =Object.keys(formikRef2.current.values);
       var formData = formikRef2.current.values;
-      console.log(arry)
-      var paramx = ''
-      for (let x = 0; x < arry.length; x++) {
-        const element = arry[x];
-        if(!element.includes('_INPUT') && element != 'REPORT' && element != 'REPORTV'){
-          console.log(element);
-          let param1 = (formData[element+'_INPUT']).split('_');
-          let param2 = 1;
 
-          if(((formData[element]).split(',')).length > 1){
-            param2 = 3
-          }
+      var validate = true;
+      var txtInput = '';
 
-          if(((formData[element]).split('-')).length > 1){
-            param2 = 2
-          }
-
-          console.log((formData[element]).split(','),(formData[element]).split('-'));
-          paramx = paramx + '@'+element+'|'+param1[0]+'|'+param2+'|'+formData[element]+'|';
+      for (let x = 0; x < inputs.length; x++) {
+        const element = inputs[x];
+        console.log('AQUI->',element['SRREQPROT'],formData[element['SRCAMPO']]);
+        if(element['SRREQPROT'] == 'R' && (formData[element['SRCAMPO']] == '' || !formData[element['SRCAMPO']])){
+          console.log('falta campo');
+          txtInput = element['SRNOMCAMPO'];
+          validate = false;
         }
-        
-      }
-      var requestParam = {
-        Id:1,
-        json:JSON.stringify({
-          Function: 'ExecuteReport',
-          Program:initialValues['REPORT'],
-          Version:initialValues['REPORTV'],
-          user:22,
-          psw:'JrVZl/C6Gr/dLBQMKJXJVA==',
-          ID:2,
-          Parameter: paramx
-        }),
-        Category:"Utilerias"
-      };
-
-      var res = await axios.post(`${url_api}`,requestParam);
-      console.log(requestParam,res.data)
-      if(res.data.Json == 'OK'){
-        setModal(false);
       }
 
-      console.log(requestParam);
+      console.log(arry)
+      if(validate){
+        var paramx = ''
+        for (let x = 0; x < arry.length; x++) {
+          const element = arry[x];
+          if(!element.includes('_INPUT') && element != 'REPORT' && element != 'REPORTV'){
+            console.log(element);
+            let param1 = (formData[element+'_INPUT']).split('_');
+            let param2 = 1;
+  
+            if(((formData[element]).split(',')).length > 1){
+              param2 = 3
+            }
+  
+            if(((formData[element]).split('-')).length > 1){
+              param2 = 2
+            }
+  
+            console.log((formData[element]).split(','),(formData[element]).split('-'));
+            paramx = paramx + '@'+element+'|'+param1[0]+'|'+param2+'|'+formData[element]+'|';
+          }
+          
+        }
+        var requestParam = {
+          Id:1,
+          json:JSON.stringify({
+            Function: 'ExecuteReport',
+            Program:initialValues['REPORT'],
+            Version:initialValues['REPORTV'],
+            user:22,
+            psw:'JrVZl/C6Gr/dLBQMKJXJVA==',
+            ID:2,
+            Parameter: paramx
+          }),
+          Category:"Utilerias"
+        };  
+        var res = await axios.post(`${url_api}`,requestParam);
+        console.log(requestParam,res.data)
+        if(res.data.Json == 'OK'){
+          setModal(false);
+        }  
+        console.log(requestParam);
+
+      }else{
+        ToastAndroid.show((txtInput.toUpperCase())+' no pueden ir vacíos', ToastAndroid.LONG);
+      }
     }
 
     return(
@@ -966,6 +1157,7 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
             }}
             containerStyle={{ marginBottom: 20 }}
           />
+          <View>
             <Formik
                 initialValues={initialValues}
                 key={'form2'}
@@ -974,54 +1166,58 @@ function formsBuilding(setModal,inputs, formikRef2,dataSelects, initialValues, l
             
             >
                 {({ handleChange, setFieldValue, handleSubmit, values }) => (
-                    
-                    <View>
-                        {
-                            inputs.map((item,i)=>{                               
-                                if(item.UDTIPO == "S"){
-                                    return(
-                                        <View style={styles.select}>
-                                            <Text style={{fontSize:17,fontWeight:900,margin:5}}>{item.SRNOMCAMPO}</Text>
-                                            <Picker
-                                                style={{color:'black'}}
-                                                selectedValue={values[item.SRCAMPO+'_INPUT']}
-                                                style={styles.formControlSelect}
-                                                onValueChange={(itemValue,itemIndex)=> {
-                                                    setFieldValue((item.SRCAMPO+'_INPUT'), itemValue)
-                                                    console.log(values, (item.SRCAMPO+'_INPUT'), values[item.SRCAMPO],itemValue,itemIndex)}}
-                                            >
-                                                <Picker.Item label={''} value='' />
-                                                {
-                                                    dataSelects['TIPOSEL'].map((item) => {
-                                                        return(
-                                                            <Picker.Item label={item.Valor} value={item.Valor} />
-                                                        )
-                                                    })
-                                                }
-                                            </Picker> 
-                                            {(true)?
-                                                <Input 
-                                                    style={styles.formControl} 
-                                                    value={values[item.SRCAMPO]} 
-                                                    disabled={item.SRREQPROT == 'P'?true:false}
-                                                    rightIcon={
-                                                        <Icon 
-                                                            name='add'
-                                                            onPress={()=> loadConfig(setFieldValue,item.SRCAMPO)}
-                                                        />
-                                                    } 
-                                                />:''}
-                                        </View>
-                                    )
-                                }
-                            })
-                        }
+                    <View style={{height:'90%', overflow:'scroll'}}>
+                      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                          {
+                              inputs.map((item,i)=>{                               
+                                  if(item.UDTIPO == "S" || item.UDTIPO == "D"){
+                                      return(
+                                          <View style={styles.select}>
+                                              <Text style={{fontSize:17,fontWeight:900,margin:5}}>{item.SRNOMCAMPO}</Text>
+                                              <Picker
+                                                  style={{color:'black'}}
+                                                  selectedValue={values[item.SRCAMPO+'_INPUT']}
+                                                  style={styles.formControlSelect}
+                                                  onValueChange={(itemValue,itemIndex)=> {
+                                                      setFieldValue((item.SRCAMPO+'_INPUT'), itemValue)
+                                                      console.log(values, (item.SRCAMPO+'_INPUT'), values[item.SRCAMPO],itemValue,itemIndex)}}
+                                              >
+                                                  <Picker.Item label={''} value='' />
+                                                  {
+                                                      dataSelects['TIPOSEL'].map((item) => {
+                                                          return(
+                                                              <Picker.Item label={item.Valor} value={item.Valor} />
+                                                          )
+                                                      })
+                                                  }
+                                              </Picker> 
+                                              {(true)?
+                                                  <Input 
+                                                      style={styles.formControl} 
+                                                      value={values[item.SRCAMPO]} 
+                                                      disabled={item.SRREQPROT == 'P'?true:false}
+                                                      rightIcon={
+                                                          <Icon 
+                                                              name='add'
+                                                              onPress={()=> loadConfig(setFieldValue,item.SRCAMPO)}
+                                                          />
+                                                      } 
+                                                  />:''}
+                                          </View>
+                                      )
+                                  }
+                              })
+                          }
+                        
+                      </ScrollView>
                     </View>
                         
                     
                 )}
 
             </Formik>
+
+          </View>
         </View>
     )
 

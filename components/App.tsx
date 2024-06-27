@@ -293,6 +293,8 @@ function HomeComponent(props) {
     if(count == inputsReq.length){
       validate = true;
     }
+
+    console.log('::::::::::::::::',lte)
     
     if(validate){
       console.log(lte,props.data.program)
@@ -394,7 +396,12 @@ function HomeComponent(props) {
           }
 
           if(value == 0){
-            openAction(dataInfo[checked]['LOITEM']?dataInfo[checked]['LOITEM']:dataInfo[checked]['RPREPORTID'],0)
+            console.log(checked);
+            if(checked){
+              openAction(dataInfo[checked]['LOITEM']?dataInfo[checked]['LOITEM']:dataInfo[checked]['RPREPORTID'],0)
+            }else{
+              ToastAndroid.show('Seleccione un elemento', ToastAndroid.LONG);
+            }
           }
           
         }}

@@ -50,6 +50,8 @@ const TextToSpeech = (props) => {
             speak(textVoice);
 
             setTimer(user['Tiempo']);
+        }else{
+          speak('')
         }
 
         
@@ -67,7 +69,7 @@ const TextToSpeech = (props) => {
         });
         Tts.addEventListener('tts-finish', (event) => {
 
-        console.log(event);
+        console.log('event',event);
         get_data();
       });
 

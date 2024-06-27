@@ -64,7 +64,6 @@ const BannersComponent = ({navigation}) => {
             {(images.length > 0 && (
                 
                 <View>
-                    <Text>{indexImg}</Text>
                     <Image
                         source={{ uri: images[indexImg].PLURL}}
                         style={{width:'100%', height:'80%'}}

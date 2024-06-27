@@ -7,6 +7,7 @@ import { Formik } from "formik";
 import * as rqdata from './params_request';
 import storage from "../Storage";
 import DeviceInfo from "react-native-device-info";
+import messaging from '@react-native-firebase/messaging';
 
 
 const LoginComponent = ({navigation}) => {
@@ -44,7 +45,10 @@ const LoginComponent = ({navigation}) => {
             let body = rqdata.login;
             let json = JSON.parse(body.json);
             let row = json.Rows;
-            let r = forms['user'] + "|"+pass+"|"+dispositivo+'|';
+            const fcmToken = await messaging().getToken();
+            console.log(fcmToken);
+            let r = forms['user'] + "|"+pass+"|"+dispositivo+'|'+fcmToken+'|';
+            console.log(r);
             row[0]['Data'] = r;
             json.Rows = row;
             body.json = JSON.stringify(json);
@@ -59,6 +63,9 @@ const LoginComponent = ({navigation}) => {
                     data: data['FUSERSLOGIN'][0]
                 });
                 navigation.navigate('Banners')
+            }else{
+                ToastAndroid.show('Usuario o contraseña invalido', ToastAndroid.LONG);
+
             }
         }
     }
