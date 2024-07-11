@@ -62,7 +62,13 @@ const LoginComponent = ({navigation}) => {
                     id:'1',
                     data: data['FUSERSLOGIN'][0]
                 });
-                navigation.navigate('Banners')
+                var userx = data['FUSERSLOGIN'][0];
+                console.log('rol',userx['usrol'])
+                if(userx['usrol'] == '1'){
+                    navigation.navigate('Maestro/Inicio')
+                }else{
+                    navigation.navigate('Banners')
+                }
             }else{
                 ToastAndroid.show('Usuario o contraseña invalido', ToastAndroid.LONG);
 

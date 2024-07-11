@@ -9,6 +9,7 @@ import loginComponent from './components/login';
 import App from './components/main';
 import InitComponent from './components/init';
 import BannersComponent from './components/banners';
+import MaestroHomeComponent from './components/maestros/home_maestro';
 
 
 
@@ -23,6 +24,7 @@ function Navigation() {
           <Stack.Screen name="Home" component={App} options={{title:''}}/>
           <Stack.Screen name="Init" component={InitComponent} options={{title:''}}/>
           <Stack.Screen name="Banners" component={BannersComponent} />
+          <Stack.Screen name="Maestro/Inicio" component={MaestroHomeComponent} />
         </Stack.Navigator>
       </NavigationContainer>
     );
