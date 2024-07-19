@@ -349,4 +349,20 @@ module.exports = {
     }),
     Category:"Utilerias"
   },
+
+  getData:{
+    Id:1,
+    json:JSON.stringify({
+      user:"2",
+      psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+      Escuela:"2",
+      Tipo: "App",
+      Tabla:"regasistencia",
+      Rows:[{
+        action:"I",
+        Data:""
+      }]
+    }),
+    Category:"Mi App"
+  },
 }
