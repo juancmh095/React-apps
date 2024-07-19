@@ -81,7 +81,13 @@ const InitComponent = ({navigation}) => {
                         marginLeft:"auto",
                         marginRight:"auto"
                     }}
-                    onPress={()=> navigation.navigate('Maestro/Inicio')}
+                    onPress={()=> {
+                        if(usuario['usrol'] == '2'){
+                            navigation.navigate('Tutor/Inicio')
+                        }else{
+                            navigation.navigate('Maestro/Inicio')
+                        }
+                    }}
                     />
                 <Button
                 containerStyle={{

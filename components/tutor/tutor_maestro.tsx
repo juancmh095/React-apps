@@ -7,12 +7,16 @@ import { ScrollView, View, Modal, ToastAndroid, Linking } from "react-native";
 import * as rqdata from '../params_request';
 import storage from "../../Storage";
 
-const MaestroHomeComponent = ({navigation}) => {
+const TutorHomeComponent = ({navigation}) => {
     const formikRef = useRef();
     const [usuario, setUsuario] = React.useState(null);
     
     const [btnBNames, setBtnBNames] = React.useState([]);
     const [btnBCode, setBtnBCode] = React.useState([]);
+    const [btnTNames, setBtnTNames] = React.useState([]);
+    const [btnTCode, setBtnTCode] = React.useState([]);
+
+    const [checkH, setCheckH] = React.useState([]);
 
     const [acordion, setAcordion] = React.useState([]);
     const [dataChecks, setDataChecks] = React.useState([]);
@@ -38,6 +42,19 @@ const MaestroHomeComponent = ({navigation}) => {
         });
     }
 
+    const showBarra = async () => {
+        let body = rqdata.labels;
+        let json = JSON.parse(body.json);
+        json.Tabla = 'BARRAPROGRAM';
+        let row = json.Rows;
+
+        let r = '0|PMENUS|';
+        row[0]['Data'] = r;
+        json.Rows = row;
+        json.action = 'I';
+        body.json = JSON.stringify(json);
+    }
+
     const showBarraBottom = async () => {
 
         let body = rqdata.labels;
@@ -50,13 +67,10 @@ const MaestroHomeComponent = ({navigation}) => {
         json.Rows = row;
         json.action = 'I';
         body.json = JSON.stringify(json);
-        console.log(body)
         var reponse = await axios.post(`${url_api}`,body);
-        console.log('bottom Bar',reponse.data);
         if(reponse.data.Json != ''){
             let datx = JSON.parse(reponse.data.Json);
             let datxx = datx['FBARRAPROGRAM'];
-            console.log(datxx);
             if(btnBNames.length < datxx.length){
                 for (let i = 0; i < datxx.length; i++) {
                     const element = datxx[i];
@@ -76,8 +90,6 @@ const MaestroHomeComponent = ({navigation}) => {
         var year = new Date().getFullYear();
         var dateStr = '20240711';
 
-        console.log(usukides,usukiduser)
-
         let body = rqdata.labels;
         let json = JSON.parse(body.json);
         json.Tabla = 'MENUS1';
@@ -87,7 +99,6 @@ const MaestroHomeComponent = ({navigation}) => {
         row[0]['Data'] = r;
         json.Rows = row;
         body.json = JSON.stringify(json);
-        console.log(body)
         var reponse = await axios.post(`${url_api}`,body);
         if(reponse.data.Json != ''){
             var datx = JSON.parse(reponse.data.Json);
@@ -120,10 +131,6 @@ const MaestroHomeComponent = ({navigation}) => {
                 menuItems[i]['Opciones'] = opt;
             }
 
-
-
-            console.log(menuItems);
-
             setAcordion(menuItems);
         }
     }  
@@ -132,9 +139,6 @@ const MaestroHomeComponent = ({navigation}) => {
         try {
         var model = {};
         var usukides = usuario['usukides'];
-
-        
-        console.log(item)
         if(item.Programa == 'PDIA'){
             let grukidgr = item['grukidgr'];
             let body = rqdata.getData;
@@ -228,11 +232,64 @@ const MaestroHomeComponent = ({navigation}) => {
         }
         
     }
+
+    const checkin = async () => {
+        for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
+            const element = acordion[0]['Opciones'][i];
+            let body = rqdata.labels;
+            let json = JSON.parse(body.json);
+            json.Tabla = 'salidacheckin';
+            let row = json.Rows;
+            var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+            let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|1|5|';
+            row[0]['Data'] = r;
+            row[0]['action'] = 'C';
+            json.Rows = row;
+            body.json = JSON.stringify(json);
+            var reponse = await axios.post(`${url_api}`,body);
+        }
+        ToastAndroid.show('Checking Correcto', ToastAndroid.LONG);
+    }
+
+    const checkout = async () => {
+        let body = rqdata.labels;
+        let json = JSON.parse(body.json);
+        json.Tabla = 'PUNTOS1';
+        let row = json.Rows;
+        var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+        let r = usuario['usukides'] + '|2|';
+        row[0]['Data'] = r;
+        row[0]['action'] = 'A';
+        json.Rows = row;
+        body.json = JSON.stringify(json);
+        var reponse = await axios.post(`${url_api}`,body);
+        console.log(reponse.data);
+        ToastAndroid.show('Check Out Correcto', ToastAndroid.LONG);
+    }
     
   return (
     <View style={{backgroundColor:'white', height:'100%'}}>
          <ScrollView>
             <View>
+            <ButtonGroup
+            buttons={['Salir','Salida','Tutor','Check In', 'Check out']}
+            selectedIndex={null}
+            buttonStyle={{backgroundColor:'#E1E1E1'}}
+            buttonContainerStyle={{borderColor:'gray'}}
+            onPress={(value) => {
+              
+                
+                if(value == 3){
+                    checkin()
+                }
+
+                if(value == 4){
+                    checkout()
+                }
+
+            }}
+            containerStyle={{ marginBottom: 20 }}
+          />
                 {acordion.map((item,i) => {
                         return(
                             <View>
@@ -258,6 +315,16 @@ const MaestroHomeComponent = ({navigation}) => {
                                                                 <ListItem.Title>{option.Opcion}</ListItem.Title>
                                                             </ListItem.Content>
                                                             <ListItem.Chevron />
+                                                            <ListItem.CheckBox
+                                                                iconType="material-community"
+                                                                checkedIcon="checkbox-marked"
+                                                                uncheckedIcon="checkbox-blank-outline"
+                                                                checked={checkH.length > 0?checkH[i]:true}
+                                                                onPress={() => { 
+                                                                    checkH[i] = !checkH[i];
+                                                                    setCheckH([...checkH]);
+                                                                }}
+                                                            />
                                                         </ListItem>
                                                     </View>
                                                 )
@@ -588,4 +655,4 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
 
 
 
-export default MaestroHomeComponent;
+export default TutorHomeComponent;
