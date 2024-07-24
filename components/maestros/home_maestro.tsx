@@ -6,6 +6,8 @@ import { Formik } from "formik";
 import { ScrollView, View, Modal, ToastAndroid, Linking } from "react-native";
 import * as rqdata from '../params_request';
 import storage from "../../Storage";
+import HomeComponent from '../App.tsx';
+import ModuleComponent from '../Module.tsx';
 
 const MaestroHomeComponent = ({navigation}) => {
     const formikRef = useRef();
@@ -19,6 +21,10 @@ const MaestroHomeComponent = ({navigation}) => {
     const [data, setData] = React.useState([]);
     const [modalProgramVisible, setModalProgramVisible] = React.useState(false);
     const [modalProgramVisible2, setModalProgramVisible2] = React.useState(false);
+    const [modalVisible3, setModalVisible3] = React.useState(false);
+    const [modalVisible4, setModalVisible4] = React.useState(false);
+    const [params_view, setParams_view] = React.useState(null);
+
     const url_api = "http://20.64.97.37/api/products";
     
     useEffect(() => {
@@ -228,6 +234,85 @@ const MaestroHomeComponent = ({navigation}) => {
         }
         
     }
+
+    const goTo = async (programa) => {
+        console.log('->',programa)
+        if(programa == 'PLOTE'){
+            navigation.navigate('Home')
+        }
+        
+        if(programa == 'PREPORTS'){
+            console.log(programa)
+            try {
+                var reponse = await axios.post(`${url_api}`,rqdata.inputs_preport);
+                
+                var dataSelect = {};
+                var modelSelect = {};
+                var dtaSelect = [];
+                if(reponse.data.Json){
+                    let d = JSON.parse(reponse.data.Json);
+                    console.log(d);  
+                    for (let i = 0; i < d.FProgramInquiry.length; i++) {
+                    const element = d.FProgramInquiry [i];
+                    if(element.UDUDC != ""){
+                        dtaSelect.push(element.UDUDC);
+                    }
+                    }
+                }
+            
+                /* CARGA LA DATA DE LOS SELECTS 1 */
+                for (let y = 0; y < dtaSelect.length; y++) {
+                    const element = dtaSelect[y];
+                    let body = rqdata.get_data_selects;
+                    let json = JSON.parse(body.json);
+                    let row = json.Rows;
+                    let r = "0|"+element+"|1|";
+                    row[0]['Data'] = r;
+                    json.Rows = row;
+                    body.json = JSON.stringify(json);
+                    var catR1 = await axios.post(`${url_api}`,body);
+                        
+                    if(catR1.data.Json){
+                        let d = JSON.parse(catR1.data.Json);
+                        modelSelect[element] = d.FPGMINQUIRY;
+                    }
+                    
+                }
+                
+            
+                
+            
+                let datax = {
+                    titulo: 'Reportes',
+                    data: {},
+                    program: programa,
+                    cat: modelSelect
+                };
+            
+                console.log(datax)
+            
+                setParams_view(datax);
+                setModalVisible3(true);
+            
+                console.log(model,datax,params);
+                
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        if(programa == 'PJOBS'){
+            let datax = {
+                titulo: 'Reportes enviados',
+                data: [],
+                program: 'PJOBS',
+                cat: [],
+                report: ''
+              };  
+              setParams_view(datax);
+              setModalVisible4(true);
+        }
+    }
     
   return (
     <View style={{backgroundColor:'white', height:'100%'}}>
@@ -253,7 +338,16 @@ const MaestroHomeComponent = ({navigation}) => {
                                         {item.Opciones.map((option,i) => {
                                                 return(
                                                     <View style={{'marginStart':50, borderBottomColor:'gray', borderBottomWidth:1}}>
-                                                        <ListItem key={0} bottomDivider onPress={()=> showProgram(option)}>
+                                                        <ListItem key={0} bottomDivider onPress={()=> {
+
+                                                                if(option['Programa'] == 'PDIA'){
+                                                                    showProgram(option)
+                                                                }
+                                                                console.log(option)
+                                                                if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS'){
+                                                                    goTo(option['Programa'])
+                                                                }
+                                                            }}>
                                                             <ListItem.Content>
                                                                 <ListItem.Title>{option.Opcion}</ListItem.Title>
                                                             </ListItem.Content>
@@ -306,6 +400,30 @@ const MaestroHomeComponent = ({navigation}) => {
           >
             <View>
                 {formScreenBuildV2(setModalProgramVisible2,data,usuario,[])}        
+            </View>
+          </Modal>
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible3}
+            >
+            <View>
+              <View>
+                <HomeComponent setModalVisible3={setModalVisible3} data={params_view} />                
+              </View>
+            </View>
+          </Modal>
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible4}
+            >
+            <View>
+              <View>
+                <ModuleComponent setModalVisible={setModalVisible4} data={params_view}/>                
+              </View>
             </View>
           </Modal>
     </View>

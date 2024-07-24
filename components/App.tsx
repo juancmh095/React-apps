@@ -118,12 +118,15 @@ function HomeComponent(props) {
     let body = rqdata.labels;
     let json = JSON.parse(body.json);
     let row = json.Rows;
+
     let r = "0|"+props.data.program+"|E|B|@0@@@@@20240430@@|"
     row[0]['Data'] = r;
     json.Rows = row;
+    json.Tabla = 'ProgramInquiry';
     body.json = JSON.stringify(json);
-    console.log(body)
+    console.log('lABELSSSS',body)
     var reponse = await axios.post(`${url_api}`,body);
+    console.log('lABELSSSS',reponse.data)
     
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
@@ -326,6 +329,7 @@ function HomeComponent(props) {
   }
 
   const openFooterAction = (value) => {
+    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
     console.log(value,btnFooterData,btnFooter);
     var program = props.data.program;
     if(program == 'PREPORTS'){

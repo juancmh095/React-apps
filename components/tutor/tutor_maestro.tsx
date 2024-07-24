@@ -3,9 +3,10 @@ import { ListItem } from '@rneui/base';
 import { Avatar, Button, ButtonGroup, Icon, Image, Input, Text } from "react-native-elements";
 import axios from "axios";
 import { Formik } from "formik";
-import { ScrollView, View, Modal, ToastAndroid, Linking } from "react-native";
+import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet } from "react-native";
 import * as rqdata from '../params_request';
 import storage from "../../Storage";
+import { Picker } from "@react-native-picker/picker";
 
 const TutorHomeComponent = ({navigation}) => {
     const formikRef = useRef();
@@ -23,6 +24,7 @@ const TutorHomeComponent = ({navigation}) => {
     const [data, setData] = React.useState([]);
     const [modalProgramVisible, setModalProgramVisible] = React.useState(false);
     const [modalProgramVisible2, setModalProgramVisible2] = React.useState(false);
+    const [modalProgramVisible3, setModalProgramVisible3] = React.useState(false);
     const url_api = "http://20.64.97.37/api/products";
     
     useEffect(() => {
@@ -129,6 +131,14 @@ const TutorHomeComponent = ({navigation}) => {
                 const element = menuItems[i];
                 var opt = rData.filter((item:any) => item.Menu === element.Menu)
                 menuItems[i]['Opciones'] = opt;
+                if(element['Programa'] == 'PHIJOS'){
+                    var chks = []
+                    for (let x = 0; x < opt.length; x++) {
+                        chks.push(true);                        
+                    }
+                    console.log(element['Programa'],opt.length,chks);
+                    setCheckH([...chks]);
+                }
             }
 
             setAcordion(menuItems);
@@ -137,96 +147,64 @@ const TutorHomeComponent = ({navigation}) => {
 
     const showProgram = async (item) => {
         try {
-        var model = {};
-        var usukides = usuario['usukides'];
-        if(item.Programa == 'PDIA'){
-            let grukidgr = item['grukidgr'];
-            let body = rqdata.getData;
-            let json = JSON.parse(body.json);
-            let row = json.Rows;
-            let r = usukides + '|' +grukidgr + '|';
-            row[0]['Data'] = r;
-            json.Rows = row;
-            body.json = JSON.stringify(json);
-            console.log('response',body);
-            let reponse = await axios.post(`${url_api}`,body);
-            if(reponse.data.Json != ''){
-                var datx = JSON.parse(reponse.data.Json);
-                
-                var chks = [];
-                if(datx['Fregasistencia']){
-                    for (let index = 0; index   < datx['Fregasistencia'].length; index++) {
-                        chks.push(true);
-                    }
-                }
-
-                setDataChecks(chks);
-
-                model = {
-                    usukides:usukides,
-                    grukidgr: grukidgr,
-                    opcion: item['Opcion'],
-                    list: datx['Fregasistencia']?datx['Fregasistencia']:[],
-                    item:item,
-                    checks:chks
-                }
-                console.log('Model',model)
-                setData(model); 
-            }
-            setModalProgramVisible(true);
-        }else{
-            if(item.Programa = 'PSALIDA'){
-                /* obtener titulos */
-                let body = rqdata.labels;
-                let json = JSON.parse(body.json);
-                json.Tabla = 'INQBARRASALIDA';
-                let row = json.Rows;
-                
-                let r = '0|'+usuario['usidioma']+'|';
-                row[0]['Data'] = r;
-                json.Rows = row;
-                body.json = JSON.stringify(json);
-                var reponse = await axios.post(`${url_api}`,body);
-                if(reponse.data.Json != ''){
-                    let datx = JSON.parse(reponse.data.Json);
-                    var optiomsbar = [];
-                    for (let i = 0; i < datx['FINQBARRASALIDA'].length; i++) {
-                        const element = datx['FINQBARRASALIDA'][i];
-                        optiomsbar.push(element['Titulo'])
-                        
-                    }
-                    console.log('btnx->',optiomsbar);
-
-                    console.log('____________________carga__________________');
-                    let body = rqdata.labels;
-                    let json = JSON.parse(body.json);
-                    json.Tabla = 'SALIDAINQAPP';
-                    let row = json.Rows;
-
-                    let r = usuario['usukides'] + '|0|5|A|';
-                    row[0]['Data'] = r;
-                    row[0]['Action'] = 'I';
-                    json.Rows = row;
-                    body.json = JSON.stringify(json);
-                    var reponse = await axios.post(`${url_api}`,body);
-                    console.log(reponse.data);
-                    var datxa = [];
-                    if(reponse.data.Json != ''){
-                        datxa = JSON.parse(reponse.data.Json);
-                        
-                    }
-                    
-                    let model = {
-                        bar: optiomsbar,
-                        opcion: 'x Primaria 5A x',
-                        list: datxa['FSALIDAINQAPP']?datxa['FSALIDAINQAPP']:[]
-                    }
-                    setData(model);
-                    setModalProgramVisible2(true);
-                }
-            }
-        }
+            var alumno = null;
+            var motivos = [];
             
+            for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
+                const element = acordion[0]['Opciones'][i];
+                if(checkH[i]){
+                    alumno = element;
+                }
+            }
+
+            if(item == 'PTIPOSAL'){
+                console.log('_________________________________')
+                let body = rqdata.getData;
+                let json = JSON.parse(body.json);
+                json.Tabla = 'UDCINQ';
+                json.Rows = [{action:'I', Data: usuario['usukides']+'|TIPOSAL||'+usuario['usidioma']+'|' }];
+                body.json = JSON.stringify(json);
+                console.log('response',body);
+                let reponse = await axios.post(`${url_api}`,body);
+                console.log('response',reponse.data);
+                if(reponse.data.Json != ""){
+                    var datx = JSON.parse(reponse.data.Json);
+                    motivos = datx['FUDCINQ'];
+                    console.log(datx['FUDCINQ']);
+                }
+
+            }
+
+            if(item == 'PINASISTENCIA'){
+                console.log('_________________________________')
+                let body = rqdata.getData;
+                let json = JSON.parse(body.json);
+                json.Tabla = 'UDCINQ';
+                json.Rows = [{action:'I', Data: usuario['usukides']+'|INASISTIR||'+usuario['usidioma']+'|' }];
+                body.json = JSON.stringify(json);
+                console.log('response',body);
+                let reponse = await axios.post(`${url_api}`,body);
+                console.log('response',reponse.data);
+                if(reponse.data.Json != ""){
+                    var datx = JSON.parse(reponse.data.Json);
+                    motivos = datx['FUDCINQ'];
+                    console.log(datx['FUDCINQ']);
+                }
+
+            }
+
+            
+            
+            let model = {
+                Programa: item,
+                alumno: alumno,
+                motivos: motivos
+            }
+
+            setData(model);
+            
+            setModalProgramVisible3(true);
+
         } catch (error) {
             console.log('error',error);
         }
@@ -236,35 +214,48 @@ const TutorHomeComponent = ({navigation}) => {
     const checkin = async () => {
         for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
             const element = acordion[0]['Opciones'][i];
-            let body = rqdata.labels;
-            let json = JSON.parse(body.json);
-            json.Tabla = 'salidacheckin';
-            let row = json.Rows;
-            var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
-            let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|1|5|';
-            row[0]['Data'] = r;
-            row[0]['action'] = 'C';
-            json.Rows = row;
-            body.json = JSON.stringify(json);
-            var reponse = await axios.post(`${url_api}`,body);
+
+            if(checkH[i]){
+                console.log(checkH)
+                let body = rqdata.labels;
+                let json = JSON.parse(body.json);
+                json.Tabla = 'salidacheckin';
+                let row = json.Rows;
+                var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+                let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|1|5|';
+                row[0]['Data'] = r;
+                row[0]['action'] = 'C';
+                json.Rows = row;
+                body.json = JSON.stringify(json);
+                var reponse = await axios.post(`${url_api}`,body);
+                console.log(reponse.data)
+            }
         }
         ToastAndroid.show('Checking Correcto', ToastAndroid.LONG);
     }
 
     const checkout = async () => {
-        let body = rqdata.labels;
-        let json = JSON.parse(body.json);
-        json.Tabla = 'PUNTOS1';
-        let row = json.Rows;
-        var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
-        let r = usuario['usukides'] + '|2|';
-        row[0]['Data'] = r;
-        row[0]['action'] = 'A';
-        json.Rows = row;
-        body.json = JSON.stringify(json);
-        var reponse = await axios.post(`${url_api}`,body);
-        console.log(reponse.data);
-        ToastAndroid.show('Check Out Correcto', ToastAndroid.LONG);
+
+        for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
+            const element = acordion[0]['Opciones'][i];
+
+            if(checkH[i]){
+                let body = rqdata.labels;
+                let json = JSON.parse(body.json);
+                json.Tabla = 'salidacheckout';
+                let row = json.Rows;
+                var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+                let r =  'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|1|5|';
+                row[0]['Data'] = r;
+                row[0]['action'] = 'C';
+                json.Rows = row;
+                body.json = JSON.stringify(json);
+                var reponse = await axios.post(`${url_api}`,body);
+                console.log(reponse.data);
+                ToastAndroid.show('Check Out Correcto', ToastAndroid.LONG);
+            }
+        }
+
     }
     
   return (
@@ -285,6 +276,13 @@ const TutorHomeComponent = ({navigation}) => {
 
                 if(value == 4){
                     checkout()
+                }
+
+                if(value == 1){
+                    showProgram('PTIPOSAL');
+                }
+                if(value == 2){
+                    showProgram('PCAMBIOTUTOR');
                 }
 
             }}
@@ -310,12 +308,13 @@ const TutorHomeComponent = ({navigation}) => {
                                         {item.Opciones.map((option,i) => {
                                                 return(
                                                     <View style={{'marginStart':50, borderBottomColor:'gray', borderBottomWidth:1}}>
-                                                        <ListItem key={0} bottomDivider onPress={()=> showProgram(option)}>
+                                                        <ListItem key={0} bottomDivider>
                                                             <ListItem.Content>
                                                                 <ListItem.Title>{option.Opcion}</ListItem.Title>
                                                             </ListItem.Content>
                                                             <ListItem.Chevron />
-                                                            <ListItem.CheckBox
+
+                                                            {((option['Programa'] == 'PHIJOS' || option['Programa'] == 'PDIA') && (<ListItem.CheckBox
                                                                 iconType="material-community"
                                                                 checkedIcon="checkbox-marked"
                                                                 uncheckedIcon="checkbox-blank-outline"
@@ -324,7 +323,7 @@ const TutorHomeComponent = ({navigation}) => {
                                                                     checkH[i] = !checkH[i];
                                                                     setCheckH([...checkH]);
                                                                 }}
-                                                            />
+                                                            />))}
                                                         </ListItem>
                                                     </View>
                                                 )
@@ -348,7 +347,7 @@ const TutorHomeComponent = ({navigation}) => {
                     name: btnBNames[value]
                 }
 
-                showProgram(model);
+                showProgram(model['Programa']);
             
 
             }}
@@ -373,6 +372,16 @@ const TutorHomeComponent = ({navigation}) => {
           >
             <View>
                 {formScreenBuildV2(setModalProgramVisible2,data,usuario,[])}        
+            </View>
+          </Modal>
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalProgramVisible3}
+          >
+            <View>
+                {buildFormV3(setModalProgramVisible3,data,usuario)}        
             </View>
           </Modal>
     </View>
@@ -651,7 +660,172 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
     )
 }
 
+function buildFormV3(setModalProgramVisible,data,usuario){
+    
+    const [tutor,setTutor] =  React.useState(null);
+    const [tutorName,setTutorName] =  React.useState(null);
+    const [motivo,setMotivo] =  React.useState(null);
+    const url_api = "http://20.64.97.37/api/products";
 
+    const validar = async (item) => {
+        let body = rqdata.getData;
+        let json = JSON.parse(body.json);
+        json.Tabla = 'tutornombre';
+        json.Rows = [{action:'I', Data: usuario['usukides']+'|'+usuario['usukiduser']+'|' }];
+        body.json = JSON.stringify(json);
+        console.log('response',body);
+        let reponse = await axios.post(`${url_api}`,body);
+        if(reponse.data.Json != ''){
+            let dx = JSON.parse(reponse.data.Json);
+            let dx2= dx['Ftutornombre']
+            console.log('response',dx);
+            setTutorName(dx2[0]['Tutor'])
+        }
+
+    }
+
+    const guardar = async () => {
+
+        if(data['Programa'] == 'PCAMBIOTUTOR'){
+            let body = rqdata.getData;
+            let json = JSON.parse(body.json);
+            json.Tabla = 'salidatutor';
+            json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+tutor+'|' }];
+            body.json = JSON.stringify(json);
+            console.log('response',body);
+            let reponse = await axios.post(`${url_api}`,body);
+            console.log(reponse.data);
+            ToastAndroid.show('Guardado Exitosamente', ToastAndroid.LONG);
+            setModalProgramVisible(false)
+        }
+
+        if(data['Programa'] == 'PTIPOSAL'){
+            let body = rqdata.getData;
+            let json = JSON.parse(body.json);
+            json.Tabla = 'salidatipo';
+            json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+motivo+'|' }];
+            body.json = JSON.stringify(json);
+            console.log('response',body);
+            let reponse = await axios.post(`${url_api}`,body);
+            console.log(reponse.data);
+            ToastAndroid.show('Guardado Exitosamente', ToastAndroid.LONG);
+            setModalProgramVisible(false)
+        }
+
+        if(data['Programa'] == 'PINASISTENCIA'){
+            let body = rqdata.getData;
+            let json = JSON.parse(body.json);
+            json.Tabla = 'FSALIDAINASIST';
+            json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+motivo+'|' }];
+            body.json = JSON.stringify(json);
+            console.log('response',body);
+            let reponse = await axios.post(`${url_api}`,body);
+            console.log(reponse.data);
+            ToastAndroid.show('Guardado Exitosamente', ToastAndroid.LONG);
+            setModalProgramVisible(false)
+        }
+
+        
+
+    }
+
+    console.log(data);
+    return (
+        <View>
+            <ButtonGroup
+            buttons={['Guardar','Cancelar','Errores']}
+            selectedIndex={null}
+            buttonStyle={{backgroundColor:'#E1E1E1'}}
+            buttonContainerStyle={{borderColor:'gray'}}
+            onPress={(value) => {
+              
+                if(value == 1){
+                    setModalProgramVisible(false);
+                }
+                if(value==0){
+                    guardar();
+                }
+            
+
+            }}
+            containerStyle={{ marginBottom: 20 }}
+          />
+            <View style={{width:'70%',marginStart:'auto', marginEnd:'auto', marginTop:100}}>
+                <Text style={{fontWeight:900}}>Nombre del Alumno:</Text>
+                <Text>{data['alumno']?data['alumno']['Opcion']:''}</Text>
+
+                {(data['Programa'] == 'PCAMBIOTUTOR' && (
+                    <View>
+                        <Text style={{fontWeight:900, marginTop:20}}>Nuevo Tutor</Text>
+                        <Input value={tutor} onChangeText={(text)=> setTutor(text)}/>
+                        <Button title={'Validar'} onPress={()=> validar()}/>
+                        <Text style={{marginTop:30,backgroundColor:'gray', color:'white'}}>{tutorName}</Text>
+                    </View>
+                ))}
+
+                {(data['Programa'] != 'PCAMBIOTUTOR' && (
+                    <View>
+                        <Picker
+                            style={{color:'black'}}
+                            selectedValue={motivo}
+                            style={styles.formControlSelect}
+                            onValueChange={(value)=> setMotivo(value)}
+                        >
+                            
+                            <Picker.Item label={'Motivos'} value={''} />
+                            {(data['motivos']?data['motivos']:[]).map((item,i) => {
+                                return(
+                                    <Picker.Item label={item['UDDESCRIPCION']} value={item['UDCLAVE']} />
+                                )
+                            })}
+                            
+                        </Picker> 
+                    </View>
+                ))}
+            </View>
+        </View>
+    )
+}
+
+const styles = StyleSheet.create({
+    select: {
+        borderBottomWidth:1,
+        borderBottomColor:'gray',
+        color:'black',
+        margin:10,
+        marginTop: 0
+    },
+    navBarLeftButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    buttonText: {
+      flex: 1,
+      paddingRight: '40px',
+      textAlign: 'center',
+    },
+    headerTitulo:{
+      textAlign: 'center',
+      padding: 10,
+      width:'100%',
+    },
+    formControl:{
+      margin:0,
+      padding:7,
+      borderColor:'gray',
+      borderRadius:5,
+      borderWidth:1
+    },
+    formControlSelect:{
+      margin:0,
+      padding:7,
+      color:'black',
+      borderColor:'gray',
+      borderRadius:5,
+      borderWidth:1,
+      backgroundColor:'#E1E1E1'
+    }
+  })
 
 
 
