@@ -3,10 +3,11 @@ import { ListItem } from '@rneui/base';
 import { Avatar, Button, ButtonGroup, Icon, Image, Input, Text } from "react-native-elements";
 import axios from "axios";
 import { Formik } from "formik";
-import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet } from "react-native";
+import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet, PermissionsAndroid } from "react-native";
 import * as rqdata from '../params_request';
 import storage from "../../Storage";
 import { Picker } from "@react-native-picker/picker";
+import Geolocation from 'react-native-geolocation-service';
 
 const TutorHomeComponent = ({navigation}) => {
     const formikRef = useRef();
@@ -211,50 +212,159 @@ const TutorHomeComponent = ({navigation}) => {
         
     }
 
-    const checkin = async () => {
-        for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
-            const element = acordion[0]['Opciones'][i];
+    function calcularDistancia(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radio de la Tierra en kilómetros
+        const dLat = gradosARadianes(lat2 - lat1);
+        const dLon = gradosARadianes(lon2 - lon1);
+        const a = 
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(gradosARadianes(lat1)) * Math.cos(gradosARadianes(lat2)) * 
+          Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+        const distancia = R * c; // Distancia en kilómetros
+        return distancia;
+    }
+      
+    function gradosARadianes(grados) {
+    return grados * (Math.PI / 180);
+    }
 
-            if(checkH[i]){
-                console.log(checkH)
-                let body = rqdata.labels;
-                let json = JSON.parse(body.json);
-                json.Tabla = 'salidacheckin';
-                let row = json.Rows;
-                var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
-                let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|1|5|';
-                row[0]['Data'] = r;
-                row[0]['action'] = 'C';
-                json.Rows = row;
-                body.json = JSON.stringify(json);
-                var reponse = await axios.post(`${url_api}`,body);
-                console.log(reponse.data)
-            }
-        }
-        ToastAndroid.show('Checking Correcto', ToastAndroid.LONG);
+    const checkin = async () => {
+
+        await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
+
+        Geolocation.getCurrentPosition(
+            async (position) => {
+                let bodGeo = rqdata.getData;
+                let json2 = JSON.parse(bodGeo.json);
+                console.log('aquis',bodGeo);
+                json2.Tabla = 'PUNTOS1';
+                let row2 = json2.Rows;
+                let r2 = usuario['usukides'] + '|2|';
+                row2[0]['Data'] = r2;
+                row2[0]['action'] = 'I';
+                json2.Rows = row2;
+                bodGeo.json = JSON.stringify(json2);
+                var geoSh = await axios.post(`${url_api}`,bodGeo);
+                if(geoSh.data.Json != ""){
+                    var pts = JSON.parse(geoSh.data.Json);
+                    var infoSc = pts['FPUNTOS1'][0];
+                    console.log('geo',infoSc)
+                }
+
+
+                var p = position['coords'];
+                var pSh = infoSc['PUGEO'].split(',');
+                var distanciaTotal = await calcularDistancia(p['latitude'],p['longitude'],pSh[0],pSh[1]);
+
+                console.log('distancia de puntos',distanciaTotal)
+
+                if(Number(distanciaTotal) <= Number(infoSc['PURANGO'])){
+                    for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
+                        const element = acordion[0]['Opciones'][i];
+            
+                        if(checkH[i]){
+                            console.log(checkH)
+                            let body = rqdata.getData;
+                            let json = JSON.parse(body.json);
+                            json.Tabla = 'salidacheckin';
+                            let row = json.Rows;
+                            var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+                            let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|'+infoSc['PUPUNTO']+'|'+Math.floor(Number(distanciaTotal))+'|';
+                            row[0]['Data'] = r;
+                            row[0]['action'] = 'C';
+                            json.Rows = row;
+                            body.json = JSON.stringify(json);
+                            var reponse = await axios.post(`${url_api}`,body);
+                            console.log(reponse.data)
+                        }
+                        
+                        let bodyl = {
+                            Id:1,
+                            json:JSON.stringify({
+                              user:"2",
+                              psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+                              Escuela:"2",
+                              Tipo: "App",
+                              Tabla:"HABLARBOCAPP",
+                              Rows:[{
+                                action:"A",
+                                Data:usuario['usukides'] + '|'+ usuario['usukiduser'] + '|' + element['idAlumno'] + '|'
+                              }]
+                            }),
+                            Category:"Mi App"                          
+                        };
+                        var resLLamado = await axios.post(`${url_api}`,bodyl);
+                        console.log(resLLamado.data);
+
+
+                    }
+                    ToastAndroid.show('Checking Correcto', ToastAndroid.LONG);
+                }else{
+                    ToastAndroid.show('Rango No Permitido', ToastAndroid.LONG);
+                }
+        
+            },
+            (error) => {
+              // See error code charts below.
+              console.log(error.code, error.message);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+
+        
     }
 
     const checkout = async () => {
 
-        for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
-            const element = acordion[0]['Opciones'][i];
+        await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
 
-            if(checkH[i]){
-                let body = rqdata.labels;
-                let json = JSON.parse(body.json);
-                json.Tabla = 'salidacheckout';
-                let row = json.Rows;
-                var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
-                let r =  'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|1|5|';
-                row[0]['Data'] = r;
-                row[0]['action'] = 'C';
-                json.Rows = row;
-                body.json = JSON.stringify(json);
-                var reponse = await axios.post(`${url_api}`,body);
-                console.log(reponse.data);
-                ToastAndroid.show('Check Out Correcto', ToastAndroid.LONG);
-            }
-        }
+        Geolocation.getCurrentPosition(
+            async (position) => {
+            var latlong = "";
+              var p = position['coords'];
+              latlong = p['latitude']+','+p['longitude'];
+
+              console.log(latlong);
+
+                for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
+                    const element = acordion[0]['Opciones'][i];
+
+                    if(checkH[i]){
+                        let body = rqdata.getData;
+                        let json = JSON.parse(body.json);
+                        json.Tabla = 'salidacheckout';
+                        let row = json.Rows;
+                        var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+                        var fech = (new Date().toISOString()).split('T')[0];
+                        fech = fech.split('-');
+                        var realF = fech[2]+'/'+fech[1]+'/'+fech[0]
+                        console.log(realF)
+                        let r =  'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|'+realF+'|'+latlong+'|';
+                        row[0]['Data'] = r;
+                        row[0]['action'] = 'C';
+                        json.Rows = row;
+                        body.json = JSON.stringify(json);
+                        console.log(body);
+                        var reponse = await axios.post(`${url_api}`,body);
+                        console.log(reponse.data);
+                        ToastAndroid.show('Check Out Correcto', ToastAndroid.LONG);
+                    }
+                }
+
+            },
+            (error) => {
+              // See error code charts below.
+              console.log(error.code, error.message);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+      
+        
 
     }
     
@@ -671,7 +781,7 @@ function buildFormV3(setModalProgramVisible,data,usuario){
         let body = rqdata.getData;
         let json = JSON.parse(body.json);
         json.Tabla = 'tutornombre';
-        json.Rows = [{action:'I', Data: usuario['usukides']+'|'+usuario['usukiduser']+'|' }];
+        json.Rows = [{action:'I', Data: usuario['usukides']+'|'+tutor+'|' }];
         body.json = JSON.stringify(json);
         console.log('response',body);
         let reponse = await axios.post(`${url_api}`,body);
@@ -680,6 +790,9 @@ function buildFormV3(setModalProgramVisible,data,usuario){
             let dx2= dx['Ftutornombre']
             console.log('response',dx);
             setTutorName(dx2[0]['Tutor'])
+        }else{
+            setTutorName("");
+            setTutor("0");
         }
 
     }
@@ -687,16 +800,20 @@ function buildFormV3(setModalProgramVisible,data,usuario){
     const guardar = async () => {
 
         if(data['Programa'] == 'PCAMBIOTUTOR'){
-            let body = rqdata.getData;
-            let json = JSON.parse(body.json);
-            json.Tabla = 'salidatutor';
-            json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+tutor+'|' }];
-            body.json = JSON.stringify(json);
-            console.log('response',body);
-            let reponse = await axios.post(`${url_api}`,body);
-            console.log(reponse.data);
-            ToastAndroid.show('Guardado Exitosamente', ToastAndroid.LONG);
-            setModalProgramVisible(false)
+            if(tutor != "0"){
+                let body = rqdata.getData;
+                let json = JSON.parse(body.json);
+                json.Tabla = 'salidatutor';
+                json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+tutor+'|' }];
+                body.json = JSON.stringify(json);
+                console.log('response',body);
+                let reponse = await axios.post(`${url_api}`,body);
+                console.log(reponse.data);
+                ToastAndroid.show('Guardado Exitosamente', ToastAndroid.LONG);
+                setModalProgramVisible(false)
+            }else{
+                ToastAndroid.show('Tutor Requerido', ToastAndroid.LONG);
+            }
         }
 
         if(data['Programa'] == 'PTIPOSAL'){

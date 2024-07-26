@@ -58,7 +58,7 @@ const MaestroHomeComponent = ({navigation}) => {
         body.json = JSON.stringify(json);
         console.log(body)
         var reponse = await axios.post(`${url_api}`,body);
-        console.log('bottom Bar',reponse.data);
+        console.log('bottom Bar',reponse.data,body);
         if(reponse.data.Json != ''){
             let datx = JSON.parse(reponse.data.Json);
             let datxx = datx['FBARRAPROGRAM'];
@@ -177,7 +177,8 @@ const MaestroHomeComponent = ({navigation}) => {
             }
             setModalProgramVisible(true);
         }else{
-            if(item.Programa = 'PSALIDA'){
+            console.log(item)
+            if(item.Programa == 'PSALIDA'){
                 /* obtener titulos */
                 let body = rqdata.labels;
                 let json = JSON.parse(body.json);
