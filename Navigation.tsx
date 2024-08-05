@@ -10,7 +10,10 @@ import App from './components/main';
 import InitComponent from './components/init';
 import BannersComponent from './components/banners';
 import MaestroHomeComponent from './components/maestros/home_maestro';
+import CargaMasivaComponent from './components/maestros/cargaMasiva';
+import OrdenCompraComponent from './components/maestros/oc';
 import TutorHomeComponent from './components/tutor/tutor_maestro';
+import MonitorComponent from './components/monitor/monitor';
 
 
 
@@ -26,7 +29,10 @@ function Navigation() {
           <Stack.Screen name="Init" component={InitComponent} options={{title:''}}/>
           <Stack.Screen name="Banners" component={BannersComponent} />
           <Stack.Screen name="Maestro/Inicio" component={MaestroHomeComponent} />
+          <Stack.Screen name="Carga" title="" component={CargaMasivaComponent} />
           <Stack.Screen name="Tutor/Inicio" component={TutorHomeComponent} />
+          <Stack.Screen name="Monitor" component={MonitorComponent} />
+          <Stack.Screen name="Compra" component={OrdenCompraComponent} />
         </Stack.Navigator>
       </NavigationContainer>
     );

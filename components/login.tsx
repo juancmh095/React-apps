@@ -8,6 +8,7 @@ import * as rqdata from './params_request';
 import storage from "../Storage";
 import DeviceInfo from "react-native-device-info";
 import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const LoginComponent = ({navigation}) => {
@@ -38,24 +39,24 @@ const LoginComponent = ({navigation}) => {
         let json = JSON.parse(body.json);
         json.Data = forms['password'];
         body.json = JSON.stringify(json);
+        console.log(body);
         var reponse = await axios.post(`${url_api}`,body);
         if(reponse.data.Json){
             let pass = reponse.data.Json;
+            console.log(reponse.data);
             //let pass = "JrVZl/C6Gr/dLBQMKJXJVA==";
             let body = rqdata.login;
             let json = JSON.parse(body.json);
             let row = json.Rows;
             const fcmToken = await messaging().getToken();
-            console.log(fcmToken);
             let r = forms['user'] + "|"+pass+"|"+dispositivo+'|'+fcmToken+'|';
-            console.log(r);
             row[0]['Data'] = r;
             json.Rows = row;
             body.json = JSON.stringify(json);
+            console.log(body);
             var reponseLogin = await axios.post(`${url_api}`,body);
-            console.log(reponseLogin.data.Json);
+            console.log(reponseLogin.data);
             if(reponseLogin.data.Json != ''){
-                console.log('entra');
                 let data = JSON.parse(reponseLogin.data.Json);
                 storage.save({
                     key:'FUSERSLOGIN',
@@ -63,14 +64,21 @@ const LoginComponent = ({navigation}) => {
                     data: data['FUSERSLOGIN'][0]
                 });
                 var userx = data['FUSERSLOGIN'][0];
-                console.log('rol',userx['usrol'])
+                await AsyncStorage.setItem('api', userx['ESPATHAPI']);
+                await AsyncStorage.setItem('idioma', userx['usidioma']);
+                console.log('rol',userx['usrol'],userx['ESPATHAPI']);
                 if(userx['usrol'] == '1'){
                     navigation.navigate('Maestro/Inicio')
+                    //navigation.navigate('Compra')
                 }else{
                     if(userx['usrol'] == '2'){
                         navigation.navigate('Tutor/Inicio')
                     }else{
-                        navigation.navigate('Banners')
+                        if(userx['usrol'] == '4'){
+                            navigation.navigate('Monitor')
+                        }else{
+                            navigation.navigate('Banners')
+                        }
                     }
                 }
             }else{

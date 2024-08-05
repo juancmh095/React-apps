@@ -8,6 +8,7 @@ import * as rqdata from '../params_request';
 import storage from "../../Storage";
 import HomeComponent from '../App.tsx';
 import ModuleComponent from '../Module.tsx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MaestroHomeComponent = ({navigation}) => {
     const formikRef = useRef();
@@ -25,7 +26,7 @@ const MaestroHomeComponent = ({navigation}) => {
     const [modalVisible4, setModalVisible4] = React.useState(false);
     const [params_view, setParams_view] = React.useState(null);
 
-    const url_api = "http://20.64.97.37/api/products";
+    var url_api = "";
     
     useEffect(() => {
         
@@ -36,15 +37,22 @@ const MaestroHomeComponent = ({navigation}) => {
     }, []);
 
     const validateUser = async () => {
+        var url = await AsyncStorage.getItem('api');
+        url_api = url;
+
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             setUsuario(res[0]);
-            console.log('Usuario',res[0]);
-            load_form_inputs(res[0]);
-            showBarraBottom();
+            if(url_api != null){
+                load_form_inputs(res[0]);
+                showBarraBottom();
+            }
         });
     }
 
     const showBarraBottom = async () => {
+
+        var url = await AsyncStorage.getItem('api');
+        url_api = url;
 
         let body = rqdata.labels;
         let json = JSON.parse(body.json);
@@ -54,12 +62,12 @@ const MaestroHomeComponent = ({navigation}) => {
         let r = '0|PMENUS|';
         row[0]['Data'] = r;
         json.Rows = row;
-        json.action = 'I';
         body.json = JSON.stringify(json);
         console.log(body)
         var reponse = await axios.post(`${url_api}`,body);
         console.log('bottom Bar',reponse.data,body);
         if(reponse.data.Json != ''){
+            console.log('------>',reponse.data.Json)
             let datx = JSON.parse(reponse.data.Json);
             let datxx = datx['FBARRAPROGRAM'];
             console.log(datxx);
@@ -76,6 +84,9 @@ const MaestroHomeComponent = ({navigation}) => {
     }
 
     const load_form_inputs = async (userx) => {
+
+        var url = await AsyncStorage.getItem('api');
+        url_api = url;
 
         var usukides = userx['usukides']
         var usukiduser = userx['usukiduser']
@@ -136,6 +147,8 @@ const MaestroHomeComponent = ({navigation}) => {
 
     const showProgram = async (item) => {
         try {
+            var url = await AsyncStorage.getItem('api');
+        url_api = url;
         var model = {};
         var usukides = usuario['usukides'];
 
@@ -237,6 +250,9 @@ const MaestroHomeComponent = ({navigation}) => {
     }
 
     const goTo = async (programa) => {
+
+        var url = await AsyncStorage.getItem('api');
+        url_api = url;
         console.log('->',programa)
         if(programa == 'PLOTE'){
             navigation.navigate('Home')
@@ -287,7 +303,7 @@ const MaestroHomeComponent = ({navigation}) => {
                     titulo: 'Reportes',
                     data: {},
                     program: programa,
-                    cat: modelSelect
+                    cat: modeSelect
                 };
             
                 console.log(datax)
@@ -302,6 +318,10 @@ const MaestroHomeComponent = ({navigation}) => {
             }
         }
 
+        if(programa == 'PCOMPRAS'){
+            navigation.navigate('Compra')
+        }
+
         if(programa == 'PJOBS'){
             let datax = {
                 titulo: 'Reportes enviados',
@@ -312,6 +332,10 @@ const MaestroHomeComponent = ({navigation}) => {
               };  
               setParams_view(datax);
               setModalVisible4(true);
+        }
+
+        if(programa == 'PCARGAMASIVA'){
+            navigation.navigate('Carga')
         }
     }
     
@@ -344,8 +368,16 @@ const MaestroHomeComponent = ({navigation}) => {
                                                                 if(option['Programa'] == 'PDIA'){
                                                                     showProgram(option)
                                                                 }
+                                                                if(option['Programa'] == 'PSALIDA'){
+                                                                    let model = {
+                                                                        Programa: option['Programa'],
+                                                                        name: option['Opcion']
+                                                                    }
+                                                    
+                                                                    showProgram(model);
+                                                                }
                                                                 console.log(option)
-                                                                if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS'){
+                                                                if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS' || option['Programa'] == 'PCARGAMASIVA' || option['Programa'] == 'PCOMPRAS'){
                                                                     goTo(option['Programa'])
                                                                 }
                                                             }}>
@@ -626,6 +658,7 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
                             <View>
                                 <ListItem.Swipeable
                                     key={i}
+                                    
                                     leftContent={(action) => (
                                         <Button
                                         containerStyle={{
@@ -640,9 +673,15 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
                                         onPress={() => { entrega(item);}}
                                         />
                                     )}
-                                      onPress={()=> { setAlumno(item); }}
+                                      onPress={()=> { 
+                                        if(alumno?.idAlumno == item.idAlumno){
+                                            setAlumno({})
+                                        }else{
+                                            setAlumno(item); 
+                                        }
+                                    }}
                                 >
-                                    <ListItem.Content>
+                                    <ListItem.Content style={(item.idAlumno == alumno?.idAlumno)?{backgroundColor:"#dad8d8"}:''}>
                                         <ListItem.Title>{item.Alumno}</ListItem.Title>
                                         <ListItem.Subtitle>{item.Tutor1}</ListItem.Subtitle>
                                     </ListItem.Content>
@@ -674,7 +713,7 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
                         />
                         <Text style={{fontWeight:900, margin:10, fontSize:16}}>Nivel: <Text style={{fontWeight:500, fontSize:16}}>{alumno?alumno['Alumno']:''}</Text></Text>
                         <Text style={{fontWeight:900, margin:10, fontSize:16}}>Materia: <Text style={{fontWeight:500, fontSize:16}}>{alumno?alumno['Grado']:''}{alumno?alumno['Grupo']:''}</Text></Text>
-                        <Text>Hola</Text>  
+                          
 
                         
                         <View style={{width:'80%', marginStart:'auto', marginEnd:'auto'}}>

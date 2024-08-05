@@ -221,7 +221,8 @@ const TutorHomeComponent = ({navigation}) => {
           Math.cos(gradosARadianes(lat1)) * Math.cos(gradosARadianes(lat2)) * 
           Math.sin(dLon / 2) * Math.sin(dLon / 2); 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-        const distancia = R * c; // Distancia en kilómetros
+        var distancia = R * c; // Distancia en kilómetros
+        distancia = distancia * 1000;
         return distancia;
     }
       
@@ -237,73 +238,79 @@ const TutorHomeComponent = ({navigation}) => {
 
         Geolocation.getCurrentPosition(
             async (position) => {
-                let bodGeo = rqdata.getData;
-                let json2 = JSON.parse(bodGeo.json);
-                console.log('aquis',bodGeo);
-                json2.Tabla = 'PUNTOS1';
-                let row2 = json2.Rows;
-                let r2 = usuario['usukides'] + '|2|';
-                row2[0]['Data'] = r2;
-                row2[0]['action'] = 'I';
-                json2.Rows = row2;
-                bodGeo.json = JSON.stringify(json2);
-                var geoSh = await axios.post(`${url_api}`,bodGeo);
-                if(geoSh.data.Json != ""){
-                    var pts = JSON.parse(geoSh.data.Json);
-                    var infoSc = pts['FPUNTOS1'][0];
-                    console.log('geo',infoSc)
-                }
-
-
-                var p = position['coords'];
-                var pSh = infoSc['PUGEO'].split(',');
-                var distanciaTotal = await calcularDistancia(p['latitude'],p['longitude'],pSh[0],pSh[1]);
-
-                console.log('distancia de puntos',distanciaTotal)
-
-                if(Number(distanciaTotal) <= Number(infoSc['PURANGO'])){
-                    for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
-                        const element = acordion[0]['Opciones'][i];
-            
-                        if(checkH[i]){
-                            console.log(checkH)
-                            let body = rqdata.getData;
-                            let json = JSON.parse(body.json);
-                            json.Tabla = 'salidacheckin';
-                            let row = json.Rows;
-                            var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
-                            let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|'+infoSc['PUPUNTO']+'|'+Math.floor(Number(distanciaTotal))+'|';
-                            row[0]['Data'] = r;
-                            row[0]['action'] = 'C';
-                            json.Rows = row;
-                            body.json = JSON.stringify(json);
-                            var reponse = await axios.post(`${url_api}`,body);
-                            console.log(reponse.data)
-                        }
-                        
-                        let bodyl = {
-                            Id:1,
-                            json:JSON.stringify({
-                              user:"2",
-                              psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
-                              Escuela:"2",
-                              Tipo: "App",
-                              Tabla:"HABLARBOCAPP",
-                              Rows:[{
-                                action:"A",
-                                Data:usuario['usukides'] + '|'+ usuario['usukiduser'] + '|' + element['idAlumno'] + '|'
-                              }]
-                            }),
-                            Category:"Mi App"                          
-                        };
-                        var resLLamado = await axios.post(`${url_api}`,bodyl);
-                        console.log(resLLamado.data);
-
-
+                try {
+                    let bodGeo = rqdata.getData;
+                    let json2 = JSON.parse(bodGeo.json);
+                    console.log('aquis',bodGeo);
+                    json2.Tabla = 'PUNTOS1';
+                    let row2 = json2.Rows;
+                    let r2 = usuario['usukides'] + '|2|';
+                    row2[0]['Data'] = r2;
+                    row2[0]['action'] = 'I';
+                    json2.Rows = row2;
+                    bodGeo.json = JSON.stringify(json2);
+                    var geoSh = await axios.post(`${url_api}`,bodGeo);
+                    if(geoSh.data.Json != ""){
+                        var pts = JSON.parse(geoSh.data.Json);
+                        var infoSc = pts['FPUNTOS1'][0];
+                        console.log('geo',infoSc)
                     }
-                    ToastAndroid.show('Checking Correcto', ToastAndroid.LONG);
-                }else{
-                    ToastAndroid.show('Rango No Permitido', ToastAndroid.LONG);
+    
+    
+                    
+                    var p = position['coords'];
+                    var pSh = infoSc['PUGEO'].split(',');
+                    var distanciaTotal = await calcularDistancia(p['latitude'],p['longitude'],pSh[0],pSh[1]);
+    
+                    console.log('distancia de puntos',distanciaTotal)
+    
+                    if(Number(distanciaTotal) <= Number(infoSc['PURANGO'])){
+                        for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
+                            const element = acordion[0]['Opciones'][i];
+                
+                            if(checkH[i]){
+                                console.log(checkH)
+                                let body = rqdata.getData;
+                                let json = JSON.parse(body.json);
+                                json.Tabla = 'salidacheckin';
+                                let row = json.Rows;
+                                var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+                                let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|'+infoSc['PUPUNTO']+'|'+Math.floor(Number(distanciaTotal))+'|';
+                                row[0]['Data'] = r;
+                                row[0]['action'] = 'C';
+                                json.Rows = row;
+                                body.json = JSON.stringify(json);
+                                var reponse = await axios.post(`${url_api}`,body);
+                                console.log(reponse.data)
+                            }
+                            
+                            let bodyl = {
+                                Id:1,
+                                json:JSON.stringify({
+                                  user:"2",
+                                  psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+                                  Escuela:"2",
+                                  Tipo: "App",
+                                  Tabla:"HABLARBOCAPP",
+                                  Rows:[{
+                                    action:"A",
+                                    Data:usuario['usukides'] + '|'+ usuario['usukiduser'] + '|' + element['idAlumno'] + '|'
+                                  }]
+                                }),
+                                Category:"Mi App"                          
+                            };
+                            var resLLamado = await axios.post(`${url_api}`,bodyl);
+                            console.log(resLLamado.data);
+    
+    
+                        }
+                        ToastAndroid.show('Checking Correcto', ToastAndroid.LONG);
+                    }else{
+                        ToastAndroid.show('Rango No Permitido', ToastAndroid.LONG);
+                    }
+                    
+                } catch (error) {
+                    console.log(error);
                 }
         
             },

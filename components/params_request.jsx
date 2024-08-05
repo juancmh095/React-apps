@@ -1,4 +1,5 @@
 module.exports = {
+    api:'',
     init:{
         Id:1,
         json:JSON.stringify({
@@ -44,6 +45,21 @@ module.exports = {
         }),
         Category:"Mi App"
     },
+    labelsProgram:{
+      Id:1,
+      json:JSON.stringify({
+        user:"22",
+        psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+        Escuela:"0",
+        Tipo:"App",
+        Tabla:"ProgramInquiry",
+        Rows:[{
+          action:"I",
+          Data:"0|PLOTE|E|B|@0@@@@@20240430@@|"
+        }]
+      }),
+      Category:"Mi App"
+  },
     list_data:{
       Id:1,
       json:JSON.stringify({
@@ -153,6 +169,7 @@ module.exports = {
     Id:1,
     json:JSON.stringify({
       Function:'ValidateInfo',
+      App:'Mi Appescolar',
       Program:'FLOTE',
       user:"22",
       psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
@@ -255,6 +272,7 @@ module.exports = {
     Id:1,
     json:JSON.stringify({
       Function:"Encrypt",
+      App:'Mi Appescolar',
       Data:""
     }),
     Category:"Utilerias"
@@ -340,6 +358,7 @@ module.exports = {
     Id:1,
     json:JSON.stringify({
       Function: 'ExecuteReport',
+      App:'Mi Appescolar',
       Program:'RALUMNO',
       Version:'MC0001',
       user:22,
@@ -365,4 +384,66 @@ module.exports = {
     }),
     Category:"Mi App"
   },
+
+  getCarga: function(tabla,action,data){
+    return {
+      Id:22,
+      json:JSON.stringify({
+        user:"22",
+        psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+        Escuela:"0",
+        Tipo: "App",
+        Tabla:tabla,
+        Rows:[{
+          action:action,
+          Data:data
+        }]
+      }),
+      Category:"Mi App"
+    }
+  },
+
+  getTitulo: function(programa,tipo,idioma){
+    return {
+      Id:22,
+      json:JSON.stringify({
+        user:"22",
+        psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
+        Escuela:"0",
+        Tipo: "App",
+        Tabla:"FormName",
+        Rows:[{
+          action:"I",
+          Data:programa+'|'+tipo+'|'+idioma+'|'
+        }]
+      }),
+      Category:"Mi App"
+    }
+  },
+
+  itemOC: function(programa,params){
+    return {
+      Id:1,
+      json:JSON.stringify({
+        Function: 'ValidateRecord',
+        App:'Mi Appescolar',
+        Program:programa,
+        user:'22',
+        psw:'JrVZl/C6Gr/dLBQMKJXJVA==',
+        ID:'0',
+        Parameter: params
+      }),
+      Category:"Utilerias"
+    }
+  },
+
+  loadFunction: function(programa,parametros,json){
+    return {
+      Function:programa,
+      App: "Mi Appescolar",
+      Parameter:parametros,
+      json:json
+    }
+  },
+  
 }

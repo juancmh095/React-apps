@@ -21,14 +21,14 @@ import { Formik } from 'formik';
 import QRComponent from './code.tsx' ;
 import HomeComponent from './App.tsx' ;
 import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function App(props) {
 
   const formikRef = useRef();
   const url_api = "http://20.64.97.37/api/products";
   const [inputs, setInputs] = React.useState([]);
-  const [titulo, setTitulo] = React.useState('Maestro de Lotes');
+  const [titulo, setTitulo] = React.useState('N/A');
   const [checked, setChecked] = React.useState(null);
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
@@ -72,7 +72,16 @@ function App(props) {
 
   const _api_init = async () => {
 
-
+    /* obtener titulos */
+    var idIdioma = await AsyncStorage.getItem('idioma');
+    var respTitulo = await axios.post(`${url_api}`, rqdata.getTitulo('PLOTE','B',idIdioma));
+    var ttl = respTitulo.data;
+    if(ttl.Json != ''){
+      var pNameJson = JSON.parse(ttl.Json);
+      let pName = pNameJson['FFormName'][0];
+      setTitulo(pName['FNNAME']);
+    }
+    console.log(ttl,rqdata.getTitulo('PLOTES','B',idIdioma));
     
     var reponse = await axios.post(`${url_api}`,rqdata.btn_buscar);
     
@@ -113,8 +122,8 @@ function App(props) {
      }
   }
   const labels_list = async () => {
-    var reponse = await axios.post(`${url_api}`,rqdata.labels);
-    
+    var reponse = await axios.post(`${url_api}`,rqdata.labelsProgram);
+    console.log('labeeeeels',reponse.data,rqdata.labelsProgram);
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       var lbs = {};
@@ -369,6 +378,7 @@ function App(props) {
         buttonStyle={{backgroundColor:'#E1E1E1'}}
         buttonContainerStyle={{borderColor:'gray'}}
         onPress={(value) => {
+          console.log(btnHeader);
           if(value == 2){
             setDataSelect(null)
             setModalVisible(true);

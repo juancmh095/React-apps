@@ -99,15 +99,16 @@ function ModuleComponent(props) {
         inp_header = rqdata.inputs_preport;
         setDataInfo(props.data.data);        
       }else{
-        if(props.data.program == 'PJOBS'){
+        if(props.data.program == 'PJOBS' || props.data.program == 'PCARGAMASIVA'){
           let body = rqdata.labels;
           let json = JSON.parse(body.json);
+          json['Tabla'] = "ProgramInquiry";
           let row = json.Rows;
           let r = "0|"+props.data.program+"|I|B||";
           row[0]['Data'] = r;
           json.Rows = row;
           body.json = JSON.stringify(json);
-          console.log(body)
+          console.log('body',body)
           inp_header = body;
         }
       }
@@ -116,6 +117,7 @@ function ModuleComponent(props) {
     
     var reponse = await axios.post(`${url_api}`,inp_header);
     
+    console.log('---->',reponse.data);
     if(reponse.data.Json){
       let d = JSON.parse(reponse.data.Json);
       setInputs(d.FProgramInquiry);

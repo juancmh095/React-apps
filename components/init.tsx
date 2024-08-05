@@ -85,7 +85,12 @@ const InitComponent = ({navigation}) => {
                         if(usuario['usrol'] == '2'){
                             navigation.navigate('Tutor/Inicio')
                         }else{
-                            navigation.navigate('Maestro/Inicio')
+                            if(usuario['usrol'] == '4'){
+                                navigation.navigate('Monitor')
+                            }else{
+                                navigation.navigate('Maestro/Inicio')
+                                //navigation.navigate('Compra')
+                            }
                         }
                     }}
                     />
