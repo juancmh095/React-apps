@@ -300,15 +300,6 @@ function Anexos() {
               setModalVisible(true);
             }}
           />
-          <Button
-          buttonStyle={styles.button}
-          title="Lista de Archivos"
-          icon={{name:'documents-outline', type:'ionicon', color:'white'}}
-          onPress={() => {
-            setTypeModal('lista');
-            setModalVisible(true);
-          }}
-          />
   
         {/* modal inicio de button URL */}
           <Modal

@@ -420,7 +420,7 @@ function App(props) {
           }
 
           if(value == 4){
-            props.navigation.navigate('Anexos')
+            props.navigation.navigate('Mis_Anexos')
             console.log(props)
           }
           

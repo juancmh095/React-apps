@@ -15,6 +15,7 @@ import OrdenCompraComponent from './components/maestros/oc';
 import TutorHomeComponent from './components/tutor/tutor_maestro';
 import MonitorComponent from './components/monitor/monitor';
 import Anexos from './components/anexos/anexos';
+import FilesComponent from './components/anexos/anexos_list';
 
 
 
@@ -35,6 +36,7 @@ function Navigation() {
           <Stack.Screen name="Monitor" component={MonitorComponent} />
           <Stack.Screen name="Compra" component={OrdenCompraComponent} />
           <Stack.Screen name="Anexos" component={Anexos} />
+          <Stack.Screen name="Mis_Anexos" component={FilesComponent} />
         </Stack.Navigator>
       </NavigationContainer>
     );
