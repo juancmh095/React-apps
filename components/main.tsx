@@ -33,6 +33,10 @@ function App(props) {
   const [dataInfo, setDataInfo] = React.useState([]);
   const [labels, setLabels] = React.useState(null);
   const [labelsArry, setLabelsArry] = React.useState([]);
+  
+  const [programs1, setPrograms1] = React.useState([]);
+  const [programs2, setPrograms2] = React.useState([]);
+  
   const [inputsReq, setInputsReq] = React.useState([]);
   const [dataSelect, setDataSelect] = React.useState(null);
   const [params_view, setParams_view] = React.useState(null);
@@ -120,6 +124,26 @@ function App(props) {
          let d = JSON.parse(catR2.data.Json);
          setCat2(d.FPGMINQUIRY);
      }
+
+
+     let bodyp1 = rqdata.getCarga('ProgramHeader','I',('PLOTE|MC0001|'+idIdioma+'|'));
+     let resP1 = await axios.post(`${url_api}`,bodyp1);
+     console.log('header',resP1.data);
+     if(resP1.data.Json != ''){
+      let d = JSON.parse(resP1.data.Json);
+      console.log(d);
+      setPrograms1(d['FProgramHeader'])
+      }
+
+      let bodyp2 = rqdata.getCarga('ProgramRow','I',('PLOTE|MC0001|'+idIdioma+'|'));
+     let resP2 = await axios.post(`${url_api}`,bodyp2);
+     console.log('header',resP2.data);
+     if(resP1.data.Json != ''){
+      let d = JSON.parse(resP2.data.Json);
+      console.log(d);
+      setPrograms2(d['FProgramRow'])
+    }
+
   }
   const labels_list = async () => {
     var reponse = await axios.post(`${url_api}`,rqdata.labelsProgram);
@@ -394,10 +418,29 @@ function App(props) {
           if(value == 0){
             openAction(dataInfo[checked]['LOITEM'],0)
           }
+
+          if(value == 4){
+            props.navigation.navigate('Anexos')
+            console.log(props)
+          }
           
         }}
         containerStyle={{ marginBottom: 20 }}
       />
+
+            <Picker
+                style={{color:'black'}}
+                style={styles.formControlSelect}
+                onValueChange={(value)=>console.log(value)}
+            >
+                {programs1.map((item) => {
+                  return(
+                      <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
+                  )
+              })}
+                
+            </Picker> 
+
 
         <Formik
             initialValues={{}}
@@ -558,6 +601,19 @@ function App(props) {
           })}
 
         </ScrollView>
+
+          <Picker
+              style={{color:'black'}}
+              style={styles.formControlSelect}
+              onValueChange={(value)=>console.log(value)}
+          >
+              {programs2.map((item) => {
+                  return(
+                      <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
+                  )
+              })}
+              
+          </Picker> 
           <ButtonGroup
             buttons={btnFooter}
             selectedIndex={selectedIndexf}

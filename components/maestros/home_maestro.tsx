@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { ListItem } from '@rneui/base';
 import { Avatar, Button, ButtonGroup, Icon, Image, Input, Text } from "react-native-elements";
 import axios from "axios";
+import { Picker } from '@react-native-picker/picker';
 import { Formik } from "formik";
-import { ScrollView, View, Modal, ToastAndroid, Linking } from "react-native";
+import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet } from "react-native";
 import * as rqdata from '../params_request';
 import storage from "../../Storage";
 import HomeComponent from '../App.tsx';
@@ -231,11 +232,21 @@ const MaestroHomeComponent = ({navigation}) => {
                         datxa = JSON.parse(reponse.data.Json);
                         
                     }
+
+                    var bodyN = rqdata.getCarga('NIVELINQ','I','2|0|');
+                    var responseN = await axios.post(`${url_api}`,bodyN);
+                    console.log('XXXXXXXXXXXXXXXXXX',responseN.data);
+                    var niveles = [];
+                    if(responseN.data.Json != ''){
+                        let nvl = JSON.parse(responseN.data.Json);
+                        niveles = nvl['FNIVELINQ'];
+                    }
                     
                     let model = {
                         bar: optiomsbar,
                         opcion: 'x Primaria 5A x',
-                        list: datxa['FSALIDAINQAPP']?datxa['FSALIDAINQAPP']:[]
+                        list: datxa['FSALIDAINQAPP']?datxa['FSALIDAINQAPP']:[],
+                        niveles: niveles
                     }
                     setData(model);
                     setModalProgramVisible2(true);
@@ -589,6 +600,7 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
             ToastAndroid.show('Entrega Correcta', ToastAndroid.LONG);
     }
 
+    
     const action = async (i) => {
         console.log(i,alumno)
         if(alumno != null && Object.keys(alumno).length > 0){
@@ -648,9 +660,42 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
                     }}
                     containerStyle={{ marginBottom: 20 }}
                 />
-                <Text style={{fontWeight:900, margin:10, fontSize:16}}>Nivel: <Text style={{fontWeight:500, fontSize:16}}>{info[1]}</Text></Text>
-                <Text style={{fontWeight:900, margin:10, fontSize:16}}>Materia: <Text style={{fontWeight:500, fontSize:16}}>{info[3]}</Text></Text>
-                <Text style={{fontWeight:900, margin:10, fontSize:16}}>Grado: <Text style={{fontWeight:500, fontSize:16}}>{info[2]}</Text></Text>
+                <View style={{width:300, marginStart:'auto', marginEnd:'auto'}}>
+                    <Picker
+                        style={{color:'black'}}
+                        onValueChange={(value) => console.log(value)}
+                        style={styles.formControlSelect}
+                    >
+                        {(data.niveles?data.niveles:[]).map((item) => {
+                            return(
+                                <Picker.Item label={item.ESDESCRIPCION} value={item.ESNIVEL} />
+                            )
+                        })}
+                    </Picker> 
+                    <Input 
+                        placeholder={'Tipo Sal.'} 
+                        style={styles.formControl}
+                        containerStyle={{margin:0, padding:0, height:50}}
+                        inputContainerStyle={{borderBottomWidth:0}}
+                        onChangeText={(value)=> console.log(value)}
+                    />
+                    <Input 
+                        placeholder={'Grado'} 
+                        style={styles.formControl}
+                        containerStyle={{margin:0, padding:0, height:50}}
+                        inputContainerStyle={{borderBottomWidth:0}}
+                        onChangeText={(value)=> console.log(value)}
+                    />
+                    <Input 
+                        placeholder={'Grupo'} 
+                        style={styles.formControl}
+                        containerStyle={{margin:0, padding:0, height:50}}
+                        inputContainerStyle={{borderBottomWidth:0}}
+                        onChangeText={(value)=> console.log(value)}
+                    />
+                    
+
+                </View>
 
                 <View style={{width:'80%', marginStart:'auto', marginEnd:'auto'}}>
                     {data.list.map((item,i) => {
@@ -743,7 +788,45 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
 }
 
 
-
+const styles = StyleSheet.create({
+    select: {
+        borderBottomWidth:1,
+        borderBottomColor:'gray',
+        color:'black',
+        margin:10,
+        marginTop: 0
+    },
+    navBarLeftButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    buttonText: {
+        flex: 1,
+        paddingRight: '40px',
+        textAlign: 'center',
+    },
+    headerTitulo:{
+        textAlign: 'center',
+        padding: 10,
+        width:'100%',
+      },
+      formControl:{
+        margin:0,
+        padding:7,
+        borderColor:'gray',
+        borderRadius:5,
+        borderWidth:1
+      },
+      formControlSelect:{
+        margin:0,
+        padding:7,
+        color:'black',
+        borderColor:'gray',
+        borderRadius:5,
+        borderWidth:1,
+        backgroundColor:'#E1E1E1'
+      }
+})
 
 
 export default MaestroHomeComponent;

@@ -36,11 +36,11 @@ const OrdenCompraComponent =  ({ navigation }) => {
 
     const getDataInfo = async (user)=>{
         try {
-            console.log('entra a buscar info',user)
+            console.log('entra a buscar infoxxx',user)
             let data = user['usukides'] + '|PCOMPRAS|I|H|@0@@@@|';
             let body = rqdata.getCarga('ProgramInquiry','I',data);
+            console.log(body)
             let response = await axios.post(`${url_api}`,body);
-            console.log(response.data,body)
             if(response.data.Json != ''){
                 let d = JSON.parse(response.data.Json);
                 let dx = d['FProgramInquiry'];
@@ -64,7 +64,7 @@ const OrdenCompraComponent =  ({ navigation }) => {
                 setForm([...d['FProgramInquiry']])
             }
         } catch (error) {
-            console.log(error);
+            console.log('error',error);
         }
     }
 
@@ -92,7 +92,7 @@ const OrdenCompraComponent =  ({ navigation }) => {
 
     const getLabelsItems = async (user)=>{
         try {
-            console.log('entra a buscar info',user)
+            console.log('entra a buscar info2',user)
             let data = '0|PCOMPRAS|E|H|';
             let body = rqdata.getCarga('ProgramInquiry','I',data);
             let response = await axios.post(`${url_api}`,body);
@@ -121,7 +121,7 @@ const OrdenCompraComponent =  ({ navigation }) => {
 
     const getLabelsErrors = async (user)=>{
         try {
-            console.log('entra a buscar info',user)
+            console.log('entra a buscar info3',user)
             let data = '0|PERRORES|E|B||';
             let body = rqdata.getCarga('ProgramInquiry','I',data);
             let response = await axios.post(`${url_api}`,body);

@@ -1,10 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React, { useEffect, useRef } from 'react';
 import {Alert, View, StyleSheet, Modal, ToastAndroid,} from 'react-native';
 import { Button, Icon } from '@rneui/themed';
@@ -25,10 +18,9 @@ import  DigitalSignature from './components/DigitalSignature';
 import  QRComponent from './components/QR';
 import  QuillComponent from './components/Quill.jsx';
 import  ContactsComponent from './components/Contacts.jsx';
-import  FilesComponent from './components/Files.jsx';
 
 
-function App() {
+function Anexos() {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [showActions, setShowActions] = React.useState(false);
   const [typeModal, setTypeModal] = React.useState('qr');
@@ -347,7 +339,6 @@ function App() {
               {typeModal == 'signature'? <DigitalSignature setModalVisible={setModalVisible} /> : ''}
               {typeModal == 'contacts'? <ContactsComponent setModalVisible={setModalVisible} /> : ''}
               {typeModal == 'text'? <QuillComponent   setModalVisible={setModalVisible} /> : ''}
-              {typeModal == 'lista'? <FilesComponent setModalVisible={setModalVisible}  /> : ''}
               {typeModal == 'url'? <Input
                       label='Enter URL'
                       leftIcon={{ type: 'font-awesome', name: 'link' }}
@@ -400,4 +391,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default App;
+export default Anexos;

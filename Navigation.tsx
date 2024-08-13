@@ -14,6 +14,7 @@ import CargaMasivaComponent from './components/maestros/cargaMasiva';
 import OrdenCompraComponent from './components/maestros/oc';
 import TutorHomeComponent from './components/tutor/tutor_maestro';
 import MonitorComponent from './components/monitor/monitor';
+import Anexos from './components/anexos/anexos';
 
 
 
@@ -33,6 +34,7 @@ function Navigation() {
           <Stack.Screen name="Tutor/Inicio" component={TutorHomeComponent} />
           <Stack.Screen name="Monitor" component={MonitorComponent} />
           <Stack.Screen name="Compra" component={OrdenCompraComponent} />
+          <Stack.Screen name="Anexos" component={Anexos} />
         </Stack.Navigator>
       </NavigationContainer>
     );
