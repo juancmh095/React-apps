@@ -35,7 +35,7 @@ function Anexos() {
   const urlFunction = async (text) => {
     var reponse = await axios.post(`${_api}`,{
       Id:1,
-      json:'"{\"Function\":\"WriteAtach\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+text+'|URL|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
+      json:'"{\"Function\":\"WriteAtach\",\"App\":\"Mi Appescolar\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+text+'|URL|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
       Category:"Utilerias"
     });
     console.log(reponse.data)
@@ -71,7 +71,7 @@ function Anexos() {
       var geo = info.coords.latitude + ',' + info.coords.longitude;
       var reponse = await axios.post(`${_api}`,{
         Id:1,
-        json:'"{\"Function\":\"WriteAtach\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+geo+'|GEO|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
+        json:'"{\"Function\":\"WriteAtach\",\"App\":\"Mi Appescolar\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+geo+'|GEO|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
         Category:"Utilerias"
       });
       console.log(reponse.data);
@@ -180,6 +180,7 @@ function Anexos() {
       Id:1,
       json: JSON.stringify({
         Function:"WriteAtach",
+        App:'Mi Appscolar',
         Base64:file,
         Parameter:"0|FUDC|55PL001|"+name+"|"+ext+"|RROJAS|20240401|122300|DISPOSITIVO1|"
       }),

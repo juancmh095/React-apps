@@ -34,7 +34,7 @@ function Navigation() {
           <Stack.Screen name="Carga" title="" component={CargaMasivaComponent} />
           <Stack.Screen name="Tutor/Inicio" component={TutorHomeComponent} />
           <Stack.Screen name="Monitor" component={MonitorComponent} />
-          <Stack.Screen name="Compra" component={OrdenCompraComponent} />
+          <Stack.Screen name="Compra" component={OrdenCompraComponent} options={{title:''}} />
           <Stack.Screen name="Anexos" component={Anexos} />
           <Stack.Screen name="Mis_Anexos" component={FilesComponent} />
         </Stack.Navigator>

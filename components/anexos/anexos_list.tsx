@@ -18,32 +18,18 @@ const FilesComponent = ({navigation}) => {
   }
 
   const getFiles = async () => {
-    try {
-        var reponse = await axios.post(`${_api}`,{
-            Id:22,
-            json:JSON.stringify({
-              user:"22",
-              psw:"JrVZl/C6Gr/dLBQMKJXJVA==",
-              Escuela:"0",
-              Tipo: "App",
-              Tabla:"INTERCONECT",
-              Rows:[{
-                action:"I",
-                Data:"PLOTE|1|PLOTE|1|"
-              }]
-            }),
-            Category:"Mi App"
-          });
-          console.log(reponse.data);
-          if(reponse.data.Json != ''){
-              var dataJS = JSON.parse(reponse.data.Json)
-              console.log('xxxx',dataJS["FINQFATTACHMENT"],'a');
-              setFiles(dataJS["FINQFATTACHMENT"])
-          }
-        
-    } catch (error) {
-        console.error(error);   
-    }
+    var reponse = await axios.post(`${_api}`,{
+        Id:1,
+        json: JSON.stringify({
+          Function:"ReadAtach",
+          App:'Mi Appscolar',
+          Parameter:"0|FUDC|55PL001|"
+        }),
+        Category:"Utilerias"
+      });
+      var dataJS = JSON.parse(reponse.data.Json)
+      console.log(dataJS["FINQFATTACHMENT"],'a');
+      setFiles(dataJS["FINQFATTACHMENT"])
   }
 
  

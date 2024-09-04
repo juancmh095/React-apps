@@ -8,6 +8,9 @@ import * as rqdata from '../params_request';
 import storage from "../../Storage";
 import { Picker } from "@react-native-picker/picker";
 import Geolocation from 'react-native-geolocation-service';
+import HomeComponent from "../App";
+import ModuleComponent from "../Module";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TutorHomeComponent = ({navigation}) => {
     const formikRef = useRef();
@@ -26,6 +29,9 @@ const TutorHomeComponent = ({navigation}) => {
     const [modalProgramVisible, setModalProgramVisible] = React.useState(false);
     const [modalProgramVisible2, setModalProgramVisible2] = React.useState(false);
     const [modalProgramVisible3, setModalProgramVisible3] = React.useState(false);
+    const [modalVisible3, setModalVisible3] = React.useState(false);
+    const [modalVisible4, setModalVisible4] = React.useState(false);
+    const [params_view, setParams_view] = React.useState(null);
     const url_api = "http://20.64.97.37/api/products";
     
     useEffect(() => {
@@ -149,11 +155,17 @@ const TutorHomeComponent = ({navigation}) => {
     const showProgram = async (item) => {
         try {
             var alumno = null;
+            var alumnosName = '';
+            var alumnos = [];
             var motivos = [];
             
             for (let i = 0; i < acordion[0]['Opciones'].length; i++) {
                 const element = acordion[0]['Opciones'][i];
                 if(checkH[i]){
+                    console.log('alumnos ------>',element);
+
+                    alumnosName = alumnosName + element['Opcion'] + ', ';
+                    alumnos.push(element)
                     alumno = element;
                 }
             }
@@ -199,7 +211,9 @@ const TutorHomeComponent = ({navigation}) => {
             let model = {
                 Programa: item,
                 alumno: alumno,
-                motivos: motivos
+                motivos: motivos,
+                alumnos: alumnos,
+                alumnosName: alumnosName
             }
 
             setData(model);
@@ -213,7 +227,7 @@ const TutorHomeComponent = ({navigation}) => {
     }
 
     function calcularDistancia(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Radio de la Tierra en kilómetros
+        const R = 6378.137; // Radio de la Tierra en kilómetros
         const dLat = gradosARadianes(lat2 - lat1);
         const dLon = gradosARadianes(lon2 - lon1);
         const a = 
@@ -235,6 +249,7 @@ const TutorHomeComponent = ({navigation}) => {
         await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
+        
 
         Geolocation.getCurrentPosition(
             async (position) => {
@@ -274,7 +289,7 @@ const TutorHomeComponent = ({navigation}) => {
                                 let json = JSON.parse(body.json);
                                 json.Tabla = 'salidacheckin';
                                 let row = json.Rows;
-                                var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+                                var hora = ((new Date().getHours()<10)?(('0')+new Date().getHours()):new Date().getHours())+''+((new Date().getMinutes()<10)?(('0')+new Date().getMinutes()):new Date().getMinutes())+'00';
                                 let r = 'C|'+usuario['usukides'] + '|' + element['idAlumno'] + '|'+hora+'|'+infoSc['PUPUNTO']+'|'+Math.floor(Number(distanciaTotal))+'|';
                                 row[0]['Data'] = r;
                                 row[0]['action'] = 'C';
@@ -319,9 +334,97 @@ const TutorHomeComponent = ({navigation}) => {
               console.log(error.code, error.message);
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
+        );   
+    }
 
+    const goTo = async (programa) => {
+
+        var url = await AsyncStorage.getItem('api');
+        let url_api = url;
+        console.log('->',programa)
+        if(programa == 'PLOTE'){
+            navigation.navigate('Home')
+        }
         
+        if(programa == 'PREPORTS'){
+            console.log(programa)
+            try {
+                var reponse = await axios.post(`${url_api}`,rqdata.inputs_preport);
+                
+                var dataSelect = {};
+                var modelSelect = {};
+                var dtaSelect = [];
+                if(reponse.data.Json){
+                    let d = JSON.parse(reponse.data.Json);
+                    console.log(d);  
+                    for (let i = 0; i < d.FProgramInquiry.length; i++) {
+                    const element = d.FProgramInquiry [i];
+                    if(element.UDUDC != ""){
+                        dtaSelect.push(element.UDUDC);
+                    }
+                    }
+                }
+            
+                /* CARGA LA DATA DE LOS SELECTS 1 */
+                for (let y = 0; y < dtaSelect.length; y++) {
+                    const element = dtaSelect[y];
+                    let body = rqdata.get_data_selects;
+                    let json = JSON.parse(body.json);
+                    let row = json.Rows;
+                    let r = "0|"+element+"|1|";
+                    row[0]['Data'] = r;
+                    json.Rows = row;
+                    body.json = JSON.stringify(json);
+                    var catR1 = await axios.post(`${url_api}`,body);
+                        
+                    if(catR1.data.Json){
+                        let d = JSON.parse(catR1.data.Json);
+                        modelSelect[element] = d.FPGMINQUIRY;
+                    }
+                    
+                }
+                
+            
+                
+            
+                let datax = {
+                    titulo: 'Reportes',
+                    data: {},
+                    program: programa,
+                    cat: modeSelect
+                };
+            
+                console.log(datax)
+            
+                setParams_view(datax);
+                setModalVisible3(true);
+            
+                console.log(model,datax,params);
+                
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        if(programa == 'PCOMPRAS'){
+            navigation.navigate('Compra')
+        }
+
+        if(programa == 'PJOBS'){
+            let datax = {
+                titulo: 'Reportes enviados',
+                data: [],
+                program: 'PJOBS',
+                cat: [],
+                report: ''
+              };  
+              setParams_view(datax);
+              setModalVisible4(true);
+        }
+
+        if(programa == 'PCARGAMASIVA'){
+            navigation.navigate('Carga')
+        }
     }
 
     const checkout = async () => {
@@ -346,7 +449,7 @@ const TutorHomeComponent = ({navigation}) => {
                         let json = JSON.parse(body.json);
                         json.Tabla = 'salidacheckout';
                         let row = json.Rows;
-                        var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+                        var hora = ((new Date().getHours()<10)?(('0')+new Date().getHours()):new Date().getHours())+''+((new Date().getMinutes()<10)?(('0')+new Date().getMinutes()):new Date().getMinutes())+'00';
                         var fech = (new Date().toISOString()).split('T')[0];
                         fech = fech.split('-');
                         var realF = fech[2]+'/'+fech[1]+'/'+fech[0]
@@ -425,7 +528,11 @@ const TutorHomeComponent = ({navigation}) => {
                                         {item.Opciones.map((option,i) => {
                                                 return(
                                                     <View style={{'marginStart':50, borderBottomColor:'gray', borderBottomWidth:1}}>
-                                                        <ListItem key={0} bottomDivider>
+                                                        <ListItem key={0} bottomDivider onPress={()=> {
+                                                            if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS' || option['Programa'] == 'PCARGAMASIVA' || option['Programa'] == 'PCOMPRAS'){
+                                                                goTo(option['Programa'])
+                                                            }
+                                                        }}>
                                                             <ListItem.Content>
                                                                 <ListItem.Title>{option.Opcion}</ListItem.Title>
                                                             </ListItem.Content>
@@ -499,6 +606,30 @@ const TutorHomeComponent = ({navigation}) => {
           >
             <View>
                 {buildFormV3(setModalProgramVisible3,data,usuario)}        
+            </View>
+          </Modal>
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible3}
+            >
+            <View>
+              <View>
+                <HomeComponent setModalVisible3={setModalVisible3} data={params_view} />                
+              </View>
+            </View>
+          </Modal>
+          <Modal
+            style={{width:'100%',height:'100%'}}
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible4}
+            >
+            <View>
+              <View>
+                <ModuleComponent setModalVisible={setModalVisible4} data={params_view}/>                
+              </View>
             </View>
           </Modal>
     </View>
@@ -780,6 +911,7 @@ function formScreenBuildV2(setModalProgramVisible,data,usuario,checks){
 function buildFormV3(setModalProgramVisible,data,usuario){
     
     const [tutor,setTutor] =  React.useState(null);
+    const pickerRef = useRef();
     const [tutorName,setTutorName] =  React.useState(null);
     const [motivo,setMotivo] =  React.useState(null);
     const url_api = "http://20.64.97.37/api/products";
@@ -811,7 +943,12 @@ function buildFormV3(setModalProgramVisible,data,usuario){
                 let body = rqdata.getData;
                 let json = JSON.parse(body.json);
                 json.Tabla = 'salidatutor';
-                json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+tutor+'|' }];
+                json.Rows = [];
+                for (let i = 0; i < data['alumnos'].length; i++) {
+                    const element = data['alumnos'][i];
+                    let l = {action:'C', Data: 'C|' + usuario['usukides']+'|'+element['idAlumno']+'|'+tutor+'|' }
+                    json.Rows.push(l);
+                }
                 body.json = JSON.stringify(json);
                 console.log('response',body);
                 let reponse = await axios.post(`${url_api}`,body);
@@ -827,8 +964,15 @@ function buildFormV3(setModalProgramVisible,data,usuario){
             let body = rqdata.getData;
             let json = JSON.parse(body.json);
             json.Tabla = 'salidatipo';
-            json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+motivo+'|' }];
+            json.Rows = [];
+
+            for (let i = 0; i < data['alumnos'].length; i++) {
+                const element = data['alumnos'][i];
+                let l = {action:'C', Data: 'C|' + usuario['usukides']+'|'+ element['idAlumno']+'|'+motivo+'|' }
+                json.Rows.push(l);
+            }
             body.json = JSON.stringify(json);
+            console.log('bodyyyy', body)
             console.log('response',body);
             let reponse = await axios.post(`${url_api}`,body);
             console.log(reponse.data);
@@ -840,7 +984,12 @@ function buildFormV3(setModalProgramVisible,data,usuario){
             let body = rqdata.getData;
             let json = JSON.parse(body.json);
             json.Tabla = 'FSALIDAINASIST';
-            json.Rows = [{action:'C', Data: 'C|' + usuario['usukides']+'|'+data['alumno']['idAlumno']+'|'+motivo+'|' }];
+            json.Rows = [];
+            for (let i = 0; i < data['alumnos'].length; i++) {
+                const element = data['alumnos'][i];
+                let l = {action:'C', Data: 'C|' + usuario['usukides']+'|'+element['idAlumno']+'|'+motivo+'|' }
+                json.Rows.push(l);
+            }
             body.json = JSON.stringify(json);
             console.log('response',body);
             let reponse = await axios.post(`${url_api}`,body);
@@ -852,6 +1001,7 @@ function buildFormV3(setModalProgramVisible,data,usuario){
         
 
     }
+    
 
     console.log(data);
     return (
@@ -868,15 +1018,14 @@ function buildFormV3(setModalProgramVisible,data,usuario){
                 }
                 if(value==0){
                     guardar();
-                }
-            
+                }           
 
             }}
             containerStyle={{ marginBottom: 20 }}
           />
             <View style={{width:'70%',marginStart:'auto', marginEnd:'auto', marginTop:100}}>
                 <Text style={{fontWeight:900}}>Nombre del Alumno:</Text>
-                <Text>{data['alumno']?data['alumno']['Opcion']:''}</Text>
+                <Text>{data['alumnosName']?data['alumnosName']:''}</Text>
 
                 {(data['Programa'] == 'PCAMBIOTUTOR' && (
                     <View>
@@ -893,10 +1042,10 @@ function buildFormV3(setModalProgramVisible,data,usuario){
                             style={{color:'black'}}
                             selectedValue={motivo}
                             style={styles.formControlSelect}
-                            onValueChange={(value)=> setMotivo(value)}
+                            onValueChange={(value)=> setMotivo(...value)}
                         >
                             
-                            <Picker.Item label={'Motivos'} value={''} />
+                            <Picker.Item label={'Motivos'} value={null} />
                             {(data['motivos']?data['motivos']:[]).map((item,i) => {
                                 return(
                                     <Picker.Item label={item['UDDESCRIPCION']} value={item['UDCLAVE']} />

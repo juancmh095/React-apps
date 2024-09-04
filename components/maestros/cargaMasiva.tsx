@@ -17,7 +17,8 @@ const CargaMasivaComponent =  ({props}) => {
 
     const [usuario, setUsuario] = React.useState(null);
     const [labels, setLabels] = React.useState(null);
-    const [labelsArry, setLabelsArry] = React.useState([]);
+    const [labelsArry, setLabelsArry] = React.useState([])
+    const [BtnArry, setBtnArry] = React.useState([])
     const [dataInfo, setDataInfo] = React.useState([]);
 
     var url_api="";
@@ -43,6 +44,22 @@ const CargaMasivaComponent =  ({props}) => {
           }
     }
 
+    const getButtons= async ()=>{
+      let data = '0|1|';
+      var body = rqdata.getCarga('INQBARRA','I',data);
+      var response = await axios.post(`${url_api}`,body);
+      if(response.data.Json != ""){
+          let d = JSON.parse(response.data.Json);
+          var btns = [];
+          for (let i = 0; i < d['FINQBARRA'].length; i++) {
+            const element = d['FINQBARRA'][i];
+            btns.push(element.Titulo)
+          }
+          console.log(d);
+          setBtnArry(btns);
+        }
+  }
+
     const getDataInfo = async (user)=>{
         let data = user['usukides'] + '|' + user['usidioma'] + '|';
         let body = rqdata.getCarga('CARGAMASIVAINQ','I',data);
@@ -62,6 +79,7 @@ const CargaMasivaComponent =  ({props}) => {
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             setUsuario(res[0]);
             getLabels();
+            getButtons();
             getDataInfo(res[0]);
             
         });
@@ -69,7 +87,9 @@ const CargaMasivaComponent =  ({props}) => {
 
     const OpenURLButton = async (url) => {
         console.log(url)
-        await Linking.openURL(url);
+        if(url.includes('https') || url.includes('http')){
+          await Linking.openURL(url);
+        }
         
     }
 
@@ -82,9 +102,9 @@ const CargaMasivaComponent =  ({props}) => {
           const [result] = await pick({
             mode: 'open',
             allowMultiSelection: false,
-            type: [types.pdf, types.docx, types.pptx, types.xlsx, types.plainText, types.csv, types.zip],
+            type: [types.xlsx, types.plainText, types.csv],
           })
-          console.log(result)
+          console.log('result',result)
           var file = await RNFS.readFile(result.uri, 'base64');
           var ext = result.name;
           ext = ext.split('.');
@@ -92,12 +112,13 @@ const CargaMasivaComponent =  ({props}) => {
           console.log(ext[sizeExt-1])
 
           let dispositivo = DeviceInfo.getDeviceNameSync();
-          var hora = (new Date().getHours())+''+(new Date().getMinutes())+'00';
+          var hora = ((new Date().getHours()<10)?(('0')+new Date().getHours()):new Date().getHours())+''+((new Date().getMinutes()<10)?(('0')+new Date().getMinutes()):new Date().getMinutes())+'00';
           var fecha = ((new Date().toISOString()).split('T')[0]).split('-');
           let fch = fecha[0]+''+fecha[1]+''+fecha[2];
 
           let data = usuario['usukides'] + '|' + usuario['usukiduser'] + '|' + dispositivo + '|' + 'PCARGAMASIVA' + '|' + fch + '|' + hora + '|';
           let body = rqdata.loadFunction('BulkLoad',data,file);
+          console.log('bodyFile',body);
 
           var response = await axios.post(`${url_api}`,{Function:'BulkLoad',App:'Mi Appescolar',Parameter:body,json:file});
           console.log(response.data);
@@ -108,6 +129,8 @@ const CargaMasivaComponent =  ({props}) => {
           console.log(err)
         }
       }
+
+      
 
 
     useEffect(() => {
@@ -121,7 +144,7 @@ const CargaMasivaComponent =  ({props}) => {
     return (
         <View>
             <ButtonGroup
-            buttons={['Selec','Buscar','Agregar','Salir','Anexos']}
+            buttons={BtnArry}
             selectedIndex={null}
             buttonStyle={{backgroundColor:'#E1E1E1'}}
             buttonContainerStyle={{borderColor:'gray'}}
@@ -143,7 +166,7 @@ const CargaMasivaComponent =  ({props}) => {
                     <ListItem.Content>
                     {labelsArry.map((label,x) => {
                         return(
-                        <ListItem.Title key={label+x+i} onPress={()=> console.log('item')}>
+                        <ListItem.Title key={label+x+i}>
                             <Text style={{fontWeight:900}}>{labels[label]}: </Text> {item[label]} 
                         </ListItem.Title>
                         )

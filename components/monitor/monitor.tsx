@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { BackHandler, ScrollView, View } from "react-native";
+import { BackHandler, ScrollView, StyleSheet, View } from "react-native";
 import { ButtonGroup, ListItem, Text } from "react-native-elements";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import storage from "../../Storage";
@@ -13,6 +13,8 @@ const MonitorComponent =  ({ navigation }) => {
 
     const [usuario, setUsuario] = React.useState(null);
     const [dataInfo, setDataInfo] = React.useState([]);
+    const [BtnArry, setBtnArry] = React.useState([]);
+    const [titulo, setTitulo] = React.useState([]);
 
     var url_api="";
 
@@ -53,8 +55,35 @@ const MonitorComponent =  ({ navigation }) => {
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             setUsuario(...res[0]);
             getDataInfo(res[0]);
-            
+            getButtons(res[0]);
         });
+    }
+
+    const getButtons= async (usuario)=>{
+        let data = '0|1|';
+        var body = rqdata.getCarga('INQBARRA','I',data);
+        var response = await axios.post(`${url_api}`,body);
+        if(response.data.Json != ""){
+            let d = JSON.parse(response.data.Json);
+            var btns = [];
+            for (let i = 0; i < d['FINQBARRA'].length; i++) {
+              const element = d['FINQBARRA'][i];
+              btns.push(element.Titulo)
+            }
+            console.log(d);
+            setBtnArry(btns);
+          }
+
+          var idIdioma = await AsyncStorage.getItem('idioma');
+
+          var respTitulo = await axios.post(`${url_api}`, rqdata.getTitulo('PMONITOR','B',idIdioma));
+
+            var ttl = respTitulo.data;
+            if(ttl.Json != ''){
+                var pNameJson = JSON.parse(ttl.Json);
+                let pName = pNameJson['FFormName'][0];
+                setTitulo(pName['FNNAME']);
+            }
     }
 
     const backAction = () => {
@@ -91,7 +120,7 @@ const MonitorComponent =  ({ navigation }) => {
     return (
         <View>
             <ButtonGroup
-            buttons={['Selec','Buscar','Agregar','Salir','Anexos']}
+            buttons={BtnArry}
             selectedIndex={null}
             buttonStyle={{backgroundColor:'#E1E1E1'}}
             buttonContainerStyle={{borderColor:'gray'}}
@@ -107,6 +136,10 @@ const MonitorComponent =  ({ navigation }) => {
             containerStyle={{ marginBottom: 20 }}
           />
           
+          <View style={styles.headerTitulo}>
+            <Text style={{textAlign:'center', fontSize:20}}>{titulo}</Text>
+        </View>
+
             <ScrollView>
           {dataInfo.map((item,i) => {
             return(
@@ -128,6 +161,14 @@ const MonitorComponent =  ({ navigation }) => {
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    headerTitulo:{
+        textAlign: 'center',
+        padding: 10,
+        width:'100%',
+      }
+})
 
 
 export default MonitorComponent;

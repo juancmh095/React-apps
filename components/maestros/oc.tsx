@@ -27,7 +27,10 @@ const OrdenCompraComponent =  ({ navigation }) => {
     const [labelsArryErr, setLabelsArryErr] = React.useState([]);
     const [tabs, setTabs] = React.useState([]);
     const [tabSelect, setTabSelect] = React.useState('');
+    const [titulo, setTitulo] = React.useState('');
+    const [count, setCount] = React.useState(1);
     const [modalVisible, setModalVisible] = React.useState(false);
+
     
 
     var url_api="";
@@ -152,6 +155,8 @@ const OrdenCompraComponent =  ({ navigation }) => {
         let url = await AsyncStorage.getItem('api');
         url_api = url;
 
+        formikRef.current.setFieldValue('PDLNID','1');
+
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             getbotones(res[0]);
             
@@ -161,6 +166,14 @@ const OrdenCompraComponent =  ({ navigation }) => {
     const validateUser = async () => {
         let url = await AsyncStorage.getItem('api');
         url_api = url;
+        var idIdioma = await AsyncStorage.getItem('idioma');
+        var respTitulo = await axios.post(`${url_api}`, rqdata.getTitulo('PCOMPRAS','H',idIdioma));
+        var ttl = respTitulo.data;
+        if(ttl.Json != ''){
+            var pNameJson = JSON.parse(ttl.Json);
+            let pName = pNameJson['FFormName'][0];
+            setTitulo(pName['FNNAME']);
+        }
 
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             
@@ -168,6 +181,8 @@ const OrdenCompraComponent =  ({ navigation }) => {
             getLabelsItems(res[0]);
             getLabelsErrors(res[0]);
             setUsuario(...res[0]);
+            
+
             
         });
     }
@@ -207,8 +222,13 @@ const OrdenCompraComponent =  ({ navigation }) => {
                 const element = labelsArry[i];
                 model[element] = values[element]
             }
+
+            if(data[Number(values['PDLNID'])-1]){
+                data[Number(values['PDLNID'])-1] = model;
+            }else{
+                data.push(model);
+            }
     
-            data.push(model);
             setData([...data]);
 
             let vals = {};
@@ -219,6 +239,9 @@ const OrdenCompraComponent =  ({ navigation }) => {
 
             console.log(vals);
             resetForm();
+            var c = count + 1;
+            setCount(c);
+            formikRef.current.setFieldValue('PDLNID',String(c));
             setFormValues({...vals});
 
         }else{
@@ -228,11 +251,24 @@ const OrdenCompraComponent =  ({ navigation }) => {
         }
     }
 
+    const editarItem = async (item,i) => {
+        console.log(item,i)
+        var obji = Object.keys(item);
+        for (let i = 0; i < obji.length; i++) {
+            const element = obji[i];
+            formikRef.current.setFieldValue(element,item[element]);
+        }
+        
+    }
+
+
     const handleSubmit = (values, { resetForm }) => {
         // handle form submission
         saveItem(values,resetForm)
         console.log(values)
+        
       }
+      
 
     useEffect(() => {       
         
@@ -260,6 +296,10 @@ const OrdenCompraComponent =  ({ navigation }) => {
             }}
             containerStyle={{ marginBottom: 20 }}
           />
+
+    <View style={styles.headerTitulo}>
+        <Text style={{textAlign:'center', fontSize:20}}>{titulo}</Text>
+      </View>
           
             <ScrollView>
 
@@ -326,6 +366,7 @@ const OrdenCompraComponent =  ({ navigation }) => {
                                     buttonStyle={{ minHeight: '85%', backgroundColor: 'red', margin:5 }}
                                 />
                             )}
+                            onPress={() => editarItem(item,i)}
                         >
                             <ListItem.Content>
                             {labelsArry.map((label,x) => {

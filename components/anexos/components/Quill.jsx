@@ -65,6 +65,7 @@ const QuillComponent = ({setModalVisible}) => {
             Id:1,
             json: JSON.stringify({
                 Function:"WriteAtach",
+                App:'Mi Appscolar',
                 Base64:encodeTxt,
                 Parameter:"0|FUDC|55PL001|Anexo de Texto|TXT|RROJAS|20240401|122300|DISPOSITIVO1|"
             }),

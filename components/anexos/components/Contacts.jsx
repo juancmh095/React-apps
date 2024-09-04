@@ -49,6 +49,7 @@ const ContactsComponent = ({setModalVisible}) => {
       Id:1,
       json: JSON.stringify({
         Function:"WriteAtach",
+        App:'Mi Appscolar',
         Base64:"",
         Parameter:"0|FUDC|55PL001|"+contact+"|Contacto|RROJAS|20240401|122300|DISPOSITIVO1|"
       }),

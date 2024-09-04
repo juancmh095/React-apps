@@ -427,19 +427,21 @@ function App(props) {
         }}
         containerStyle={{ marginBottom: 20 }}
       />
+            {(programs1.length > 0 && (
+              <Picker
+                  style={{color:'black'}}
+                  style={styles.formControlSelect}
+                  onValueChange={(value)=>console.log(value)}
+              >
+                  {programs1.map((item) => {
+                    return(
+                        <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
+                    )
+                })}
+                  
+              </Picker> 
 
-            <Picker
-                style={{color:'black'}}
-                style={styles.formControlSelect}
-                onValueChange={(value)=>console.log(value)}
-            >
-                {programs1.map((item) => {
-                  return(
-                      <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
-                  )
-              })}
-                
-            </Picker> 
+            ))}
 
 
         <Formik
@@ -564,6 +566,21 @@ function App(props) {
             )}
 
         </Formik>
+        {(programs2.length > 0 && (
+          <Picker
+                style={{color:'black'}}
+                style={styles.formControlSelect}
+                onValueChange={(value)=>console.log(value)}
+            >
+                {programs2.map((item) => {
+                    return(
+                        <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
+                    )
+                })}
+                
+            </Picker> 
+
+        ))}
         <ScrollView>
           {dataInfo.map((item,i) => {
             return(
@@ -602,18 +619,7 @@ function App(props) {
 
         </ScrollView>
 
-          <Picker
-              style={{color:'black'}}
-              style={styles.formControlSelect}
-              onValueChange={(value)=>console.log(value)}
-          >
-              {programs2.map((item) => {
-                  return(
-                      <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
-                  )
-              })}
-              
-          </Picker> 
+          
           <ButtonGroup
             buttons={btnFooter}
             selectedIndex={selectedIndexf}
