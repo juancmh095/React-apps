@@ -64,6 +64,7 @@ const LoginComponent = ({navigation}) => {
                     data: data['FUSERSLOGIN'][0]
                 });
                 var userx = data['FUSERSLOGIN'][0];
+                await AsyncStorage.setItem('FUSERSLOGIN', userx);
                 await AsyncStorage.setItem('api', userx['ESPATHAPI']);
                 await AsyncStorage.setItem('idioma', userx['usidioma']);
                 console.log('rol',userx['usrol'],userx['ESPATHAPI']);
