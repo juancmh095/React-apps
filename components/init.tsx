@@ -82,7 +82,8 @@ const InitComponent = ({navigation}) => {
                         marginRight:"auto"
                     }}
                     onPress={()=> {
-                        if(usuario['usrol'] == '2'){
+                        navigation.navigate('Program')
+                        /* if(usuario['usrol'] == '2'){
                             navigation.navigate('Tutor/Inicio')
                         }else{
                             if(usuario['usrol'] == '4'){
@@ -91,7 +92,7 @@ const InitComponent = ({navigation}) => {
                                 navigation.navigate('Maestro/Inicio')
                                 //navigation.navigate('Compra')
                             }
-                        }
+                        } */
                     }}
                     />
                 <Button

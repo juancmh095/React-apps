@@ -17,6 +17,8 @@ import MonitorComponent from './components/monitor/monitor';
 import Anexos from './components/anexos/anexos';
 import FilesComponent from './components/anexos/anexos_list';
 
+import  ProgramPage  from './src/pages/program';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -37,6 +39,7 @@ function Navigation() {
           <Stack.Screen name="Compra" component={OrdenCompraComponent} options={{title:''}} />
           <Stack.Screen name="Anexos" component={Anexos} />
           <Stack.Screen name="Mis_Anexos" component={FilesComponent} />
+          <Stack.Screen name="Program" component={ProgramPage} />
         </Stack.Navigator>
       </NavigationContainer>
     );

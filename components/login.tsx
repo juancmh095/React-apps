@@ -66,8 +66,12 @@ const LoginComponent = ({navigation}) => {
                 var userx = data['FUSERSLOGIN'][0];
                 await AsyncStorage.setItem('api', userx['ESPATHAPI']);
                 await AsyncStorage.setItem('idioma', userx['usidioma']);
+                await AsyncStorage.setItem('psw', pass);
+                var userx2 = JSON.stringify(userx);
+                await AsyncStorage.setItem('FUSERSLOGIN', userx2);
                 console.log('rol',userx['usrol'],userx['ESPATHAPI']);
-                if(userx['usrol'] == '1'){
+                navigation.navigate('Program')
+                /* if(userx['usrol'] == '1'){
                     navigation.navigate('Maestro/Inicio')
                     //navigation.navigate('Compra')
                 }else{
@@ -80,7 +84,7 @@ const LoginComponent = ({navigation}) => {
                             navigation.navigate('Banners')
                         }
                     }
-                }
+                } */
             }else{
                 ToastAndroid.show('Usuario o contraseña invalido', ToastAndroid.LONG);
 
