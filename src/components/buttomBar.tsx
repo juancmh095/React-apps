@@ -27,7 +27,6 @@ const ButtomBarModule = ({props}) => {
         // Función para obtener los botones desde la API
         const fetchButtons = async () => {
           try {
-            console.log(_apiServices)
             var btn = [];
             const response = await _apiServices('program','','BARRAPROGRAM',[{action:"I",Data:"0|PLOTE|"}],{},'Mi App','0');
             for (let i = 0; i < response.length; i++) {
@@ -35,7 +34,6 @@ const ButtomBarModule = ({props}) => {
               btn.push(element['Titulo']?element['Titulo']:element['NOMBREPGM']);
             }
             setButtons([...btn])
-            console.log(response);
           } catch (error) {
             console.error('Error fetching buttons:', error);
           }

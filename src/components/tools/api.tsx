@@ -32,11 +32,9 @@ const api_service = async (type,app,func,parametros,json,cat,escuela) => {
         }
     
         let response = await axios.post(`${api}`,params);
-        console.log(response.data, params);
         if(response.data.Json != ''){
             let d = JSON.parse(response.data.Json);
             let keyObject = 'F'+func;
-            console.log(d[keyObject]);
             return d[keyObject];
         }else{
             return []
