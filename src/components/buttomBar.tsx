@@ -29,7 +29,7 @@ const ButtomBarModule = (props) => {
           try {
             var btn = [];
 
-            console.log('bottom',props['program'])
+            console.log('bottom',props['program'],props['OPFORMA'])
             const response = await _apiServices('program','','BARRAPROGRAM',[{action:"I",Data:"0|"+props['program']+"|"+props['OPFORMA']+"|B|1|"}],{},'Mi App','0');
             console.log('bottom',response)
             for (let i = 0; i < response.length; i++) {

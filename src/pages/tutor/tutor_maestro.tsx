@@ -11,6 +11,7 @@ import Geolocation from 'react-native-geolocation-service';
 import HomeComponent from '../../../components/App.tsx';
 import ModuleComponent from '../../../components/Module.tsx';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import  ButtomBarModule  from '../../components/buttomBar';
 
 const TutorHomeComponent = ({navigation}) => {
     const formikRef = useRef();
@@ -47,7 +48,7 @@ const TutorHomeComponent = ({navigation}) => {
             setUsuario(res[0]);
             console.log('Usuario',res[0]);
             load_form_inputs(res[0]);
-            showBarraBottom();
+            
         });
     }
 
@@ -63,37 +64,7 @@ const TutorHomeComponent = ({navigation}) => {
         json.action = 'I';
         body.json = JSON.stringify(json);
     }
-
-    const showBarraBottom = async () => {
-
-        let body = rqdata.labels;
-        let json = JSON.parse(body.json);
-        json.Tabla = 'BARRAPROGRAM';
-        let row = json.Rows;
-
-        let r = '2|PMENUS|';
-        row[0]['Data'] = r;
-        json.Rows = row;
-        json.action = 'I';
-        body.json = JSON.stringify(json);
-
-        var reponse = await axios.post(`${url_api}`,body);
-        console.log('btto', body,reponse.data)
-        if(reponse.data.Json != ''){
-            let datx = JSON.parse(reponse.data.Json);
-            let datxx = datx['FBARRAPROGRAM'];
-            if(btnBNames.length < datxx.length){
-                for (let i = 0; i < datxx.length; i++) {
-                    const element = datxx[i];
-                    btnBNames.push(element['OPTITULO'])
-                    btnBCode.push(element['OPOBNMOPC']);                
-                }
-                setBtnBCode([...btnBCode]);
-                setBtnBNames([...btnBNames]);
-            }
-        }
-    }
-
+    
     const load_form_inputs = async (userx) => {
 
         var usukides = userx['usukides']
@@ -565,24 +536,7 @@ const TutorHomeComponent = ({navigation}) => {
                 
             </View>
          </ScrollView>
-         <ButtonGroup
-            buttons={btnBNames}
-            selectedIndex={null}
-            buttonStyle={{backgroundColor:'#E1E1E1'}}
-            buttonContainerStyle={{borderColor:'gray'}}
-            onPress={(value) => {
-              
-                let model = {
-                    Programa: btnBCode[value],
-                    name: btnBNames[value]
-                }
-
-                showProgram(model['Programa']);
-            
-
-            }}
-            containerStyle={{ marginBottom: 20 }}
-          />
+         <ButtomBarModule program={'PMENUS'} OPFORMA={'WMENUSA'} />
          <Modal
             style={{width:'100%',height:'100%'}}
             animationType="slide"
