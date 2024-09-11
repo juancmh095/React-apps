@@ -21,8 +21,15 @@ const TopbarModule = (props) => {
         3:'green',
         4:'red'
     }
-    const [buttons, setButtons] = useState([]);
+    const [buttonsTop, setButtonsTop] = useState([]);
     const [buttonsCode, setButtonsCode] = useState([]);
+
+    const action = (id) => {
+      var form = props['form'];
+      if(id == 1){
+        console.log(form['current']['values']);
+      }
+    }
 
     useEffect(() => {
         // Función para obtener los botones desde la API
@@ -34,7 +41,7 @@ const TopbarModule = (props) => {
               const element = response[i];
               btn.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
             }
-            setButtons([...btn])
+            setButtonsTop([...btn])
           } catch (error) {
             console.error('Error fetching buttons:', error);
           }
@@ -46,11 +53,11 @@ const TopbarModule = (props) => {
     return (
         <View>
             <ButtonGroup
-              buttons={buttons}
+              buttons={buttonsTop}
               buttonStyle={{backgroundColor:'#E1E1E1'}}
               buttonContainerStyle={{borderColor:'gray'}}
               onPress={(value) => {
-                console.log(value);
+                action((value+1))
               }}
               containerStyle={{ marginBottom: 20 }}
             />

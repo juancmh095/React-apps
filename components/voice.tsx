@@ -4,7 +4,7 @@ import axios from 'axios';
 import * as rqdata from './params_request';
 import Tts from 'react-native-tts';
 import { ButtonGroup, Icon } from 'react-native-elements';
-import storage from "../Storage";
+import storage from "../src/services/Storage";
 
 const TextToSpeech = (props) => {
   const [text, setText] = useState('');

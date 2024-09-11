@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { BackHandler, Modal, ScrollView, StyleSheet, View } from "react-native";
 import { ButtonGroup, TabView, Text } from "react-native-elements";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import storage from "../../src/services/Storage";
+import storage from "../../services/Storage";
 
-import * as rqdata from '../params_request';
+import * as rqdata from '../../components/tools/params_request';
 import axios from "axios";
 import { Input, Icon } from '@rneui/themed';
 import { Formik } from "formik";

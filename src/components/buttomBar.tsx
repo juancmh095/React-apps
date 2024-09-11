@@ -4,7 +4,7 @@ import  {default as _apiServices} from './tools/api';
 import { Text } from 'react-native-elements';
 import { ButtonGroup } from '@rneui/base';
 
-const ButtomBarModule = ({props}) => {
+const ButtomBarModule = (props) => {
 
     var icons = 
     { 
@@ -28,7 +28,10 @@ const ButtomBarModule = ({props}) => {
         const fetchButtons = async () => {
           try {
             var btn = [];
-            const response = await _apiServices('program','','BARRAPROGRAM',[{action:"I",Data:"0|PLOTE|"}],{},'Mi App','0');
+
+            console.log('bottom',props['program'])
+            const response = await _apiServices('program','','BARRAPROGRAM',[{action:"I",Data:"0|"+props['program']+"|"+props['OPFORMA']+"|B|1|"}],{},'Mi App','0');
+            console.log('bottom',response)
             for (let i = 0; i < response.length; i++) {
               const element = response[i];
               btn.push(element['Titulo']?element['Titulo']:element['NOMBREPGM']);

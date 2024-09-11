@@ -14,9 +14,8 @@ const ProgramPage = (props) => {
     return (
         <View style={{width:'100%',height:'100%'}}>
             <View>
-                <TopbarModule />
+                <TopbarModule form={formikRef} />
             </View>
-            <Text>Hola</Text>
             <View>
                 <Formik
                 initialValues={{}}
@@ -28,11 +27,12 @@ const ProgramPage = (props) => {
                 {({ handleChange, setFieldValue, handleSubmit, values }) => (
 
                     <FormsComponent 
-                        program="PLOTE" 
-                        item="MC0001"
+                        program={props['Programa']} 
+                        item={props['COVERSIONTO']}
                         handleChange = {handleChange}
                         setFieldValue = {setFieldValue}
                         handleSubmit = {handleSubmit}
+                        form = {formikRef}
                         values = {values}
                     />
 
@@ -40,7 +40,7 @@ const ProgramPage = (props) => {
                 </Formik>
             </View>
             <View style={styles.fixedButton}>
-                <ButtomBarModule />
+                <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} />
             </View>
         </View>
     )

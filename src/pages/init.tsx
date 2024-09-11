@@ -4,8 +4,8 @@ import { Button, Icon, Input, Text } from "react-native-elements";
 import axios from "axios";
 import { Formik } from "formik";
 
-import * as rqdata from './params_request';
-import storage from "../src/services/Storage";
+import * as rqdata from '../components/tools/params_request';
+import storage from "../services/Storage";
 
 
 const InitComponent = ({navigation}) => {
@@ -32,6 +32,7 @@ const InitComponent = ({navigation}) => {
     const validateUser = async () => {
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             setUsuario(res[0]);
+            console.log(res[0]);
             
         });
     }
@@ -58,9 +59,9 @@ const InitComponent = ({navigation}) => {
                         marginTop:50,
                         marginBottom:60
                     }}
-                    source={require('../assets/logo.png')}
+                    source={{uri: usuario?usuario['Icono']:''}}
                 />
-                <Text style={{fontSize:25, fontWeight:600, textAlign:'center' }}>¡Hola {usuario?usuario['ESNOMBRECOR']:''}!</Text>
+                <Text style={{fontSize:25, fontWeight:600, textAlign:'center' }}>¡Hola {usuario?usuario['Nombre']:''}!</Text>
                 <Text style={{fontSize:18, fontWeight:600, textAlign:'center' }}>*{usuario?usuario['ususer']:''}</Text>
             </View>
             <View style={{marginTop:60}}>
@@ -82,8 +83,8 @@ const InitComponent = ({navigation}) => {
                         marginRight:"auto"
                     }}
                     onPress={()=> {
-                        navigation.navigate('Program')
-                        /* if(usuario['usrol'] == '2'){
+                        //navigation.navigate('Program')
+                        if(usuario['usrol'] == '2'){
                             navigation.navigate('Tutor/Inicio')
                         }else{
                             if(usuario['usrol'] == '4'){
@@ -92,7 +93,7 @@ const InitComponent = ({navigation}) => {
                                 navigation.navigate('Maestro/Inicio')
                                 //navigation.navigate('Compra')
                             }
-                        } */
+                        }
                     }}
                     />
                 <Button

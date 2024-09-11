@@ -1,14 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
 import  {default as _apiServices} from './tools/api';
 import { Text } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Input } from '@rneui/base';
 import { Picker } from '@react-native-picker/picker';
+import QRComponent from './tools/code.tsx' ;
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 const FormsComponent = (props) => {
 
     const [inputs, setInputs] = useState([]);
+    const [lote, setLote] = useState('');
+    const [modalVisible2, setModalVisible2] = useState(false);
+    const [datePk, setDatePk] = React.useState(new Date())
+
+    const changeDateTime = (setFieldValue,campo, value, event) => {
+        if(event.type == 'set'){
+          if(campo == 'LODATRECEIP'){
+            let dt = new Date(value);
+            dt = dt.toLocaleDateString('es-MX').split('/');
+            dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
+            setFieldValue(campo,dt);
+          }else{
+            let dt = new Date(value);
+            let hora = dt.toLocaleTimeString('es-MX').split(' ')[0];
+            setFieldValue(campo,hora);
+          }
+        }
+      }
 
     useEffect(() => {
         
@@ -17,26 +37,28 @@ const FormsComponent = (props) => {
           try {
             var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
             usuario = JSON.parse(usuario)
-            console.log(props,usuario)
+            console.log('program',props['program'])
             const response = await _apiServices('program','','INQFORMNAME',[{action:"I",Data:usuario['usukides']+'|'+props['program']+'|'}],{},'Mi App','0');
-       
-            var dta = "0|"+usuario['usukiduser']+'|'+props['program']+'|A|'+response[0]['OPFORMDEFAULT']+'|'+props['item']+'|';
-            const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');
-            /* aqui se llenan los inputs de formulario */
-            /* recorremos todos para saber cual es de tipo S que es un select */
-            for (let i = 0; i < responseForm.length; i++) {
-                const element = responseForm[i];
-                if(element['UDTIPO'] == 'S'){
-                    element['VALORES'] = [];
-                    let dtaCat = "0|"+element['UDUDC']+"|1|"
-                    let respDataSelect = await _apiServices('program','','PGMINQUIRY',[{action:"I",Data:dtaCat}],{},'Mi App','0');
-                    element['VALORES'] = respDataSelect;
+            console.log(response)
+            if(response.length > 0){
+                var dta = "0|"+usuario['usukiduser']+'|'+props['program']+'|A|'+response[0]['OPFORMDEFAULT']+'|'+props['item']+'|';
+                const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');
+                /* aqui se llenan los inputs de formulario */
+                /* recorremos todos para saber cual es de tipo S que es un select */
+                for (let i = 0; i < responseForm.length; i++) {
+                    const element = responseForm[i];
+                    if(element['UDTIPO'] == 'S'){
+                        element['VALORES'] = [];
+                        let dtaCat = "0|"+element['UDUDC']+"|1|"
+                        let respDataSelect = await _apiServices('program','','PGMINQUIRY',[{action:"I",Data:dtaCat}],{},'Mi App','0');
+                        element['VALORES'] = respDataSelect;
+                    }
+                    
                 }
-                
+                setInputs([...responseForm]);
             }
-            setInputs([...responseForm]);
           } catch (error) {
-            console.error('Error fetching buttons:', error);
+            console.log('Error fetching buttons:', error);
           }
         };
     
@@ -103,7 +125,7 @@ const FormsComponent = (props) => {
                                                 containerStyle={{margin:0, padding:0, height:50}}
                                                 inputContainerStyle={{borderBottomWidth:0}}
                                                 maxLength={Number(item.UDLONGITUD)}
-                                                onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value,event)} })}
+                                                onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                 onChangeText={props['handleChange'](item.UDCAMPO)}
                                                 value={props['values'][item.UDCAMPO]}
                                             />
@@ -118,7 +140,7 @@ const FormsComponent = (props) => {
                                                     containerStyle={{margin:0, padding:0, height:50}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}
-                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(setFieldValue,item.UDCAMPO,value,event)} })}
+                                                    onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                     onChangeText={props['handleChange'](item.UDCAMPO)}
                                                     value={props['values'][item.UDCAMPO]}
                                                 /> 
@@ -133,6 +155,18 @@ const FormsComponent = (props) => {
                     <View>
                     </View>
                 </View>
+                <Modal
+                    style={{width:'100%',height:'100%'}}
+                    animationType="slide"
+                    transparent={false}
+                    visible={modalVisible2}
+                >
+                    <View>
+                    <View>
+                        <QRComponent setModalVisible={setModalVisible2} lote={lote} setLote={setLote} form={props['form']} />                
+                    </View>
+                    </View>
+                </Modal>
         </View>
     )
 }

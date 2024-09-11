@@ -5,19 +5,19 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
-import loginComponent from './components/login';
-import App from './components/main';
-import InitComponent from './components/init';
-import BannersComponent from './components/banners';
-import MaestroHomeComponent from './components/maestros/home_maestro';
-import CargaMasivaComponent from './components/maestros/cargaMasiva';
-import OrdenCompraComponent from './components/maestros/oc';
-import TutorHomeComponent from './components/tutor/tutor_maestro';
-import MonitorComponent from './components/monitor/monitor';
-import Anexos from './components/anexos/anexos';
-import FilesComponent from './components/anexos/anexos_list';
+import loginComponent from '../pages/login';
+import App from '../pages/main';
+import InitComponent from '../pages/init';
+import BannersComponent from '../pages/banners';
+import MaestroHomeComponent from '../pages/maestros/home_maestro';
+import CargaMasivaComponent from '../pages/maestros/cargaMasiva';
+import OrdenCompraComponent from '../pages/maestros/oc';
+import TutorHomeComponent from '../pages/tutor/tutor_maestro';
+import MonitorComponent from '../pages/monitor/monitor';
+import Anexos from '../components/anexos/anexos';
+import FilesComponent from '../components/anexos/anexos_list';
 
-import  ProgramPage  from './src/pages/program';
+import  OpenProgram  from '../components/tools/openProgram';
 
 
 
@@ -39,7 +39,7 @@ function Navigation() {
           <Stack.Screen name="Compra" component={OrdenCompraComponent} options={{title:''}} />
           <Stack.Screen name="Anexos" component={Anexos} />
           <Stack.Screen name="Mis_Anexos" component={FilesComponent} />
-          <Stack.Screen name="Program" component={ProgramPage} />
+          <Stack.Screen name="Program" component={OpenProgram} />
         </Stack.Navigator>
       </NavigationContainer>
     );

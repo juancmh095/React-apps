@@ -5,7 +5,7 @@ import axios from "axios";
 import { Formik } from "formik";
 import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet, PermissionsAndroid } from "react-native";
 import * as rqdata from '../params_request';
-import storage from "../../Storage";
+import storage from "../../src/services/Storage";
 import { Picker } from "@react-native-picker/picker";
 import Geolocation from 'react-native-geolocation-service';
 import HomeComponent from "../App";

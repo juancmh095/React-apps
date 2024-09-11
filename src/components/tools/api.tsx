@@ -30,7 +30,6 @@ const api_service = async (type,app,func,parametros,json,cat,escuela) => {
                 json:json
             }
         }
-    
         let response = await axios.post(`${api}`,params);
         if(response.data.Json != ''){
             let d = JSON.parse(response.data.Json);

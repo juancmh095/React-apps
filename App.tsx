@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Icon, Input, Text } from "react-native-elements";
 import axios from "axios";
 import { Formik } from "formik";
-import Navigation from './Navigation';
+import Navigation from './src/services/Navigation';
 
 const App = () => {
     

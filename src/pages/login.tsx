@@ -4,8 +4,8 @@ import { Button, Icon, Input, Text } from "react-native-elements";
 import axios from "axios";
 import { Formik } from "formik";
 
-import * as rqdata from './params_request';
-import storage from "../src/services/Storage";
+import * as rqdata from '../components/tools/params_request';
+import storage from "../services/Storage";
 import DeviceInfo from "react-native-device-info";
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -70,8 +70,8 @@ const LoginComponent = ({navigation}) => {
                 var userx2 = JSON.stringify(userx);
                 await AsyncStorage.setItem('FUSERSLOGIN', userx2);
                 console.log('rol',userx['usrol'],userx['ESPATHAPI']);
-                navigation.navigate('Program')
-                /* if(userx['usrol'] == '1'){
+                //navigation.navigate('Program')
+                if(userx['usrol'] == '1'){
                     navigation.navigate('Maestro/Inicio')
                     //navigation.navigate('Compra')
                 }else{
@@ -84,7 +84,7 @@ const LoginComponent = ({navigation}) => {
                             navigation.navigate('Banners')
                         }
                     }
-                } */
+                }
             }else{
                 ToastAndroid.show('Usuario o contraseña invalido', ToastAndroid.LONG);
 

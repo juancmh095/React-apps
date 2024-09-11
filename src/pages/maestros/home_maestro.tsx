@@ -5,10 +5,10 @@ import axios from "axios";
 import { Picker } from '@react-native-picker/picker';
 import { Formik } from "formik";
 import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet } from "react-native";
-import * as rqdata from '../params_request';
-import storage from "../../src/services/Storage.tsx";
-import HomeComponent from '../App.tsx';
-import ModuleComponent from '../Module.tsx';
+import * as rqdata from '../../components/tools/params_request';
+import storage from "../../services/Storage";
+import HomeComponent from '../../../components/App.tsx';
+import ModuleComponent from '../../../components/Module.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MaestroHomeComponent = ({navigation}) => {

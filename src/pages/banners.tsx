@@ -4,8 +4,8 @@ import { Button, Icon, Image, Input, Text } from "react-native-elements";
 import axios from "axios";
 import { Formik } from "formik";
 
-import * as rqdata from './params_request';
-import storage from "../src/services/Storage";
+import * as rqdata from '../components/tools/params_request';
+import storage from "../services/Storage";
 
 
 const BannersComponent = ({navigation}) => {
