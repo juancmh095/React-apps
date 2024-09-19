@@ -44,6 +44,7 @@ const TutorHomeComponent = ({navigation}) => {
     }, []);
 
     const validateUser = async () => {
+        
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             setUsuario(res[0]);
             console.log('Usuario',res[0]);

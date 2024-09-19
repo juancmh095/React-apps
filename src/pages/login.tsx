@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, ToastAndroid, View } from "react-native";
+import { ActivityIndicator, Modal, StyleSheet, ToastAndroid, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Icon, Input, Text } from "react-native-elements";
 import axios from "axios";
@@ -6,6 +6,7 @@ import { Formik } from "formik";
 
 import * as rqdata from '../components/tools/params_request';
 import storage from "../services/Storage";
+import {default as _apiServices} from "../components/tools/api";
 import DeviceInfo from "react-native-device-info";
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,6 +16,9 @@ const LoginComponent = ({navigation}) => {
     const formikRef = useRef();
     const [textinit, setExtInit] = React.useState('Bienvenido');
     const [passView, setPasswordView] = React.useState(true);
+    const [modalVisible, setModalVisible] = React.useState(false);
+    const [newApi, setNewApi] = React.useState('');
+    const [lablesURL, setLabelsURL] = React.useState({METITLE:'',MEOK:'',MEMESSAGE:'',MECANCEL:''});
     const url_api = "http://20.64.97.37/api/products";
    
     useEffect(() => {
@@ -22,12 +26,24 @@ const LoginComponent = ({navigation}) => {
     })
 
     const validateUser = async () => {
+        var id = await AsyncStorage.getItem('usukiduser');
+        formikRef.current?.setFieldValue('user',id);
         storage.getAllDataForKey('FUSERSLOGIN').then(res => {
             console.log('aqui el usuario',res);
+            
             if(res.length > 0){
                 navigation.navigate('Init')
             }
+
         });
+    }
+
+    const getLabelsUrl = async () => {
+        const response = await _apiServices('program','','LABELS',[{action:"I",Data:"URL|1|"}],{},'Mi App','0');
+        console.log(response);
+        setLabelsURL({...response[0]})
+        var apix = await AsyncStorage.getItem('api');
+        setNewApi(apix);
     }
     
     
@@ -65,6 +81,7 @@ const LoginComponent = ({navigation}) => {
                 });
                 var userx = data['FUSERSLOGIN'][0];
                 await AsyncStorage.setItem('api', userx['ESPATHAPI']);
+                await AsyncStorage.setItem('usukiduser', userx['usukiduser']);
                 await AsyncStorage.setItem('idioma', userx['usidioma']);
                 await AsyncStorage.setItem('psw', pass);
                 var userx2 = JSON.stringify(userx);
@@ -141,7 +158,66 @@ const LoginComponent = ({navigation}) => {
 
                 )}
             </Formik>
+
+            <Text
+                style={{
+                    marginStart:'auto',
+                    marginEnd:10
+                }}
+                onPress={()=>{
+                    setModalVisible(true);
+                    getLabelsUrl();
+                }}
+            >URL</Text>
         </View>
+
+        <Modal
+            style={{width:'50%',height:'50%'}}
+            animationType="fade"
+            presentationStyle={'overFullScreen'}
+            transparent={true}
+            visible={modalVisible}
+            >
+            <View>
+                
+              <View style={{
+                width:'80%',
+                marginStart:'auto',
+                marginEnd:'auto',
+                marginTop:100,
+                marginBottom:'auto',
+                backgroundColor:'white',
+                padding:10,
+                shadowColor: '#000',
+                shadowOffset: {
+                width: 0,
+                height: 2,
+                },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 5,
+              }}>
+                
+                <Text style={{textAlign:'center', fontSize:20, fontWeight:'900'}}>{lablesURL['METITLE']}</Text>
+                <Text style={{fontSize:15, fontWeight:'800'}}>{lablesURL['MEMESSAGE']}</Text>
+                <Input style={styles.inputs} value={newApi} onChangeText={(text)=> setNewApi(text)} />
+                <View style={styles.btnr}>
+                    <Button title={lablesURL['MEOK']} onPress={()=>{
+                        AsyncStorage.setItem('api', newApi);
+                        setModalVisible(false)
+                    }}
+                    ></Button>               
+                </View>
+                <View style={styles.btnl}>             
+                    <Button title={lablesURL['MECANCEL']} onPress={()=> {
+                        
+                        AsyncStorage.setItem('api', url_api);
+                        setModalVisible(false)
+                    }}></Button>               
+                </View>
+              </View>
+            </View>
+          </Modal>
     </View>
     
   );
@@ -154,6 +230,16 @@ const styles = StyleSheet.create({
         marginLeft:'auto',
         marginRight:'auto',
         marginTop:'auto'
+    },
+    btnr:{
+        marginEnd:0,
+        width:200,
+        marginStart:0
+    },
+    btnl:{
+        width:200,
+        marginStart:'auto',
+        marginTop:-40
     }
 })
 

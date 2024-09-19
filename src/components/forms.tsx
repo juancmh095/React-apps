@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
 import  {default as _apiServices} from './tools/api';
-import { Text } from 'react-native-elements';
+import { Icon, Text } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Input } from '@rneui/base';
 import { Picker } from '@react-native-picker/picker';
@@ -76,8 +76,10 @@ const FormsComponent = (props) => {
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={props['values'][item.UDCAMPO]}
                                     style={styles.formControl}
+                                    rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
                                     containerStyle={{margin:0, padding:0, height:50}}
                                     inputContainerStyle={{borderBottomWidth:0}}
+                                    returnKeyType="next"
                                     onChangeText={props['handleChange'](item.UDCAMPO)}
                                 />
                             )
@@ -89,9 +91,10 @@ const FormsComponent = (props) => {
                                         style={styles.formControl}
                                         containerStyle={{margin:0, padding:0, height:50}}
                                         inputContainerStyle={{borderBottomWidth:0}}
-                                        rightIcon={{ type: 'ionicon', name: 'barcode-outline', size:40 }}
+                                        rightIcon = {<Icon name='qr-code' onPress={()=> setModalVisible2(true) } />}
                                         maxLength={Number(item.UDLONGITUD)}
-                                        onFocus={()=> setModalVisible2(true)}
+                                        clearButtonMode='always'
+                                        returnKeyType="next"
                                         value={props['values'][item.UDCAMPO]}
                                         onChangeText={props['handleChange'](item.UDCAMPO)}
                                     />
@@ -125,8 +128,10 @@ const FormsComponent = (props) => {
                                                 containerStyle={{margin:0, padding:0, height:50}}
                                                 inputContainerStyle={{borderBottomWidth:0}}
                                                 maxLength={Number(item.UDLONGITUD)}
+                                                rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
                                                 onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                 onChangeText={props['handleChange'](item.UDCAMPO)}
+                                                returnKeyType="next"
                                                 value={props['values'][item.UDCAMPO]}
                                             />
                                         )
@@ -140,8 +145,10 @@ const FormsComponent = (props) => {
                                                     containerStyle={{margin:0, padding:0, height:50}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}
+                                                    rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
                                                     onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                     onChangeText={props['handleChange'](item.UDCAMPO)}
+                                                    returnKeyType="next"
                                                     value={props['values'][item.UDCAMPO]}
                                                 /> 
                                             )
