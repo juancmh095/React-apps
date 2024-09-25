@@ -17,7 +17,7 @@ const FormsComponent = (props) => {
 
     const changeDateTime = (setFieldValue,campo, value, event) => {
         if(event.type == 'set'){
-          if(campo == 'LODATRECEIP'){
+          if(campo == 'LODATRECEIP' || campo == 'JBSBMDATE'){
             let dt = new Date(value);
             dt = dt.toLocaleDateString('es-MX').split('/');
             dt = (Number(dt[0])<9?('0'+dt[0]):dt[0]) + '/' + (Number(dt[1])<9?('0'+dt[1]):dt[1]) + '/' + (Number(dt[2])<9?('0'+dt[2]):dt[2]);
@@ -124,7 +124,7 @@ const FormsComponent = (props) => {
                                         return(
                                             <Input 
                                                 key={item.UDCAMPO}
-                                                placeholder={item.UDDESCRIPCION} 
+                                                placeholder={item.UDDESCRIPCION+''} 
                                                 style={styles.formControl}
                                                 containerStyle={{margin:0, padding:0, height:50}}
                                                 inputContainerStyle={{borderBottomWidth:0}}

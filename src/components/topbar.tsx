@@ -26,7 +26,7 @@ const TopbarModule = (props) => {
 
     const action = (id) => {
       var form = props['form'];
-      if(id == 1){
+      if(id == 2){
         console.log(form['current']['values']);
       }
     }
