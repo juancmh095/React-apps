@@ -13,6 +13,8 @@ import ModuleComponent from '../../../components/Module.tsx';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import  ButtomBarModule  from '../../components/buttomBar';
 
+import  {default as _apiServices} from '../../components/tools/api.tsx';
+
 const TutorHomeComponent = ({navigation}) => {
     const formikRef = useRef();
     const [usuario, setUsuario] = React.useState(null);
@@ -458,7 +460,7 @@ const TutorHomeComponent = ({navigation}) => {
          <ScrollView>
             <View>
             <ButtonGroup
-            buttons={['Salir','Salida','Tutor','Check In', 'Check out']}
+            buttons={['No Asisitir','Salida','Tutor','Check In', 'Check out']}
             selectedIndex={null}
             buttonStyle={{backgroundColor:'#E1E1E1'}}
             buttonContainerStyle={{borderColor:'gray'}}
@@ -471,6 +473,10 @@ const TutorHomeComponent = ({navigation}) => {
 
                 if(value == 4){
                     checkout()
+                }
+
+                if(value == 0){
+                    showProgram('PNOASISTIR');
                 }
 
                 if(value == 1){
@@ -607,6 +613,20 @@ function formScreenBuild(setModalProgramVisible,data,usuario, dataChecks){
     data.list = data.list?data.list:[];
     data.checks = data.checks?data.checks:[];
     const [arrData, setArrData] = React.useState(dataChecks);
+    const [labels, setLabels] = React.useState({});
+
+    const getLabels =  async ()=>{
+        var idioma = await AsyncStorage.getItem('idioma');
+        const response = await _apiServices('program','','LABELS',[{action:"I",Data:"PASISTENCIA|"+idioma+"|"}],{},'Mi App','0');
+        console.log('bottomXXXXXXXXXXXXXXXXXXXXXXXXXXXX',response,idioma)
+        if(response.length > 0){
+            setLabels({...response[0]})
+        }
+    }
+
+    useEffect(() => {
+        getLabels();
+    },[])
 
     const ejecutar = async () => {
         if(data.item['Programa'] == 'PDIA'){
@@ -875,6 +895,8 @@ function buildFormV3(setModalProgramVisible,data,usuario){
     const pickerRef = useRef();
     const [tutorName,setTutorName] =  React.useState(null);
     const [motivo,setMotivo] =  React.useState(null);
+    const [labels, setLabels] = React.useState({});
+
     const url_api = "http://20.64.97.37/api/products";
 
     const validar = async (item) => {
@@ -896,6 +918,19 @@ function buildFormV3(setModalProgramVisible,data,usuario){
         }
 
     }
+
+    const getLabels =  async ()=>{
+        var idioma = await AsyncStorage.getItem('idioma');
+        const response = await _apiServices('program','','LABELS',[{action:"I",Data:"PCAMSAL|"+idioma+"|"}],{},'Mi App','0');
+        console.log('bottomXXXXXXXXXXXXXXXXXXXXXXXXXXXX',response,idioma)
+        if(response.length > 0){
+            setLabels({...response[0]})
+        }
+    }
+    useEffect(()=>{
+        getLabels();
+    },[])
+
 
     const guardar = async () => {
 

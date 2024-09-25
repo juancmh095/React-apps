@@ -11,6 +11,8 @@ import HomeComponent from '../../../components/App.tsx';
 import ModuleComponent from '../../../components/Module.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import  {default as _apiServices} from '../../components/tools/api';
+
 const MaestroHomeComponent = ({navigation}) => {
     const formikRef = useRef();
     const [usuario, setUsuario] = React.useState(null);
@@ -157,23 +159,13 @@ const MaestroHomeComponent = ({navigation}) => {
         console.log(item)
         if(item.Programa == 'PDIA'){
             let grukidgr = item['grukidgr'];
-            let body = rqdata.getData;
-            let json = JSON.parse(body.json);
-            let row = json.Rows;
-            let r = usukides + '|' +grukidgr + '|';
-            row[0]['Data'] = r;
-            json.Rows = row;
-            body.json = JSON.stringify(json);
-            console.log('response',body);
-            let reponse = await axios.post(`${url_api}`,body);
-            if(reponse.data.Json != ''){
-                var datx = JSON.parse(reponse.data.Json);
+            const response = await _apiServices('program','','regasistencia',[{action:"I",Data:usukides + '|' +grukidgr + '|'}],{},'Mi App','0');
+            console.log('163',response);
+            if(response.length > 0){
                 
                 var chks = [];
-                if(datx['Fregasistencia']){
-                    for (let index = 0; index   < datx['Fregasistencia'].length; index++) {
-                        chks.push(true);
-                    }
+                for (let index = 0; index  < response.length; index++) {
+                    chks.push(true);
                 }
 
                 setDataChecks(chks);
@@ -194,58 +186,43 @@ const MaestroHomeComponent = ({navigation}) => {
             console.log(item)
             if(item.Programa == 'PSALIDA'){
                 /* obtener titulos */
-                let body = rqdata.labels;
-                let json = JSON.parse(body.json);
-                json.Tabla = 'INQBARRASALIDA';
-                let row = json.Rows;
                 
                 let r = '0|'+usuario['usidioma']+'|';
-                row[0]['Data'] = r;
-                json.Rows = row;
-                body.json = JSON.stringify(json);
-                var reponse = await axios.post(`${url_api}`,body);
-                if(reponse.data.Json != ''){
-                    let datx = JSON.parse(reponse.data.Json);
+                const response2 = await _apiServices('program','','INQBARRASALIDA',[{action:"I",Data:r}],{},'Mi App','0');
+                console.log('192',response2);
+                if(response2.length > 0){
                     var optiomsbar = [];
-                    for (let i = 0; i < datx['FINQBARRASALIDA'].length; i++) {
-                        const element = datx['FINQBARRASALIDA'][i];
+                    for (let i = 0; i < response2.length; i++) {
+                        const element = response2[i];
                         optiomsbar.push(element['Titulo'])
                         
                     }
                     console.log('btnx->',optiomsbar);
 
                     console.log('____________________carga__________________');
-                    let body = rqdata.labels;
-                    let json = JSON.parse(body.json);
-                    json.Tabla = 'SALIDAINQAPP';
-                    let row = json.Rows;
 
                     let r = usuario['usukides'] + '|0|5|A|';
-                    row[0]['Data'] = r;
-                    row[0]['Action'] = 'I';
-                    json.Rows = row;
-                    body.json = JSON.stringify(json);
-                    var reponse = await axios.post(`${url_api}`,body);
-                    console.log(reponse.data);
+                    const response3 = await _apiServices('program','','SALIDAINQAPP',[{action:"I",Data:r}],{},'Mi App','0');
+                    console.log('206',response3);
+                    console.log(response3);
                     var datxa = [];
-                    if(reponse.data.Json != ''){
-                        datxa = JSON.parse(reponse.data.Json);
-                        
+                    if(response3.length > 0){
+                        datxa = response3;                        
                     }
 
-                    var bodyN = rqdata.getCarga('NIVELINQ','I','2|0|');
-                    var responseN = await axios.post(`${url_api}`,bodyN);
-                    console.log('XXXXXXXXXXXXXXXXXX',responseN.data);
+                    const responseN = await _apiServices('program','','NIVELINQ',[{action:"I",Data:"2|0|"}],{},'Mi App','0');
+                    console.log('214',responseN);
+
+                    console.log('XXXXXXXXXXXXXXXXXX',responseN);
                     var niveles = [];
-                    if(responseN.data.Json != ''){
-                        let nvl = JSON.parse(responseN.data.Json);
-                        niveles = nvl['FNIVELINQ'];
+                    if(responseN.length > 0){
+                        niveles = responseN;
                     }
                     
                     let model = {
                         bar: optiomsbar,
                         opcion: 'x Primaria 5A x',
-                        list: datxa['FSALIDAINQAPP']?datxa['FSALIDAINQAPP']:[],
+                        list: datxa,
                         niveles: niveles
                     }
                     setData(model);
@@ -376,7 +353,7 @@ const MaestroHomeComponent = ({navigation}) => {
                                                     <View style={{'marginStart':50, borderBottomColor:'gray', borderBottomWidth:1}}>
                                                         <ListItem key={0} bottomDivider onPress={()=> {
 
-                                                                if(option['Programa'] == 'PDIA'){
+                                                                if(option['Programa'] == 'PDIA' || option['Programa'] == 'PASISTENCIA'){
                                                                     showProgram(option)
                                                                 }
                                                                 if(option['Programa'] == 'PSALIDA'){
@@ -388,8 +365,12 @@ const MaestroHomeComponent = ({navigation}) => {
                                                                     showProgram(model);
                                                                 }
                                                                 console.log(option)
-                                                                if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS' || option['Programa'] == 'PCARGAMASIVA' || option['Programa'] == 'PCOMPRAS'){
-                                                                    goTo(option['Programa'])
+                                                                if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS'){
+                                                                    navigation.navigate('Program',option)
+                                                                }else{
+                                                                    if(option['Programa'] == 'PCARGAMASIVA' || option['Programa'] == 'PCOMPRAS'){
+                                                                        goTo(option['Programa'])
+                                                                    }
                                                                 }
                                                             }}>
                                                             <ListItem.Content>
@@ -484,6 +465,21 @@ function formScreenBuild(setModalProgramVisible,data,usuario, dataChecks){
     data.list = data.list?data.list:[];
     data.checks = data.checks?data.checks:[];
     const [arrData, setArrData] = React.useState(dataChecks);
+    const [labels, setLabels] = React.useState({});
+
+    const getLabels =  async ()=>{
+        var idioma = await AsyncStorage.getItem('idioma');
+        const response = await _apiServices('program','','LABELS',[{action:"I",Data:"PASISTENCIA|"+idioma+"|"}],{},'Mi App','0');
+        console.log('bottomXXXXXXXXXXXXXXXXXXXXXXXXXXXX',response,idioma)
+        if(response.length > 0){
+            setLabels({...response[0]})
+        }
+    }
+
+    useEffect(()=> {
+        getLabels();
+    },[])
+
 
     const ejecutar = async () => {
         if(data.item['Programa'] == 'PDIA'){
@@ -539,9 +535,9 @@ function formScreenBuild(setModalProgramVisible,data,usuario, dataChecks){
                     }}
                     containerStyle={{ marginBottom: 20 }}
                 />
-                <Text style={{fontWeight:900, margin:10, fontSize:16}}>Nivel: <Text style={{fontWeight:500, fontSize:16}}>{info[1]}</Text></Text>
-                <Text style={{fontWeight:900, margin:10, fontSize:16}}>Materia: <Text style={{fontWeight:500, fontSize:16}}>{info[3]}</Text></Text>
-                <Text style={{fontWeight:900, margin:10, fontSize:16}}>Grado: <Text style={{fontWeight:500, fontSize:16}}>{info[2]}</Text></Text>
+                <Text style={{fontWeight:900, margin:10, fontSize:16}}>{labels['METITLE']?labels['METITLE']:'-'}: <Text style={{fontWeight:500, fontSize:16}}>{info[1]}</Text></Text>
+                <Text style={{fontWeight:900, margin:10, fontSize:16}}>{labels['MEMESSAGE']?labels['MEMESSAGE']:'-'}: <Text style={{fontWeight:500, fontSize:16}}>{info[3]}</Text></Text>
+                <Text style={{fontWeight:900, margin:10, fontSize:16}}>{labels['MEOK']?labels['MEOK']:'-'}: <Text style={{fontWeight:500, fontSize:16}}>{info[2]}</Text></Text>
 
                 <View style={{width:'80%', marginStart:'auto', marginEnd:'auto'}}>
                     { data.list.map((item,i) => {

@@ -39,10 +39,11 @@ const FormsComponent = (props) => {
             usuario = JSON.parse(usuario)
             console.log('program',props['program'])
             const response = await _apiServices('program','','INQFORMNAME',[{action:"I",Data:usuario['usukides']+'|'+props['program']+'|'}],{},'Mi App','0');
-            console.log(response)
+            console.log('esta es la forma',response)
             if(response.length > 0){
                 var dta = "0|"+usuario['usukiduser']+'|'+props['program']+'|A|'+response[0]['OPFORMDEFAULT']+'|'+props['item']+'|';
                 const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');
+                console.log('esta es la forma', responseForm);
                 /* aqui se llenan los inputs de formulario */
                 /* recorremos todos para saber cual es de tipo S que es un select */
                 for (let i = 0; i < responseForm.length; i++) {
