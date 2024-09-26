@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import  {default as _apiServices} from './tools/api';
 import { Text } from 'react-native-elements';
 import { ButtonGroup, Icon } from '@rneui/base';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TopbarModule = (props) => {
 
@@ -24,11 +25,32 @@ const TopbarModule = (props) => {
     const [buttonsTop, setButtonsTop] = useState([]);
     const [buttonsCode, setButtonsCode] = useState([]);
 
-    const action = (id) => {
+    const action = async (id) => {
       var form = props['form'];
+      var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
+      usuario = JSON.parse(usuario)
+      console.log(props['data']['OPFORMA'],props['data']['Programa'])
       if(id == 2){
         console.log(form['current']['values']);
+        let dataForm = form['current']['values'];
+        var keysObject = Object.keys(form['current']['values']);
+        let campos = '';
+        for (let i = 0; i < keysObject.length; i++) {
+          const element = keysObject[i];
+            if(i == 0){
+                campos = campos + '@' + keysObject[i] + ':' + dataForm[keysObject[i]];
+            }else{
+                campos = campos + '@' + keysObject[i] + ':' + dataForm[keysObject[i]];
+            }
+        }
+        let r = '2|22|'+props['data']['Programa'] + '|F|' + props['data']['OPFORMA'] + '|' + props['data']['COVERSIONTO'] + '|' + campos + '|';
+        console.log(r);
+        const data = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
+        console.log(data);
       }
+
+
+     
     }
 
     useEffect(() => {

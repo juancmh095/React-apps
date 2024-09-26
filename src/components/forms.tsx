@@ -3,7 +3,7 @@ import { Modal, StyleSheet, View } from 'react-native';
 import  {default as _apiServices} from './tools/api';
 import { Icon, Text } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Input } from '@rneui/base';
+import { Input, Tab } from '@rneui/base';
 import { Picker } from '@react-native-picker/picker';
 import QRComponent from './tools/code.tsx' ;
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
@@ -14,6 +14,9 @@ const FormsComponent = (props) => {
     const [lote, setLote] = useState('');
     const [modalVisible2, setModalVisible2] = useState(false);
     const [datePk, setDatePk] = React.useState(new Date())
+    const [tabs, setTabs] = React.useState([])
+    const [index, setIndex] = React.useState(0);
+    const [tabSelect, setTabSelect] = React.useState('');
 
     const changeDateTime = (setFieldValue,campo, value, event) => {
         if(event.type == 'set'){
@@ -37,15 +40,13 @@ const FormsComponent = (props) => {
           try {
             var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
             usuario = JSON.parse(usuario)
-            console.log('program',props['program'])
             const response = await _apiServices('program','','INQFORMNAME',[{action:"I",Data:usuario['usukides']+'|'+props['program']+'|'}],{},'Mi App','0');
-            console.log('esta es la forma',response)
             if(response.length > 0){
                 var dta = "0|"+usuario['usukiduser']+'|'+props['program']+'|A|'+response[0]['OPFORMDEFAULT']+'|'+props['item']+'|';
                 const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');
-                console.log('esta es la forma', responseForm);
                 /* aqui se llenan los inputs de formulario */
                 /* recorremos todos para saber cual es de tipo S que es un select */
+                //console.log(responseForm);
                 for (let i = 0; i < responseForm.length; i++) {
                     const element = responseForm[i];
                     if(element['UDTIPO'] == 'S'){
@@ -54,8 +55,16 @@ const FormsComponent = (props) => {
                         let respDataSelect = await _apiServices('program','','PGMINQUIRY',[{action:"I",Data:dtaCat}],{},'Mi App','0');
                         element['VALORES'] = respDataSelect;
                     }
-                    
+                    /* sacar las tabs */
+                    let tabsI = tabs.filter((item)=> item == element['FOTAB']);
+                    if(tabsI.length <= 0){
+                        tabs.push(element['FOTAB']);
+                    }                    
                 }
+
+                console.log(tabs);
+                setTabs([...tabs])
+                setTabSelect(tabs[0])
                 setInputs([...responseForm]);
             }
           } catch (error) {
@@ -69,6 +78,19 @@ const FormsComponent = (props) => {
     return (
         <View>
             <View>
+
+                    <View>
+                        <Tab value={index?0:index} onChange={(values)=> {
+                            setIndex(values);
+                            setTabSelect(tabs[values]);
+                        }} dense>
+                            {tabs.map((item,i)=>{
+                                return(
+                                    <Tab.Item>{item}</Tab.Item>
+                                )
+                            })}
+                        </Tab>
+                    </View>
                     {inputs.map((item,i)=>{
                         if(item.UDUDC == "" && item.UDTIPO != "T" && item.UDTIPO != "D"){
                             return(
@@ -78,7 +100,8 @@ const FormsComponent = (props) => {
                                     value={props['values'][item.UDCAMPO]}
                                     style={styles.formControl}
                                     rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
-                                    containerStyle={{margin:0, padding:0, height:50}}
+                                    disabled={(tabSelect == item['FOTAB'])?false:true}
+                                    containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
                                     inputContainerStyle={{borderBottomWidth:0}}
                                     returnKeyType="next"
                                     onChangeText={props['handleChange'](item.UDCAMPO)}
@@ -90,7 +113,8 @@ const FormsComponent = (props) => {
                                     <Input
                                         placeholder={item.UDDESCRIPCION} 
                                         style={styles.formControl}
-                                        containerStyle={{margin:0, padding:0, height:50}}
+                                        cdisabled={(tabSelect == item['FOTAB'])?false:true}
+                                        containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
                                         inputContainerStyle={{borderBottomWidth:0}}
                                         rightIcon = {<Icon name='qr-code' onPress={()=> setModalVisible2(true) } />}
                                         maxLength={Number(item.UDLONGITUD)}
@@ -126,7 +150,8 @@ const FormsComponent = (props) => {
                                                 key={item.UDCAMPO}
                                                 placeholder={item.UDDESCRIPCION+''} 
                                                 style={styles.formControl}
-                                                containerStyle={{margin:0, padding:0, height:50}}
+                                                disabled={(tabSelect == item['FOTAB'])?false:true}
+                                                containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
                                                 inputContainerStyle={{borderBottomWidth:0}}
                                                 maxLength={Number(item.UDLONGITUD)}
                                                 rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
@@ -143,7 +168,8 @@ const FormsComponent = (props) => {
                                                     key={item.UDCAMPO}
                                                     placeholder={item.UDDESCRIPCION} 
                                                     style={styles.formControl}
-                                                    containerStyle={{margin:0, padding:0, height:50}}
+                                                    cdisabled={(tabSelect == item['FOTAB'])?false:true}
+                                                    containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}
                                                     rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}

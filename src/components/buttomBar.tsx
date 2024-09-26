@@ -3,9 +3,9 @@ import { View } from 'react-native';
 import  {default as _apiServices} from './tools/api';
 import { Text } from 'react-native-elements';
 import { ButtonGroup } from '@rneui/base';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ButtomBarModule = (props) => {
-
     var icons = 
     { 
         1:'check',
@@ -21,6 +21,7 @@ const ButtomBarModule = (props) => {
         4:'red'
     }
     const [buttons, setButtons] = useState([]);
+    const [options, setOptions] = useState([]);
     const [buttonsCode, setButtonsCode] = useState([]);
 
     useEffect(() => {
@@ -29,12 +30,14 @@ const ButtomBarModule = (props) => {
           try {
             var btn = [];
 
-            console.log('bottom',props['program'],props['OPFORMA'])
-            const response = await _apiServices('program','','BARRAPROGRAM',[{action:"I",Data:"0|"+props['program']+"|"+props['OPFORMA']+"|B|1|"}],{},'Mi App','0');
-            console.log('bottom',response)
+            var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
+            usuario = JSON.parse(usuario)
+            const response = await _apiServices('program','','BARRAPROGRAM',[{action:"I",Data:usuario['usukides']+"|"+props['program']+"|"+props['OPFORMA']+"|B|1|"}],{},'Mi App','0');
+        
+            setOptions([...response]);
             for (let i = 0; i < response.length; i++) {
               const element = response[i];
-              btn.push(element['Titulo']?element['Titulo']:element['NOMBREPGM']);
+              btn.push(element['OPTITULO']?element['OPTITULO']:element['NOMBREPGM']);
             }
             setButtons([...btn])
           } catch (error) {
@@ -53,6 +56,7 @@ const ButtomBarModule = (props) => {
               buttonContainerStyle={{borderColor:'gray'}}
               onPress={(value) => {
                 console.log(value);
+                console.log(options[value]);
               }}
               containerStyle={{ marginBottom: 20 }}
             />
