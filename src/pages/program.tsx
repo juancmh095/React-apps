@@ -5,6 +5,7 @@ import { Icon, Text } from 'react-native-elements';
 import  TopbarModule  from '../components/topbar';
 import  ButtomBarModule  from '../components/buttomBar';
 import  FormsComponent  from '../components/forms';
+import  ListDataModule  from '../components/listData';
 import { Formik } from 'formik';
 import { Picker } from '@react-native-picker/picker';
 
@@ -20,6 +21,7 @@ const ProgramPage = (props) => {
     /* CONVERSIONTO:VERSION, OPFORMA:FORMA, Programa */
     const [programs1, setPrograms1] = React.useState([]);
     const [programs2, setPrograms2] = React.useState([]);
+    const [listData, setListData] = React.useState([]);
     const [pSelect, setPSelect] = React.useState({});
     const navigation = React.useContext(NavigationContext);
     const formikRef = useRef();
@@ -47,7 +49,7 @@ const ProgramPage = (props) => {
     }
 
     const selectProgram = (program) => {
-        console.log(program);
+        console.log(props);
         setPSelect({...program});
     }
 
@@ -76,7 +78,7 @@ const ProgramPage = (props) => {
     return (
         <View style={{width:'100%',height:'100%'}}>
             <View>
-                <TopbarModule form={formikRef} data={props} />
+                <TopbarModule form={formikRef} data={props} setListData={setListData} />
             </View>
             <View>
                 {(programs1.length > 0 && (
@@ -141,6 +143,9 @@ const ProgramPage = (props) => {
                     </Picker> 
 
                 ))}
+            </View>
+            <View>
+                <ListDataModule Programa={props['Programa']} dataList={listData} OPFORMA={props['OPFORMA']} Params={props['Params']} />
             </View>
             <View style={styles.fixedButton}>
                 <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} />

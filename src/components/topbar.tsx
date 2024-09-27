@@ -47,6 +47,7 @@ const TopbarModule = (props) => {
         console.log(r);
         const data = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
         console.log(data);
+        props['setListData']([...data]);
       }
 
 

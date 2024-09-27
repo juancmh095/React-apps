@@ -46,7 +46,7 @@ const FormsComponent = (props) => {
                 const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');
                 /* aqui se llenan los inputs de formulario */
                 /* recorremos todos para saber cual es de tipo S que es un select */
-                //console.log(responseForm);
+                console.log(responseForm);
                 for (let i = 0; i < responseForm.length; i++) {
                     const element = responseForm[i];
                     if(element['UDTIPO'] == 'S'){
