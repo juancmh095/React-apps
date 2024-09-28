@@ -32,6 +32,7 @@ const FormsComponent = (props) => {
           }
         }
       }
+      
 
     useEffect(() => {
         
@@ -62,7 +63,6 @@ const FormsComponent = (props) => {
                     }                    
                 }
 
-                console.log(tabs);
                 setTabs([...tabs])
                 setTabSelect(tabs[0])
                 setInputs([...responseForm]);
@@ -99,6 +99,7 @@ const FormsComponent = (props) => {
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={props['values'][item.UDCAMPO]}
                                     style={styles.formControl}
+                                    secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
                                     rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
                                     disabled={(tabSelect == item['FOTAB'])?false:true}
                                     containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
@@ -114,6 +115,7 @@ const FormsComponent = (props) => {
                                         placeholder={item.UDDESCRIPCION} 
                                         style={styles.formControl}
                                         cdisabled={(tabSelect == item['FOTAB'])?false:true}
+                                        secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
                                         containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
                                         inputContainerStyle={{borderBottomWidth:0}}
                                         rightIcon = {<Icon name='qr-code' onPress={()=> setModalVisible2(true) } />}
@@ -153,6 +155,7 @@ const FormsComponent = (props) => {
                                                 disabled={(tabSelect == item['FOTAB'])?false:true}
                                                 containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
                                                 inputContainerStyle={{borderBottomWidth:0}}
+                                                secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
                                                 maxLength={Number(item.UDLONGITUD)}
                                                 rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
                                                 onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
@@ -169,6 +172,7 @@ const FormsComponent = (props) => {
                                                     placeholder={item.UDDESCRIPCION} 
                                                     style={styles.formControl}
                                                     cdisabled={(tabSelect == item['FOTAB'])?false:true}
+                                                    secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
                                                     containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}

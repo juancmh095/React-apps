@@ -5,8 +5,11 @@ import { Camera, getCameraDevice, CodeScanner } from "react-native-vision-camera
 import { Button, Text } from "react-native-elements";
 import axios from "axios";
 
+import  {default as _apiServices} from '../../tools/api';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const QRComponent = ({setModalVisible}) => {
+
+const QRComponent = ({setModalVisible, req}) => {
     const devices = Camera.getAvailableCameraDevices()
     const device = getCameraDevice(devices, 'back')    
     const [restult, setResult] = React.useState('')
@@ -33,18 +36,16 @@ const QRComponent = ({setModalVisible}) => {
       }
 
     const SendQR = async()=>{
-        var reponse = await axios.post(`${_api}`,{
-            Id:1,
-            json: JSON.stringify({
-              Function:"WriteAtach",
-              App:'Mi Appscolar',
-              Base64:"",
-              Parameter:"0|FUDC|55PL001|"+restult+"|QR|RROJAS|20240401|122300|DISPOSITIVO1|"
-            }),
-            Category:"Utilerias"
-          });
-          console.log(reponse.data);
-          if(reponse.data.Json == 'OK'){
+
+          var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+          usuario = JSON.parse(usuario);
+
+          var dataRoute = req['params'];
+          var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+restult+'|'+'QR|';
+          var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,'','Utilerias','0');
+          console.log(reponse);
+
+          if(reponse[0] == 'OK'){
             showToast('Guardado satisfactoriamente')
             setResult(null)
             setModalVisible(false);

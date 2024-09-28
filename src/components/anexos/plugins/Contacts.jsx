@@ -6,8 +6,11 @@ import { Card, Image } from "@rneui/base";
 import { Button } from "react-native-elements";
 import axios from "axios";
 
+import  {default as _apiServices} from '../../tools/api';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ContactsComponent = ({setModalVisible}) => {
+
+const ContactsComponent = ({setModalVisible, req}) => {
   const _api = 'http://20.64.97.37/api/products';
 
   const [users, setUsers] = React.useState([]);
@@ -45,18 +48,15 @@ const ContactsComponent = ({setModalVisible}) => {
     phone = phone.replace(regex,'');
 
     var contact = contacto.displayName + '-' + phone;
-    var reponse = await axios.post(`${_api}`,{
-      Id:1,
-      json: JSON.stringify({
-        Function:"WriteAtach",
-        App:'Mi Appscolar',
-        Base64:"",
-        Parameter:"0|FUDC|55PL001|"+contact+"|Contacto|RROJAS|20240401|122300|DISPOSITIVO1|"
-      }),
-      Category:"Utilerias"
-    });
-    console.log(reponse.data);
-    if(reponse.data.Json == 'OK'){
+
+    var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+    usuario = JSON.parse(usuario);
+
+    var dataRoute = req['params'];
+    var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+contact+'|Contacto|';
+    var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,'','Utilerias','0');
+    console.log(reponse);
+    if(reponse[0] == 'OK'){
       showToast('Contacto guardado satisfactoriamente');
       setModalVisible(false);
     } else {

@@ -8,7 +8,10 @@ import * as rqdata from '../../components/tools/params_request';
 import axios from "axios";
 import { Input, Icon } from '@rneui/themed';
 import { Formik } from "formik";
-import { ListItem, Tab, Button } from "@rneui/base";
+import { ListItem, Tab, Button, Card } from "@rneui/base";
+import  {default as _apiServices} from '../../components/tools/api';
+
+import  QuillComponent from '../../components/anexos/plugins/Quill';
 
 const OrdenCompraComponent =  ({ navigation }) => {
 
@@ -30,6 +33,9 @@ const OrdenCompraComponent =  ({ navigation }) => {
     const [titulo, setTitulo] = React.useState('');
     const [count, setCount] = React.useState(1);
     const [modalVisible, setModalVisible] = React.useState(false);
+    const [modalVisible2, setModalVisible2] = React.useState(false);
+
+    const [reqData, setReq] = React.useState({});
 
     
 
@@ -39,33 +45,46 @@ const OrdenCompraComponent =  ({ navigation }) => {
 
     const getDataInfo = async (user)=>{
         try {
-            console.log('entra a buscar infoxxx',user)
-            let data = user['usukides'] + '|PCOMPRAS|I|H|@0@@@@|';
-            let body = rqdata.getCarga('ProgramInquiry','I',data);
-            console.log(body)
-            let response = await axios.post(`${url_api}`,body);
-            if(response.data.Json != ''){
-                let d = JSON.parse(response.data.Json);
-                let dx = d['FProgramInquiry'];
 
+            var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
+            usuario = JSON.parse(usuario)
+            const response = await _apiServices('program','','INQFORMNAME',[{action:"I",Data:usuario['usukides']+'|PCOMPRAS|'}],{},'Mi App','0');
+            console.log(response);
+            if(response.length > 0){
+                var dta = "0|"+usuario['usukiduser']+'|PCOMPRAS|A|'+response[0]['OPFORMDEFAULT']+'|MC0001|';
+                const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');
+                /* aqui se llenan los inputs de formulario */
+                /* recorremos todos para saber cual es de tipo S que es un select */
+                //console.log(responseForm);
                 var vals = {};
-                var tabs = [];
-                var tabsFinal = [];
-                for (let i = 0; i < dx.length; i++) {
-                    const element = dx[i];
-                    vals[element['UDCAMPO']] = '';
-                    var tabsI = tabs.filter((item)=> item == element['FOTAB']);
+                for (let i = 0; i < responseForm.length; i++) {
+                    const element = responseForm[i];
+                    if(element['UDTIPO'] == 'S'){
+                        element['VALORES'] = [];
+                        vals[element['UDCAMPO']] = '';
+                        let dtaCat = "0|"+element['UDUDC']+"|1|"
+                        let respDataSelect = await _apiServices('program','','PGMINQUIRY',[{action:"I",Data:dtaCat}],{},'Mi App','0');
+                        element['VALORES'] = respDataSelect;
+                    }
+                    /* sacar las tabs */
+                    let tabsI = tabs.filter((item)=> item == element['FOTAB']);
                     if(tabsI.length <= 0){
                         tabs.push(element['FOTAB']);
-                    }
+                    }                    
                 }
 
-        
+                tabs.push('Attachment');
+                
+                setTabs([...tabs])
                 setTabSelect(tabs[0])
-                setTabs([...tabs]);
                 setFormValues({...vals});
-                setForm([...d['FProgramInquiry']])
+                setForm([...responseForm]);
             }
+
+
+
+            /* ---------------------------------------- */
+           
         } catch (error) {
             console.log('error',error);
         }
@@ -175,32 +194,25 @@ const OrdenCompraComponent =  ({ navigation }) => {
             setTitulo(pName['FNNAME']);
         }
 
-        storage.getAllDataForKey('FUSERSLOGIN').then(res => {
-            
-            getDataInfo(res[0]);
-            getLabelsItems(res[0]);
-            getLabelsErrors(res[0]);
-            setUsuario(...res[0]);
-            
-
-            
-        });
+        var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+        usuario = JSON.parse(usuario)
+        getDataInfo(usuario);
+        getLabelsItems(usuario);
+        getLabelsErrors(usuario);
+        setUsuario({...usuario});
     }
 
     const validate = async ()=> {
         try {
             console.log('entra a buscar info')
-            let url = await AsyncStorage.getItem('api');
-            url_api = url;
             let data = 'PCOMPRAS|H|1|';
-            let body = rqdata.getCarga('FormName','I',data);
-            let response = await axios.post(`${url_api}`,body);
-            console.log('validate',response.data);
-            if(response.data.Json){
-                let d = JSON.parse(response.data.Json);
-                if(d['FFormName']){
-                    validateUser();
-                }
+
+            let response = await _apiServices('program','','FormName',[{action:"I",Data:data}],{},'Mi App','0');
+
+            console.log('validate',response);
+            if(response.length > 0){
+                navigation.setOptions({ title: response[0]['FNNAME'] });
+                validateUser();
             }
         } catch (error) {
             console.log(error);
@@ -305,8 +317,19 @@ const OrdenCompraComponent =  ({ navigation }) => {
 
                 <View>
                     <Tab value={index?0:index} onChange={(values)=> {
-                        setIndex(values);
-                        setTabSelect(tabs[values]);
+                        console.log(values);
+                        if((tabs.length-1) == values){
+                            let params = {
+                                params: '',
+                                Programa: 'PCOMPRAS',
+                                OPFORMA: 'WCOMPRASB'
+                            }
+                            setReq({...params});
+                            setModalVisible2(true)
+                        }else{
+                            setIndex(values);
+                            setTabSelect(tabs[values]);
+                        }
                     }} dense>
                         {tabs.map((item,i)=>{
                             return(
@@ -424,6 +447,34 @@ const OrdenCompraComponent =  ({ navigation }) => {
                         })}
                     </View>
             </Modal>
+            <Modal
+                animationType="slide"
+                visible={modalVisible2}
+                onRequestClose={() => {
+                setModalVisible2(!modalVisible2);
+            }}>
+            <View style={styles.centeredView}>
+            <Button
+                title={'Cancelar'}
+                    buttonStyle={{
+                        borderColor: 'rgba(78, 116, 289, 1)',
+                    }}
+                    type='solid'
+                    containerStyle={{
+                        marginEnd:'auto',
+                        marginStart:10,
+                        width:150,
+                        marginTop:20,
+                        marginBottom:10
+                    }}
+                    onPress={() => setModalVisible2(!modalVisible2)}
+                ></Button>
+                <Card.Divider />
+                        <View style={styles.modalView}>
+                            <QuillComponent   setModalVisible={setModalVisible2} req={reqData} />                  
+                        </View>
+                    </View>
+                </Modal>
         </View>
     )
 }

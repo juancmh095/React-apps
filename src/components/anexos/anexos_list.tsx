@@ -6,10 +6,15 @@ import { ButtonGroup, Card, Image, color } from "@rneui/base";
 import axios from "axios";
 import { Button } from "react-native-elements";
 
-const FilesComponent = ({navigation}) => {
+import  {default as _apiServices} from '../tools/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContext } from "@react-navigation/native";
+
+const FilesComponent = (props) => {
 
   const _api = 'http://20.64.97.37/api/products';
   const [files, setFiles] = React.useState([]);
+  const navigation = React.useContext(NavigationContext);
     
   
 
@@ -18,18 +23,16 @@ const FilesComponent = ({navigation}) => {
   }
 
   const getFiles = async () => {
-    var reponse = await axios.post(`${_api}`,{
-        Id:1,
-        json: JSON.stringify({
-          Function:"ReadAtach",
-          App:'Mi Appscolar',
-          Parameter:"0|FUDC|55PL001|"
-        }),
-        Category:"Utilerias"
-      });
-      var dataJS = JSON.parse(reponse.data.Json)
-      console.log(dataJS["FINQFATTACHMENT"],'a');
-      setFiles(dataJS["FINQFATTACHMENT"])
+    var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+    usuario = JSON.parse(usuario);
+
+    var dataRoute = props['route']['params'];
+    var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['COVERSIONTO']+'|';
+    var response = await await _apiServices('program','Mi App','INQFATTACHMENT',[{action:'I', Data:params}],'','Mi App','0');
+    
+      
+      console.log('response',response, dataRoute,params);
+      setFiles([...response])
   }
 
  
@@ -44,7 +47,7 @@ const FilesComponent = ({navigation}) => {
     if(files.length == 0){
         getFiles();
     }
-  });
+  },[]);
  
   return (
     <View style={{height:'90%', overflow:'scroll'}}>
@@ -58,7 +61,8 @@ const FilesComponent = ({navigation}) => {
                 if(value == 0){
                     navigation.navigate('Home');
                 }else{
-                    navigation.navigate('Anexos');
+                   
+                    navigation.push('Anexos',props['route']['params']);
                 }
             
 

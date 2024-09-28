@@ -31,9 +31,8 @@ const TopbarModule = (props) => {
       var form = props['form'];
       var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
       usuario = JSON.parse(usuario)
-      console.log(props['data']['OPFORMA'],props['data']['Programa'])
+      console.log(props['data']['OPFORMA'],props['data']['Programa'],id)
       if(id == 2){
-        console.log(form['current']['values']);
         let dataForm = form['current']['values'];
         var keysObject = Object.keys(form['current']['values']);
         let campos = '';
@@ -46,47 +45,50 @@ const TopbarModule = (props) => {
             }
         }
         let r = '2|22|'+props['data']['Programa'] + '|F|' + props['data']['OPFORMA'] + '|' + props['data']['COVERSIONTO'] + '|' + campos + '|';
-        console.log(r);
         const data = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
-        console.log(data);
         props['setListData']([...data]);
       }
 
       if(id == 5){
-        var campos='';
-        if(Object.keys(props['listDataSelect']).length > 0){
-          if(props['data']['Programa'] == 'PLOTE'){
-            let r = props['data']['Programa'] + '|' + props['data']['OPFORMA'] + '|' + props['data']['Programa'] + '|' + props['data']['OPFORMA'] +'|';
-            let paramsProgram = await _apiServices('program','','INTERCONECT',[{action:"I",Data:r}],{},'Mi App','0');
-            for (let index = 0; index < paramsProgram.length; index++) {
-              const element = paramsProgram[index];
-              if(index == 0){
-                  campos = campos + '@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
-              }else{
-                  campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+        try {
+          var campos='';
+          if(Object.keys(props['listDataSelect']).length > 0){
+            if(props['data']['Programa'] == 'PLOTE'){
+              let r = props['data']['Programa'] + '|' + props['data']['OPFORMA'] + '|' + props['data']['Programa'] + '|' + props['data']['OPFORMA'] +'|';
+              let paramsProgram = await _apiServices('program','','INTERCONECT',[{action:"I",Data:r}],{},'Mi App','0');
+              for (let index = 0; index < paramsProgram.length; index++) {
+                const element = paramsProgram[index];
+                if(index == 0){
+                    campos = campos + '@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+                }else{
+                    campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+                }
+              }
+    
+            }else{
+              let r = 'PLOTE|WLOTEA|' + props['data']['Programa'] + '|' + props['data']['OPFORMA'] +'|';
+              let paramsProgram = await _apiServices('program','','INTERCONECT',[{action:"I",Data:r}],{},'Mi App','0');
+              for (let index = 0; index < paramsProgram.length; index++) {
+                const element = paramsProgram[index];
+                if(index == 0){
+                    campos = campos + '@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+                }else{
+                    campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+                }
               }
             }
-  
-          }else{
-            let r = 'PLOTE|WLOTEA|' + props['data']['Programa'] + '|' + props['data']['OPFORMA'] +'|';
-            let paramsProgram = await _apiServices('program','','INTERCONECT',[{action:"I",Data:r}],{},'Mi App','0');
-            for (let index = 0; index < paramsProgram.length; index++) {
-              const element = paramsProgram[index];
-              if(index == 0){
-                  campos = campos + '@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
-              }else{
-                  campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
-              }
+            let params = {
+              params: campos,
+              Programa: props['data']['Programa'],
+              OPFORMA: props['data']['OPFORMA'],
+              COVERSIONTO: props['data']['COVERSIONTO']
             }
+            navigation.push('Mis_Anexos',params)
           }
-          let params = {
-            params: campos,
-            Programa: props['data']['Programa'],
-            OPFORMA: props['data']['OPFORMA']
-          }
-          console.log(params)
-          navigation.push('Anexos',params)
+        } catch (error) {
+            console.log(error);
         }
+        
       }
 
 
@@ -95,6 +97,7 @@ const TopbarModule = (props) => {
 
     useEffect(() => {
         // Función para obtener los botones desde la API
+        console.log('propstopbar',props)
         const fetchButtons = async () => {
           try {
             var btn = [];
@@ -119,7 +122,9 @@ const TopbarModule = (props) => {
               buttonStyle={{backgroundColor:'#E1E1E1'}}
               buttonContainerStyle={{borderColor:'gray'}}
               onPress={(value) => {
-                action((value+1))
+                if(props['TipoAcceso'] == '1'){
+                  action((value+1))
+                }
               }}
               containerStyle={{ marginBottom: 20 }}
             />

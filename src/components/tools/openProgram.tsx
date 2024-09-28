@@ -6,7 +6,7 @@ import ProgramPage from '../../pages/program';
 
 const OpenProgram =  ({ route, navigation }) => {
 
-    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params, Opcion } = route.params;
+    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params, Opcion, TipoAcceso } = route.params;
     const [showPrm, setShowPrm] = useState([]);
 
     useEffect(() => {
@@ -14,10 +14,8 @@ const OpenProgram =  ({ route, navigation }) => {
 
         const alert = async () => {
           try {
-            console.log('alert',OPMESSAGE,route.params);
             if(OPMESSAGE != ''){
                 const response = await _apiServices('program','','MESSAGE',[{action:"I",Data:'IMPFACT|1|'}],{},'Mi App','0');
-                console.log(response);
                 if(response.length > 0){
                     Alert.alert(response[0]['METITLE'], response[0]['MEMESSAGE'], [
                         {
@@ -43,7 +41,7 @@ const OpenProgram =  ({ route, navigation }) => {
 
     return(
         <View style={{color:'black'}}>
-            <ProgramPage Programa={Programa} OPFORMA={OPFORMA} COVERSIONTO={COVERSIONTO} Params={Params} Opcion={Opcion} />
+            <ProgramPage Programa={Programa} OPFORMA={OPFORMA} COVERSIONTO={COVERSIONTO} Params={Params} Opcion={Opcion} TipoAcceso={TipoAcceso} />
         </View>
     )
 }

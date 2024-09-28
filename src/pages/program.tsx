@@ -39,7 +39,6 @@ const ProgramPage = (props) => {
 
         if(props['Params']){
             let params = props['Params'];
-            console.log(params);
             let paramsArr = params.split('@');
             for (let i = 0; i < paramsArr.length; i++) {
                 const element = paramsArr[i];
@@ -80,7 +79,7 @@ const ProgramPage = (props) => {
     return (
         <View style={{width:'100%',height:'100%'}}>
             <View>
-                <TopbarModule form={formikRef} data={props} setListData={setListData} listDataSelect={listDataSelect} />
+                <TopbarModule form={formikRef} data={props} setListData={setListData} listDataSelect={listDataSelect} TipoAcceso={props['TipoAcceso']}/>
             </View>
             <View>
                 {(programs1.length > 0 && (

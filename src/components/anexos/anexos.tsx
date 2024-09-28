@@ -332,10 +332,10 @@ function Anexos(props) {
               ></Button>
               <Card.Divider />
             <View style={styles.modalView}>
-              {typeModal == 'qr'?  <QRComponent setModalVisible={setModalVisible} /> : ''}
-              {typeModal == 'signature'? <DigitalSignature setModalVisible={setModalVisible} params={props['route']['params']} /> : ''}
-              {typeModal == 'contacts'? <ContactsComponent setModalVisible={setModalVisible} /> : ''}
-              {typeModal == 'text'? <QuillComponent   setModalVisible={setModalVisible} /> : ''}
+              {typeModal == 'qr'?  <QRComponent setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
+              {typeModal == 'signature'? <DigitalSignature setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
+              {typeModal == 'contacts'? <ContactsComponent setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
+              {typeModal == 'text'? <QuillComponent   setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
               {typeModal == 'url'? <Input
                       label='Enter URL'
                       leftIcon={{ type: 'font-awesome', name: 'link' }}

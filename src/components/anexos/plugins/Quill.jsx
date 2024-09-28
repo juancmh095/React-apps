@@ -6,9 +6,12 @@ import { Button } from "react-native-elements";
 
 
 import  buffer from 'buffer';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import  {default as _apiServices} from '../../tools/api';
 
 
-const QuillComponent = ({setModalVisible}) => {
+const QuillComponent = ({setModalVisible,req}) => {
 
     const _editor = useRef()
     const isIphone = true    
@@ -61,18 +64,15 @@ const QuillComponent = ({setModalVisible}) => {
   
     const SendQuill = async () => {
         let encodeTxt = new buffer.Buffer(text.html).toString("base64");
-        var reponse = await axios.post(`${_api}`,{
-            Id:1,
-            json: JSON.stringify({
-                Function:"WriteAtach",
-                App:'Mi Appscolar',
-                Base64:encodeTxt,
-                Parameter:"0|FUDC|55PL001|Anexo de Texto|TXT|RROJAS|20240401|122300|DISPOSITIVO1|"
-            }),
-            Category:"Utilerias"
-        });
-        console.log(reponse.data);
-        if(reponse.data.Json == 'OK'){
+
+        var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+        usuario = JSON.parse(usuario);
+
+        var dataRoute = req['params'];
+        var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+'Anexo de Texto|TXT|';
+        var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,encodeTxt,'Utilerias','0');
+        console.log(reponse);
+        if(reponse[0] == 'OK'){
             console.log(_editor.current.setText(''))
             
             showToast('Texto guardado satisfactoriamente')

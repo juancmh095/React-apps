@@ -36,15 +36,28 @@ const api_service = async (type,app,func,parametros,json,cat,escuela) => {
             }
         }else{
             if(type == 'FANEXO'){
-                params = {
-                    id:1,
-                    json:JSON.stringify({
-                        Function: func,
-                        App:app,
-                        Base64:json,
-                        Parameter:parametros + usuario['ususer'] +'|'+fechaD+'|'+horaD+'|'+dispositivo+'|'
-                    }),
-                    Category: cat
+                if(func == 'ReadAtach'){
+                    params = {
+                        id:1,
+                        json:JSON.stringify({
+                            Function: func,
+                            App:app,
+                            Base64:json,
+                            Parameter:parametros
+                        }),
+                        Category: cat
+                    }
+                }else{
+                    params = {
+                        id:1,
+                        json:JSON.stringify({
+                            Function: func,
+                            App:app,
+                            Base64:json,
+                            Parameter:parametros + usuario['ususer'] +'|'+fechaD+'|'+horaD+'|'+dispositivo+'|'
+                        }),
+                        Category: cat
+                    }
                 }
             }else{
                 params = {

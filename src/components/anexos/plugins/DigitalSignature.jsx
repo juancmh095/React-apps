@@ -6,8 +6,11 @@ import axios from 'axios';
 import { Button } from "react-native-elements";
 const _api = 'http://20.64.97.37/api/products';
 
+import  {default as _apiServices} from '../../tools/api';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const DigitalSignature = ({setModalVisible,params}) => {
+
+const DigitalSignature = ({setModalVisible,req}) => {
     
   const ref = useRef();
   const [s, setS] = React.useState('qr');
@@ -21,19 +24,15 @@ const DigitalSignature = ({setModalVisible,params}) => {
   const firmaFunction = async () => {
     console.log(s);
     var b64 = s.replace('data:image/png;base64,','');
-    console.log(b64);
-    var reponse = await axios.post(`${_api}`,{
-      Id:1,
-      json: JSON.stringify({
-        Function:"WriteAtach",
-        App:'Mi Appscolar',
-        Base64:b64,
-        Parameter:"0|FUDC|55PL001|Text1|PNG|RROJAS|20240401|122300|DISPOSITIVO1|"
-      }),
-      Category:"Utilerias"
-    });
-    console.log(reponse.data);
-    if(reponse.data.Json == 'OK'){
+
+    var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+    usuario = JSON.parse(usuario);
+
+    var dataRoute = req['params'];
+    var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+'Text1|PNG|';
+    var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,b64,'Utilerias','0');
+    console.log(reponse);
+    if(reponse[0] == 'OK'){
       showToast('Firma guardada satisfactoriamente');
       ref.current.clearSignature();
       setModalVisible(false);

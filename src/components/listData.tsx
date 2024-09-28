@@ -14,7 +14,6 @@ const ListDataModule = (props) => {
     const getLabelsData = async ()=> {
         let r = '2|22|'+props['Programa']+'|E|'+props['OPFORMA'];
         const response = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
-        console.log('labels',response);
         var lbs = {};
         var dArr = [];
         for (let i = 0; i < response.length; i++) { 
@@ -25,14 +24,12 @@ const ListDataModule = (props) => {
                 dArr.push(element.UDCAMPO);
             }
         }
-        console.log(lbs,dArr);
         setLabel({...lbs});
         setLabelsArry([...dArr]);
     }
 
 
     const deleteItem = async (item,i) => {
-        console.log(item,props['Params']);
         let params:any;
         var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
         var idioma = await AsyncStorage.getItem('idioma');
