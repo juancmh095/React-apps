@@ -6,7 +6,7 @@ import ProgramPage from '../../pages/program';
 
 const OpenProgram =  ({ route, navigation }) => {
 
-    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params } = route.params;
+    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params, Opcion } = route.params;
     const [showPrm, setShowPrm] = useState([]);
 
     useEffect(() => {
@@ -43,7 +43,7 @@ const OpenProgram =  ({ route, navigation }) => {
 
     return(
         <View style={{color:'black'}}>
-            <ProgramPage Programa={Programa} OPFORMA={OPFORMA} COVERSIONTO={COVERSIONTO} Params={Params} />
+            <ProgramPage Programa={Programa} OPFORMA={OPFORMA} COVERSIONTO={COVERSIONTO} Params={Params} Opcion={Opcion} />
         </View>
     )
 }

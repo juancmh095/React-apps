@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import  {default as _apiServices} from './tools/api';
-import { CheckBox, Text } from 'react-native-elements';
+import { CheckBox, Icon, Text } from 'react-native-elements';
 import { Alert, ScrollView, View } from 'react-native';
 import { ListItem,Button } from '@rneui/base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -94,17 +94,27 @@ const ListDataModule = (props) => {
                 
                     <CheckBox
                         checked={checked === i}
-                        onPress={() => setChecked(i)}
+                        onPress={() => {
+                            setChecked(i)
+                            props['setListDataSelect'](item);
+                        }}
                     />
                     <ListItem.Content>
                     {labelsArry.map((label,x) => {
                         return(
                         <ListItem.Title key={label+x+i}>
                             <Text style={{fontWeight:900}}>{labels[label]}: </Text> {item[label]} 
+                            
                         </ListItem.Title>
                         )
                     })}
                     </ListItem.Content>
+                    {(item['JBPATH'] && (item['JBPATH']).includes('.pdf') && (
+                        <Icon name='file-pdf-o' size={40} type="font-awesome" />
+                    ))}
+                    {(item['JBPATH'] && ((item['JBPATH']).includes('.xlsx') || (item['JBPATH']).includes('.xls') || (item['JBPATH']).includes('.csv')) && (
+                        <Icon name='file-excel-o' size={40} type="font-awesome" />
+                    ))}
                     <ListItem.Chevron />
                 </ListItem.Swipeable>
 

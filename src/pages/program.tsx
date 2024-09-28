@@ -22,6 +22,7 @@ const ProgramPage = (props) => {
     const [programs1, setPrograms1] = React.useState([]);
     const [programs2, setPrograms2] = React.useState([]);
     const [listData, setListData] = React.useState([]);
+    const [listDataSelect, setListDataSelect] = React.useState({});
     const [pSelect, setPSelect] = React.useState({});
     const navigation = React.useContext(NavigationContext);
     const formikRef = useRef();
@@ -60,25 +61,26 @@ const ProgramPage = (props) => {
         for (let index = 0; index < paramsProgram.length; index++) {
             const element = paramsProgram[index];
             if(index == 0){
-                campos = campos + '@' + element['PPCAMPOTO'] + ':' + element['PPCAMPOFROM'];
+                campos = campos + '@' + element['PPCAMPOTO'] + ':' + listDataSelect[element['PPCAMPOFROM']];
             }else{
-                campos = campos + ',@' + element['PPCAMPOTO'] + ':' + element['PPCAMPOFROM'];
+                campos = campos + ',@' + element['PPCAMPOTO'] + ':' + listDataSelect[element['PPCAMPOFROM']];
             }
         }
-        let dataProgram = {COVERSIONTO:pSelect['COVERSIONTO'], OPFORMA:pSelect['COFORMATO'], Programa:pSelect['COOBNMOPC'],Params:campos, OPMESSAGE:pSelect['COMESSAGE'], 'Opcion':pSelect['COTITULO']}
-        console.log(pSelect);
+        let dataProgram = {COVERSIONTO:pSelect['COVERSIONTO'], OPFORMA:pSelect['COFORMATO'], Programa:pSelect['COOBNMOPC'],Params:campos, OPMESSAGE:pSelect['COMESSAGE'], 'Opcion':pSelect['COTITULO'], dataSelect:listDataSelect}
+        //console.log(dataProgram);
         navigation.push('Program',dataProgram)
     }
 
     useEffect(()=> {
         getDataPrograms();
-        getParamsProgram();        
+        getParamsProgram();  
+        navigation.setOptions({ title: props['Opcion'] });      
     },[])
 
     return (
         <View style={{width:'100%',height:'100%'}}>
             <View>
-                <TopbarModule form={formikRef} data={props} setListData={setListData} />
+                <TopbarModule form={formikRef} data={props} setListData={setListData} listDataSelect={listDataSelect} />
             </View>
             <View>
                 {(programs1.length > 0 && (
@@ -145,7 +147,7 @@ const ProgramPage = (props) => {
                 ))}
             </View>
             <View>
-                <ListDataModule Programa={props['Programa']} dataList={listData} OPFORMA={props['OPFORMA']} Params={props['Params']} />
+                <ListDataModule Programa={props['Programa']} dataList={listData} OPFORMA={props['OPFORMA']} Params={props['Params']} setListDataSelect={setListDataSelect} />
             </View>
             <View style={styles.fixedButton}>
                 <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} />

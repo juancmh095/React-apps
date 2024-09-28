@@ -19,8 +19,11 @@ import  QRComponent from './plugins/QR.jsx';
 import  QuillComponent from './plugins/Quill.jsx';
 import  ContactsComponent from './plugins/Contacts.jsx';
 
+import  {default as _apiServices} from '../tools/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function Anexos() {
+
+function Anexos(props) {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [showActions, setShowActions] = React.useState(false);
   const [typeModal, setTypeModal] = React.useState('qr');
@@ -33,13 +36,14 @@ function Anexos() {
   }
 
   const urlFunction = async (text) => {
-    var reponse = await axios.post(`${_api}`,{
-      Id:1,
-      json:'"{\"Function\":\"WriteAtach\",\"App\":\"Mi Appescolar\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+text+'|URL|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
-      Category:"Utilerias"
-    });
-    console.log(reponse.data)
-    if(reponse.data.Json == 'OK'){
+    var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+    usuario = JSON.parse(usuario);
+
+    var dataRoute = props['route']['params'];
+    var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+text+'|URL|';
+    var response = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,'','Utilerias','0');
+    console.log(response);
+    if(response[0] == 'OK'){
       showToast('Exito al guardar')
       setModalVisible(false);
     } else {
@@ -54,7 +58,7 @@ function Anexos() {
 
   useEffect(() => {
     checkPermission();
-  });
+  },[]);
 
 
   const checkPermission = async () => {
@@ -69,13 +73,16 @@ function Anexos() {
     Geolocation.getCurrentPosition(async(info) => {
       console.log(info);
       var geo = info.coords.latitude + ',' + info.coords.longitude;
-      var reponse = await axios.post(`${_api}`,{
-        Id:1,
-        json:'"{\"Function\":\"WriteAtach\",\"App\":\"Mi Appescolar\",\"Base64\":\"\", \"Parameter\":\"0|FUDC|55PL001|'+geo+'|GEO|RROJAS|20240401|122300|DISPOSITIVO1|\"}"',
-        Category:"Utilerias"
-      });
-      console.log(reponse.data);
-      if(reponse.data.Json == 'OK'){
+
+      var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+      usuario = JSON.parse(usuario);
+
+      var dataRoute = props['route']['params'];
+      var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+geo+'|GEO|';
+      var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,'','Utilerias','0');
+      console.log(reponse);
+
+      if(reponse[0] == 'OK'){
         showToast('Geoposición guardada satisfactoriamente')
       } else {
         showToast('Error al guardar')
@@ -176,18 +183,16 @@ function Anexos() {
   }
 
    const constHttpPost = async (file,name,ext, msg) => {
-    var reponse = await axios.post(`${_api}`,{
-      Id:1,
-      json: JSON.stringify({
-        Function:"WriteAtach",
-        App:'Mi Appscolar',
-        Base64:file,
-        Parameter:"0|FUDC|55PL001|"+name+"|"+ext+"|RROJAS|20240401|122300|DISPOSITIVO1|"
-      }),
-      Category:"Utilerias"
-    });
-    console.log(reponse.data);
-    if(reponse.data.Json == 'OK'){
+
+    var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+    usuario = JSON.parse(usuario);
+
+    var dataRoute = props['route']['params'];
+    var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+name+'|'+ext+'|';
+    var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,file,'Utilerias','0');
+    console.log(reponse);
+
+    if(reponse[0] == 'OK'){
       showToast(msg)
     } else {
       showToast('Error al guardar')
@@ -328,7 +333,7 @@ function Anexos() {
               <Card.Divider />
             <View style={styles.modalView}>
               {typeModal == 'qr'?  <QRComponent setModalVisible={setModalVisible} /> : ''}
-              {typeModal == 'signature'? <DigitalSignature setModalVisible={setModalVisible} /> : ''}
+              {typeModal == 'signature'? <DigitalSignature setModalVisible={setModalVisible} params={props['route']['params']} /> : ''}
               {typeModal == 'contacts'? <ContactsComponent setModalVisible={setModalVisible} /> : ''}
               {typeModal == 'text'? <QuillComponent   setModalVisible={setModalVisible} /> : ''}
               {typeModal == 'url'? <Input

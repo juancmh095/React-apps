@@ -7,7 +7,7 @@ import { Button } from "react-native-elements";
 const _api = 'http://20.64.97.37/api/products';
 
 
-const DigitalSignature = ({setModalVisible}) => {
+const DigitalSignature = ({setModalVisible,params}) => {
     
   const ref = useRef();
   const [s, setS] = React.useState('qr');

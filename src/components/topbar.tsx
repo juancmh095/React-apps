@@ -4,6 +4,7 @@ import  {default as _apiServices} from './tools/api';
 import { Text } from 'react-native-elements';
 import { ButtonGroup, Icon } from '@rneui/base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContext } from '@react-navigation/native';
 
 const TopbarModule = (props) => {
 
@@ -24,6 +25,7 @@ const TopbarModule = (props) => {
     }
     const [buttonsTop, setButtonsTop] = useState([]);
     const [buttonsCode, setButtonsCode] = useState([]);
+    const navigation = React.useContext(NavigationContext);
 
     const action = async (id) => {
       var form = props['form'];
@@ -48,6 +50,43 @@ const TopbarModule = (props) => {
         const data = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
         console.log(data);
         props['setListData']([...data]);
+      }
+
+      if(id == 5){
+        var campos='';
+        if(Object.keys(props['listDataSelect']).length > 0){
+          if(props['data']['Programa'] == 'PLOTE'){
+            let r = props['data']['Programa'] + '|' + props['data']['OPFORMA'] + '|' + props['data']['Programa'] + '|' + props['data']['OPFORMA'] +'|';
+            let paramsProgram = await _apiServices('program','','INTERCONECT',[{action:"I",Data:r}],{},'Mi App','0');
+            for (let index = 0; index < paramsProgram.length; index++) {
+              const element = paramsProgram[index];
+              if(index == 0){
+                  campos = campos + '@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+              }else{
+                  campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+              }
+            }
+  
+          }else{
+            let r = 'PLOTE|WLOTEA|' + props['data']['Programa'] + '|' + props['data']['OPFORMA'] +'|';
+            let paramsProgram = await _apiServices('program','','INTERCONECT',[{action:"I",Data:r}],{},'Mi App','0');
+            for (let index = 0; index < paramsProgram.length; index++) {
+              const element = paramsProgram[index];
+              if(index == 0){
+                  campos = campos + '@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+              }else{
+                  campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+              }
+            }
+          }
+          let params = {
+            params: campos,
+            Programa: props['data']['Programa'],
+            OPFORMA: props['data']['OPFORMA']
+          }
+          console.log(params)
+          navigation.push('Anexos',params)
+        }
       }
 
 
