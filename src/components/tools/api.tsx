@@ -60,11 +60,41 @@ const api_service = async (type,app,func,parametros,json,cat,escuela) => {
                     }
                 }
             }else{
-                params = {
-                    Function:func,
-                    App: app,
-                    Parameter:parametros,
-                    json:json
+                if(type == 'FUNC'){
+                    params = {
+                        id:1,
+                        json:JSON.stringify({
+                            Function: func,
+                            App:app,
+                            Parameter:parametros
+                        }),
+                        Category: cat
+                    }
+
+                }else{
+                    if(type == 'FUNCUBE'){
+                        params = {
+                            id:1,
+                            json:JSON.stringify({
+                                Function:func,
+                                Program: app,
+                                Version:'MC0001',
+                                user: usuario['ususer'],
+                                psw: psw,
+                                ID:"2",
+                                Parameter:parametros
+                            }),
+                            Category: cat                           
+                        }
+                    }else{
+                        params = {
+                            Function:func,
+                            App: app,
+                            Parameter:parametros,
+                            json:json
+                        }
+                    }
+
                 }
             }
         }

@@ -23,7 +23,7 @@ const LoginComponent = ({navigation}) => {
    
     useEffect(() => {
         validateUser();
-    })
+    },[])
 
     const validateUser = async () => {
         var id = await AsyncStorage.getItem('usukiduser');
@@ -39,11 +39,16 @@ const LoginComponent = ({navigation}) => {
     }
 
     const getLabelsUrl = async () => {
-        const response = await _apiServices('program','','LABELS',[{action:"I",Data:"URL|1|"}],{},'Mi App','0');
-        console.log(response);
-        setLabelsURL({...response[0]})
-        var apix = await AsyncStorage.getItem('api');
-        setNewApi(apix);
+        try {
+            setModalVisible(true);
+            const response = await _apiServices('program','','LABELS',[{action:"I",Data:"URL|1|"}],{},'Mi App','0');
+            console.log(response);
+            setLabelsURL({...response[0]})
+            var apix = await AsyncStorage.getItem('api');
+            setNewApi(apix);
+        } catch (error) {
+            console.log(error);
+        }
     }
     
     
@@ -159,16 +164,7 @@ const LoginComponent = ({navigation}) => {
                 )}
             </Formik>
 
-            <Text
-                style={{
-                    marginStart:'auto',
-                    marginEnd:10
-                }}
-                onPress={()=>{
-                    setModalVisible(true);
-                    getLabelsUrl();
-                }}
-            >URL</Text>
+            <Button title={'URL'} type="clear" onPress={()=> getLabelsUrl()} />
         </View>
 
         <Modal
@@ -202,16 +198,16 @@ const LoginComponent = ({navigation}) => {
                 <Text style={{fontSize:15, fontWeight:'800'}}>{lablesURL['MEMESSAGE']}</Text>
                 <Input style={styles.inputs} value={newApi} onChangeText={(text)=> setNewApi(text)} />
                 <View style={styles.btnr}>
-                    <Button title={lablesURL['MEOK']} onPress={()=>{
-                        AsyncStorage.setItem('api', newApi);
+                    <Button title={lablesURL['MEOK']} onPress={async ()=>{
+                        await AsyncStorage.setItem('api', newApi);
                         setModalVisible(false)
                     }}
                     ></Button>               
                 </View>
                 <View style={styles.btnl}>             
-                    <Button title={lablesURL['MECANCEL']} onPress={()=> {
+                    <Button title={lablesURL['MECANCEL']} onPress={async ()=> {
                         
-                        AsyncStorage.setItem('api', url_api);
+                        await AsyncStorage.setItem('api', url_api);
                         setModalVisible(false)
                     }}></Button>               
                 </View>
@@ -233,11 +229,11 @@ const styles = StyleSheet.create({
     },
     btnr:{
         marginEnd:0,
-        width:200,
+        width:'40%',
         marginStart:0
     },
     btnl:{
-        width:200,
+        width:'40%',
         marginStart:'auto',
         marginTop:-40
     }

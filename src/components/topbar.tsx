@@ -28,6 +28,7 @@ const TopbarModule = (props) => {
     const navigation = React.useContext(NavigationContext);
 
     const action = async (id) => {
+      console.log('idddddddddd',id)
       var form = props['form'];
       var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
       usuario = JSON.parse(usuario)
@@ -49,7 +50,7 @@ const TopbarModule = (props) => {
         props['setListData']([...data]);
       }
 
-      if(id == 5){
+      if(id == 4){
         try {
           var campos='';
           if(Object.keys(props['listDataSelect']).length > 0){

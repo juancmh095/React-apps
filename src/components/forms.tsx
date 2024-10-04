@@ -98,12 +98,13 @@ const FormsComponent = (props) => {
                                     placeholder={item.UDDESCRIPCION} 
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={props['values'][item.UDCAMPO]}
-                                    style={styles.formControl}
                                     secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
-                                    rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
+                                    rightIcon = {(props['values'][item.UDCAMPO] != '' && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
                                     disabled={(tabSelect == item['FOTAB'])?false:true}
-                                    containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
+                                    containerStyle={(tabSelect == item['FOTAB'] && item['FOVISIBLE'] != 'N')?styles.formControl:{display:'none'}}
                                     inputContainerStyle={{borderBottomWidth:0}}
+                                    style={{textAlign:item['FOJUSTIFICACION']}}
+                                    keyboardType={item['UDTIPO'] == 'N'?'numeric':'default'}
                                     returnKeyType="next"
                                     onChangeText={props['handleChange'](item.UDCAMPO)}
                                 />
@@ -113,10 +114,9 @@ const FormsComponent = (props) => {
                                 return(
                                     <Input
                                         placeholder={item.UDDESCRIPCION} 
-                                        style={styles.formControl}
                                         cdisabled={(tabSelect == item['FOTAB'])?false:true}
                                         secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
-                                        containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
+                                        containerStyle={(tabSelect == item['FOTAB'] && item['FOVISIBLE'] != 'N')?styles.formControl:{display:'none'}}
                                         inputContainerStyle={{borderBottomWidth:0}}
                                         rightIcon = {<Icon name='qr-code' onPress={()=> setModalVisible2(true) } />}
                                         maxLength={Number(item.UDLONGITUD)}
@@ -136,7 +136,7 @@ const FormsComponent = (props) => {
                                                 style={styles.formControlSelect}
                                                 onValueChange={props['handleChange'](item.UDCAMPO)}
                                             >
-                                                <Picker.Item label='Categoria 1' value='' />
+                                                <Picker.Item label={item.UDDESCRIPCION+''}  value='' />
                                                 {item['VALORES'].map((item) => {
                                                     return(
                                                         <Picker.Item label={item.Valor} value={item.Valor} />
@@ -151,13 +151,12 @@ const FormsComponent = (props) => {
                                             <Input 
                                                 key={item.UDCAMPO}
                                                 placeholder={item.UDDESCRIPCION+''} 
-                                                style={styles.formControl}
                                                 disabled={(tabSelect == item['FOTAB'])?false:true}
-                                                containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
+                                                containerStyle={(tabSelect == item['FOTAB'] && item['FOVISIBLE'] != 'N')?styles.formControl:{display:'none'}}
                                                 inputContainerStyle={{borderBottomWidth:0}}
                                                 secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
                                                 maxLength={Number(item.UDLONGITUD)}
-                                                rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
+                                                rightIcon = {(props['values'][item.UDCAMPO] != '' && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
                                                 onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                 onChangeText={props['handleChange'](item.UDCAMPO)}
                                                 returnKeyType="next"
@@ -170,13 +169,12 @@ const FormsComponent = (props) => {
                                                 <Input 
                                                     key={item.UDCAMPO}
                                                     placeholder={item.UDDESCRIPCION} 
-                                                    style={styles.formControl}
                                                     cdisabled={(tabSelect == item['FOTAB'])?false:true}
                                                     secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
-                                                    containerStyle={(tabSelect == item['FOTAB'])?{margin:0, padding:0, height:50}:{display:'none'}}
+                                                    containerStyle={(tabSelect == item['FOTAB'] && item['FOVISIBLE'] != 'N')?styles.formControl:{display:'none'}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}
-                                                    rightIcon = {<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />}
+                                                    rightIcon = {(props['values'][item.UDCAMPO] != '' && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
                                                     onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                     onChangeText={props['handleChange'](item.UDCAMPO)}
                                                     returnKeyType="next"
@@ -211,11 +209,16 @@ const FormsComponent = (props) => {
 
 const styles = StyleSheet.create({
     formControl:{
-        margin:0,
-        padding:7,
+        marginStart:'auto',
+        marginEnd:'auto',
+        marginTop:5,
+        marginBottom:5,
+        width:'97%',
+        padding:0,
         borderColor:'gray',
         borderRadius:5,
-        borderWidth:1
+        borderWidth:1,
+        height:50
       },
       formControlSelect:{
         margin:0,
@@ -225,6 +228,9 @@ const styles = StyleSheet.create({
         borderRadius:5,
         borderWidth:1,
         backgroundColor:'#E1E1E1'
+      },
+      icon:{
+        color:'red'
       }
 });
 

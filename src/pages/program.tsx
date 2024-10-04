@@ -20,6 +20,7 @@ const ProgramPage = (props) => {
 
     /* CONVERSIONTO:VERSION, OPFORMA:FORMA, Programa */
     const [programs1, setPrograms1] = React.useState([]);
+    const [idP1, setIdP1] = React.useState('');
     const [programs2, setPrograms2] = React.useState([]);
     const [listData, setListData] = React.useState([]);
     const [listDataSelect, setListDataSelect] = React.useState({});
@@ -65,7 +66,16 @@ const ProgramPage = (props) => {
                 campos = campos + ',@' + element['PPCAMPOTO'] + ':' + listDataSelect[element['PPCAMPOFROM']];
             }
         }
-        let dataProgram = {COVERSIONTO:pSelect['COVERSIONTO'], OPFORMA:pSelect['COFORMATO'], Programa:pSelect['COOBNMOPC'],Params:campos, OPMESSAGE:pSelect['COMESSAGE'], 'Opcion':pSelect['COTITULO'], dataSelect:listDataSelect}
+        let dataProgram = {
+            COVERSIONTO:pSelect['COVERSIONTO'], 
+            OPFORMA:pSelect['COFORMATO'], 
+            Programa:pSelect['COOBNMOPC'],
+            Params:campos, 
+            OPMESSAGE:pSelect['COMESSAGE'], 
+            'Opcion':pSelect['COTITULO'], 
+            dataSelect:listDataSelect,
+            COTIPO:pSelect['COTIPO']
+        }
         //console.log(dataProgram);
         navigation.push('Program',dataProgram)
     }
@@ -87,12 +97,17 @@ const ProgramPage = (props) => {
                         <Picker
                             style={{color:'black'}}
                             style={styles.formControlSelect}
-                            selectedValue={pSelect}
-                            onValueChange={(value)=>selectProgram(value)}
+                            selectedValue={idP1}
+                            onValueChange={(value,index)=>{
+                                console.log(programs1[index-1])
+                                setIdP1(value);
+                                setPSelect({...programs1[index-1]})
+                            }}
                         >
+                            <Picker.Item label={'...'} value={''} />
                             {programs1.map((item) => {
                                 return(
-                                    <Picker.Item label={item.COTITULO} value={item} />
+                                    <Picker.Item label={item.COTITULO} value={item['COOBNMOPC']} />
                                 )
                             })}
                             
@@ -149,7 +164,7 @@ const ProgramPage = (props) => {
                 <ListDataModule Programa={props['Programa']} dataList={listData} OPFORMA={props['OPFORMA']} Params={props['Params']} setListDataSelect={setListDataSelect} />
             </View>
             <View style={styles.fixedButton}>
-                <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} />
+                <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} listDataSelect={listDataSelect} />
             </View>
         </View>
     )

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import  {default as _apiServices} from './tools/api';
 import { CheckBox, Icon, Text } from 'react-native-elements';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, Linking, ScrollView, View } from 'react-native';
 import { ListItem,Button } from '@rneui/base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -56,13 +56,24 @@ const ListDataModule = (props) => {
                     deleteData = item[element['PPCAMPOTO']] + '|';
                 }
                 let deleteItem = await _apiServices('program','','PLOTE',[{action:"D",Data:'D|'+usuario['usukides']+'|'+deleteData}],{},'Mi App','0');
+                 
                 var itemsData = props['dataList'];
                 var realData = itemsData.splice(i,1);
-                props['dataList'] = realData;
-                console.log(deleteItem);
+                props['setListDataSelect']([...realData]);
+                console.log(realData.length);
             }},
         ]);
 
+        
+    }
+
+    const openAction = async (program,index) => {
+        console.log(program,index)
+    }
+
+    const OpenURLButton = async (url) => {
+    
+        await Linking.openURL(url);
         
     }
 
@@ -107,10 +118,10 @@ const ListDataModule = (props) => {
                     })}
                     </ListItem.Content>
                     {(item['JBPATH'] && (item['JBPATH']).includes('.pdf') && (
-                        <Icon name='file-pdf-o' size={40} type="font-awesome" />
+                        <Icon name='file-pdf-o' size={40} type="font-awesome" onPress={()=> OpenURLButton(item['JBPATH'])} />
                     ))}
                     {(item['JBPATH'] && ((item['JBPATH']).includes('.xlsx') || (item['JBPATH']).includes('.xls') || (item['JBPATH']).includes('.csv')) && (
-                        <Icon name='file-excel-o' size={40} type="font-awesome" />
+                        <Icon name='file-excel-o' size={40} type="font-awesome" onPress={()=> OpenURLButton(item['JBPATH'])} />
                     ))}
                     <ListItem.Chevron />
                 </ListItem.Swipeable>

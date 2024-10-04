@@ -182,6 +182,10 @@ function Anexos(props) {
     }
   }
 
+  const voiceRecord = async () => {
+    
+  }
+
    const constHttpPost = async (file,name,ext, msg) => {
 
     var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
@@ -253,8 +257,12 @@ function Anexos(props) {
                 color='#2AAA52'
                 onPress={() => getGeo()}
               />
+              
               </View>
-              <View>
+              <View 
+              style={{
+                flexDirection: 'row'
+              }}>
                 <Icon
                   reverse
                   name='person'
@@ -265,6 +273,17 @@ function Anexos(props) {
                     setModalVisible(true);
                   }}
                 />
+
+                <Icon
+                  reverse
+                  name='mic'
+                  type='ionicons'
+                  color='#f56533'
+                  onPress={() => {
+                    voiceRecord()
+                  }}
+                />
+                
               </View>
             </Card>
           ))}

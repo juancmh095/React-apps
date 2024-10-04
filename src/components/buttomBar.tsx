@@ -4,6 +4,7 @@ import  {default as _apiServices} from './tools/api';
 import { Text } from 'react-native-elements';
 import { ButtonGroup } from '@rneui/base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContext } from '@react-navigation/native';
 
 const ButtomBarModule = (props) => {
     var icons = 
@@ -23,6 +24,7 @@ const ButtomBarModule = (props) => {
     const [buttons, setButtons] = useState([]);
     const [options, setOptions] = useState([]);
     const [buttonsCode, setButtonsCode] = useState([]);
+    const navigation = React.useContext(NavigationContext);
 
     useEffect(() => {
         // Función para obtener los botones desde la API
@@ -48,6 +50,24 @@ const ButtomBarModule = (props) => {
         fetchButtons();
       }, []);
 
+      const gotoProgram = async (PROGRAM) => {
+        const paramsProgram = await _apiServices('program','','INTERCONECT',[{action:"I",Data:props['program']+'|'+props['OPFORMA']+'|'+PROGRAM['OPOBNMOPC']+'|'+PROGRAM['OPFORMATO']+'||'}],{},'Mi App','0');
+       
+        let campos = '';
+        for (let index = 0; index < paramsProgram.length; index++) {
+            const element = paramsProgram[index];
+            if(index == 0){
+                campos = campos + '@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+            }else{
+                campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
+            }
+        }
+        let dataProgram = {COVERSIONTO:PROGRAM['OPVERSION'], OPFORMA:PROGRAM['OPFORMATO'], Programa:PROGRAM['OPOBNMOPC'],Params:campos, OPMESSAGE:PROGRAM['OPMESSAGE'], 'Opcion':PROGRAM['OPTITULO'], dataSelect:props['listDataSelect']}
+        //console.log(dataProgram);
+        navigation.push('Program',dataProgram)
+    }
+
+
     return (
         <View>
             <ButtonGroup
@@ -55,8 +75,7 @@ const ButtomBarModule = (props) => {
               buttonStyle={{backgroundColor:'#E1E1E1'}}
               buttonContainerStyle={{borderColor:'gray'}}
               onPress={(value) => {
-                console.log(value);
-                console.log(options[value]);
+                gotoProgram(options[value]);
               }}
               containerStyle={{ marginBottom: 20 }}
             />
