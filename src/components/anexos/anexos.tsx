@@ -18,6 +18,7 @@ import  DigitalSignature from './plugins/DigitalSignature.jsx';
 import  QRComponent from './plugins/QR.jsx';
 import  QuillComponent from './plugins/Quill.jsx';
 import  ContactsComponent from './plugins/Contacts.jsx';
+import  AudioRecorderComponent from './plugins/Arecorder.jsx';
 
 import  {default as _apiServices} from '../tools/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -280,7 +281,8 @@ function Anexos(props) {
                   type='ionicons'
                   color='#f56533'
                   onPress={() => {
-                    voiceRecord()
+                    setTypeModal('AR');
+                    setModalVisible(true);
                   }}
                 />
                 
@@ -355,6 +357,7 @@ function Anexos(props) {
               {typeModal == 'signature'? <DigitalSignature setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
               {typeModal == 'contacts'? <ContactsComponent setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
               {typeModal == 'text'? <QuillComponent   setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
+              {typeModal == 'AR'? <AudioRecorderComponent setModalVisible={setModalVisible} req={props['route']['params']} /> : ''}
               {typeModal == 'url'? <Input
                       label='Enter URL'
                       leftIcon={{ type: 'font-awesome', name: 'link' }}

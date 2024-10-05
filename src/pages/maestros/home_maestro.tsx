@@ -365,7 +365,7 @@ const MaestroHomeComponent = ({navigation}) => {
                                                                     showProgram(model);
                                                                 }
                                                                 console.log(option)
-                                                                if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS'){
+                                                                if(option['Programa'] == 'PLOTE' || option['Programa'] == 'PREPORTS' || option['Programa'] == 'PJOBS' || option['Programa'] == 'PFAVORITOS'){
                                                                     navigation.navigate('Program',option)
                                                                 }else{
                                                                     if(option['Programa'] == 'PCARGAMASIVA' || option['Programa'] == 'PCOMPRAS'){

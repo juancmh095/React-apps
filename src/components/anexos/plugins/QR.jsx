@@ -42,7 +42,7 @@ const QRComponent = ({setModalVisible, req}) => {
 
           var dataRoute = req['params'];
           var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+restult+'|'+'QR|';
-          var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,'','Utilerias','0');
+          var reponse = await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,'','Utilerias','0');
           console.log(reponse);
 
           if(reponse[0] == 'OK'){

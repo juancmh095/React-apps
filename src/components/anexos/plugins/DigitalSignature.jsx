@@ -30,7 +30,7 @@ const DigitalSignature = ({setModalVisible,req}) => {
 
     var dataRoute = req['params'];
     var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+'Text1|PNG|';
-    var reponse = await await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,b64,'Utilerias','0');
+    var reponse = await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,b64,'Utilerias','0');
     console.log(reponse);
     if(reponse[0] == 'OK'){
       showToast('Firma guardada satisfactoriamente');

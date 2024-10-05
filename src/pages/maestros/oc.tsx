@@ -11,7 +11,7 @@ import { Formik } from "formik";
 import { ListItem, Tab, Button, Card } from "@rneui/base";
 import  {default as _apiServices} from '../../components/tools/api';
 
-import  QuillComponent from '../../components/anexos/plugins/Quill';
+import  QuillComponent from '../../components/anexos/plugins/QuillOc';
 
 const OrdenCompraComponent =  ({ navigation }) => {
 
@@ -34,6 +34,8 @@ const OrdenCompraComponent =  ({ navigation }) => {
     const [count, setCount] = React.useState(1);
     const [modalVisible, setModalVisible] = React.useState(false);
     const [modalVisible2, setModalVisible2] = React.useState(false);
+
+    const [textBase64, setTextBase64] = React.useState('');
 
     const [reqData, setReq] = React.useState({});
 
@@ -94,12 +96,13 @@ const OrdenCompraComponent =  ({ navigation }) => {
         try {
             console.log('entra a buscar info',user)
             let data = user['usukides'] + '|' + user['usidioma'] + '|';
-            let body = rqdata.getCarga('INQBARRAFIX','I',data);
-            let response = await axios.post(`${url_api}`,body);
-            if(response.data.Json != ''){
+
+
+
+            const response = await _apiServices('program','','INQBARRAFIX',[{action:"I",Data:data}],{},'Mi App','0');
+            if(response.length > 0){
                 var tit = [];
-                let d = JSON.parse(response.data.Json);
-                var inpts = d['FINQBARRAFIX'];
+                var inpts = response;
                 for (let i = 0; i < inpts.length; i++) {
                     const element = inpts[i];
                     tit.push(element['Titulo']);
@@ -116,16 +119,16 @@ const OrdenCompraComponent =  ({ navigation }) => {
         try {
             console.log('entra a buscar info2',user)
             let data = '0|PCOMPRAS|E|H|';
-            let body = rqdata.getCarga('ProgramInquiry','I',data);
-            let response = await axios.post(`${url_api}`,body);
-            console.log('pestanas',response.data);
 
-            if(response.data.Json){
-                let d = JSON.parse(response.data.Json);
+            const response = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:data}],{},'Mi App','0');
+            console.log('pestanas',response);
+
+            if(response.length > 0){
+                let d = response;
                 var lbs = {};
                 var dArr = [];
-                for (let i = 0; i < d.FProgramInquiry.length; i++) { 
-                  const element = d.FProgramInquiry[i];
+                for (let i = 0; i < d.length; i++) { 
+                  const element = d[i];
                   lbs[element.UDCAMPO] = element.UDDESCRIPCION
                   let fil = dArr.filter(item => item == element.UDCAMPO);
                   if(fil.length == 0){
@@ -176,10 +179,9 @@ const OrdenCompraComponent =  ({ navigation }) => {
 
         formikRef.current.setFieldValue('PDLNID','1');
 
-        storage.getAllDataForKey('FUSERSLOGIN').then(res => {
-            getbotones(res[0]);
-            
-        });
+        var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
+        usuario = JSON.parse(usuario);
+        getbotones(usuario);
     }
 
     const validateUser = async () => {
@@ -223,7 +225,7 @@ const OrdenCompraComponent =  ({ navigation }) => {
         console.log(values);
         let url = await AsyncStorage.getItem('api');
         url_api = url;
-        let r = 'A|0|'+values['PDDOCO']+'|'+values['PDDCTO']+'|'+values['PDLITM']+'|'+values['PDUORG']+'|'+values['PDPRRC']+'|';
+        let r = 'A|0|'+values['PDDOCO']+'|'+values['PDDCTO']+'|'+values['PDLITM']+'|'+values['PDUORG']+'|'+values['PDPRRC']+'|'+textBase64+'|';
         let body = rqdata.itemOC('PCOMPRAS',r);
         let response = await axios.post(`${url_api}`,body);
         console.log(response.data);
@@ -234,6 +236,8 @@ const OrdenCompraComponent =  ({ navigation }) => {
                 const element = labelsArry[i];
                 model[element] = values[element]
             }
+
+            model['PDCNID'] = textBase64;
 
             if(data[Number(values['PDLNID'])-1]){
                 data[Number(values['PDLNID'])-1] = model;
@@ -255,6 +259,8 @@ const OrdenCompraComponent =  ({ navigation }) => {
             setCount(c);
             formikRef.current.setFieldValue('PDLNID',String(c));
             setFormValues({...vals});
+            setTextBase64('');
+            
 
         }else{
             let d = JSON.parse(response.data.Json);
@@ -471,7 +477,7 @@ const OrdenCompraComponent =  ({ navigation }) => {
                 ></Button>
                 <Card.Divider />
                         <View style={styles.modalView}>
-                            <QuillComponent   setModalVisible={setModalVisible2} req={reqData} />                  
+                            <QuillComponent   setModalVisible={setModalVisible2} setTextBase64={setTextBase64} req={reqData} />                  
                         </View>
                     </View>
                 </Modal>

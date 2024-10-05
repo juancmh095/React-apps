@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import  {default as _apiServices} from '../../tools/api';
 
 
-const QuillComponent = ({setModalVisible,req}) => {
+const QuillComponent = ({setModalVisible, setTextBase64, req}) => {
 
     const _editor = useRef()
     const isIphone = true    
@@ -65,22 +65,8 @@ const QuillComponent = ({setModalVisible,req}) => {
     const SendQuill = async () => {
         let encodeTxt = new buffer.Buffer(text.html).toString("base64");
 
-        var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
-        usuario = JSON.parse(usuario);
-
-        var dataRoute = req['params'];
-        var params = usuario['usukides']+'|'+dataRoute['Programa']+'|'+dataRoute['params']+'|'+'Anexo de Texto|TXT|';
-        var reponse = await _apiServices('FANEXO','Mi Appescolar','WriteAtach',params,encodeTxt,'Utilerias','0');
-        console.log(reponse);
-        if(reponse[0] == 'OK'){
-            console.log(_editor.current.setText(''))
-            
-            showToast('Texto guardado satisfactoriamente')
-            setModalVisible(false);
-            
-          } else {
-            showToast('Error al guardar')
-          }
+        setTextBase64(encodeTxt);
+        setModalVisible(false);
     }
 
     const showToast = (text) => {
