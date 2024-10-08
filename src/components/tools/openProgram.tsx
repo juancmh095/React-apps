@@ -6,7 +6,7 @@ import ProgramPage from '../../pages/program';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const OpenProgram =  ({ route, navigation }) => {
 
-    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params, Opcion, TipoAcceso, COTIPO, dataSelect } = route.params;
+    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params, Opcion, TipoAcceso, COTIPO, dataSelect, TIPO } = route.params;
     const [showPrm, setShowPrm] = useState(false);
 
     const openBForUBE = async (tipo) => {
@@ -111,7 +111,7 @@ const OpenProgram =  ({ route, navigation }) => {
     return(
         <View style={{color:'black'}}>
             {(showPrm &&(
-              <ProgramPage Programa={Programa} OPFORMA={OPFORMA} COVERSIONTO={COVERSIONTO} Params={Params} Opcion={Opcion} TipoAcceso={TipoAcceso} />
+              <ProgramPage Programa={Programa} OPFORMA={OPFORMA} COVERSIONTO={COVERSIONTO} Params={Params} Opcion={Opcion} TipoAcceso={TipoAcceso} TIPO={TIPO}/>
             ))}
         </View>
     )

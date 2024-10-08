@@ -87,11 +87,27 @@ const api_service = async (type,app,func,parametros,json,cat,escuela) => {
                             Category: cat                           
                         }
                     }else{
-                        params = {
-                            Function:func,
-                            App: app,
-                            Parameter:parametros,
-                            json:json
+                        if(type=='GLOTE'){
+                            params = {
+                                id:1,
+                                json:JSON.stringify({
+                                    Function:func,
+                                    App:'Mi Appescolar',
+                                    Program: app,
+                                    user: usuario['ususer'],
+                                    psw: psw,
+                                    ID:"0",
+                                    Parameter:parametros
+                                }),
+                                Category: cat                           
+                            }
+                        }else{
+                            params = {
+                                Function:func,
+                                App: app,
+                                Parameter:parametros,
+                                json:json
+                            }
                         }
                     }
 

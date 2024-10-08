@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, ToastAndroid, View } from 'react-native';
 import  {default as _apiServices} from './tools/api';
 import { Text } from 'react-native-elements';
 import { ButtonGroup, Icon } from '@rneui/base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContext } from '@react-navigation/native';
+import DeviceInfo from 'react-native-device-info';
 
 const TopbarModule = (props) => {
 
@@ -92,8 +93,111 @@ const TopbarModule = (props) => {
         
       }
 
+      if(id==1){
+
+        let r = usuario['usukiduser']+'|'+usuario['ususer']+'|'+ props['data']['Programa'] + '|U|WLOTEB' +'|'+props['listDataSelect']['LOITEM']+'|';
+        let response = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
+        console.log(response);
+
+        let campos = '';
+        let oKeys = Object.keys(response[0]);
+        for (let index = 0; index < oKeys.length; index++) {
+            const element = oKeys[index];
+            if(index == 0){
+                campos = campos + '@' + element + ':' + response[0][element];
+            }else{
+                campos = campos + ',@' + element + ':' + response[0][element];
+            }
+        }
+        let dataProgram = {
+            COVERSIONTO:props['data']['COVERSIONTO'], 
+            OPFORMA:props['data']['OPFORMA'], 
+            Programa:props['data']['Programa'],
+            Params:campos, 
+            OPMESSAGE:'', 
+            'Opcion':'Mantenimiento de Lotes', 
+            dataSelect:props['listDataSelect'],
+            COTIPO:'APP',
+            TIPO:'U'
+        }
+        console.log(dataProgram);
+        navigation.push('Program',dataProgram)
+
+      }
+
+      if(id==3){
+        let r = usuario['usukiduser']+"|"+ props['data']['Programa'] +"|A|F|@0@"+props['listDataSelect']['LOITEM']+"|";
+        let response = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
+        console.log(response);
+
+        let dataProgram = {
+          COVERSIONTO:props['data']['COVERSIONTO'], 
+          OPFORMA:props['data']['OPFORMA'], 
+          Programa:props['data']['Programa'],
+          Params:'', 
+          OPMESSAGE:'', 
+          'Opcion':'Mantenimiento de Lotes', 
+          dataSelect:props['listDataSelect'],
+          COTIPO:'APP',
+          TIPO:'A'
+        }
+        console.log(dataProgram);
+        navigation.push('Program',dataProgram)
+
+      }
+
 
      
+    }
+
+    const action2 = async (id) => {
+      console.log(id);
+      if(id==2){
+        navigation.goBack()
+      }
+      
+      if(id==1){
+        var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
+        usuario = JSON.parse(usuario)
+        console.log(props['data']['TIPO']);
+
+        var form = props['form'];
+        let dispositivo = DeviceInfo.getDeviceNameSync();
+        let dateDevice = new Date().toLocaleDateString('es-MX').split('/');
+        let timeDevice = new Date().toLocaleTimeString('es-MX').split(' ')[0];
+        let fechaD = dateDevice[0]+((Number(dateDevice[1])<9)?'0'+dateDevice[1]:dateDevice[1])+dateDevice[2];
+        let rgx = /[:,/]/gm;
+        let horaD = timeDevice.replace(rgx,'');
+        var lte = form['current']['values'];
+        console.log(dateDevice,fechaD,horaD);
+
+        if(props['data']['TIPO'] == 'U'){
+          const regex = /[:,/]/gm;
+          let dta = lte.LODATRECEIP.replace(regex,'');
+          let r = 'U|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'+usuario['usukiduser']+'|'+dispositivo+'|'+props['data']['Programa']+'|'+fechaD+'|'+horaD+'|'
+          
+          let response = await _apiServices('GLOTE','FLOTE','ValidateInfo',r,{},'Utilerias','0');
+          console.log(response)
+          if(response[0] === 'OK'){
+              ToastAndroid.show('Actualizado correctamente', ToastAndroid.LONG);
+              navigation.goBack()
+          }else{
+              //setErrors(JSON.stringify(guardar.data.Json))
+          }
+        }else{
+          const regex = /[:,/]/gm;
+          let dta = lte.LODATRECEIP.replace(regex,'');
+          r = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'+usuario['usukiduser']+'|'+dispositivo+'|'+props['data']['Programa']+'|'+fechaD+'|'+horaD+'|'
+          let response = await _apiServices('GLOTE','FLOTE','ValidateInfo',r,{},'Utilerias','0');
+          console.log(response)
+          if(response[0] === 'OK'){
+              ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
+              form['current']['resetForm']({})
+          }else{
+              //setErrors(JSON.stringify(guardar.data.Json))
+          }
+        }
+      }
     }
 
     useEffect(() => {
@@ -117,18 +221,33 @@ const TopbarModule = (props) => {
       }, []);
 
     return (
+      
         <View>
-            <ButtonGroup
-              buttons={buttonsTop}
-              buttonStyle={{backgroundColor:'#E1E1E1'}}
-              buttonContainerStyle={{borderColor:'gray'}}
-              onPress={(value) => {
-                if(props['TipoAcceso'] == '1'){
-                  action((value+1))
-                }
-              }}
-              containerStyle={{ marginBottom: 20 }}
-            />
+            {((props['data']["TIPO"] == null)&&(
+              <ButtonGroup
+                buttons={buttonsTop}
+                buttonStyle={{backgroundColor:'#E1E1E1'}}
+                buttonContainerStyle={{borderColor:'gray'}}
+                onPress={(value) => {
+                  if(props['TipoAcceso'] == '1'){
+                    action((value+1))
+                  }
+                }}
+                containerStyle={{ marginBottom: 20 }}
+              />
+            ))}
+            {((props['data']["TIPO"] != null)&&(
+              <ButtonGroup
+                buttons={['OK','Cancelar','Errores']}
+                buttonStyle={{backgroundColor:'#E1E1E1'}}
+                buttonContainerStyle={{borderColor:'gray'}}
+                onPress={(value) => {
+                  
+                  action2((value+1))
+                }}
+                containerStyle={{ marginBottom: 20 }}
+              />
+            ))}
         </View>
     )
 }

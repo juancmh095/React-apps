@@ -83,7 +83,6 @@ const ListDataModule = (props) => {
 
     return (
         <View style={{color:'black'}}>
-            <ScrollView>
             {props['dataList'].map((item,i) => {
                 return(
                 <ListItem.Swipeable
@@ -128,8 +127,6 @@ const ListDataModule = (props) => {
 
                 )
             })}
-
-            </ScrollView>
 
         </View>
     )

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import { Icon, Text } from 'react-native-elements';
 
 import  TopbarModule  from '../components/topbar';
@@ -92,7 +92,7 @@ const ProgramPage = (props) => {
                 <TopbarModule form={formikRef} data={props} setListData={setListData} listDataSelect={listDataSelect} TipoAcceso={props['TipoAcceso']}/>
             </View>
             <View>
-                {(programs1.length > 0 && (
+                {(programs1.length > 0 && props['TIPO'] == null && (
                     <View style={styles.row}>
                         <Picker
                             style={{color:'black'}}
@@ -120,49 +120,51 @@ const ProgramPage = (props) => {
                     </View>
                 ))}
             </View>
-            <View>
-                <Formik
-                initialValues={{}}
-                key={'form1'}
-                onSubmit={values => console.log(values)}
-                innerRef={formikRef}
-                
-                >
-                {({ handleChange, setFieldValue, handleSubmit, values }) => (
-
-                    <FormsComponent 
-                        program={props['Programa']} 
-                        item={props['COVERSIONTO']}
-                        handleChange = {handleChange}
-                        setFieldValue = {setFieldValue}
-                        handleSubmit = {handleSubmit}
-                        form = {formikRef}
-                        values = {values}
-                    />
-
-                )}
-                </Formik>
-            </View>
-            <View>
-                {( programs2.length > 0 && (
-                    <Picker
-                        style={{color:'black'}}
-                        style={styles.formControlSelect}
-                        onValueChange={(value)=>console.log(value)}
+            <ScrollView>
+                <View>
+                    <Formik
+                    initialValues={{}}
+                    key={'form1'}
+                    onSubmit={values => console.log(values)}
+                    innerRef={formikRef}
+                    
                     >
-                        {programs2.map((item) => {
-                            return(
-                                <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
-                            )
-                        })}
-                        
-                    </Picker> 
+                    {({ handleChange, setFieldValue, handleSubmit, values }) => (
 
-                ))}
-            </View>
-            <View>
-                <ListDataModule Programa={props['Programa']} dataList={listData} OPFORMA={props['OPFORMA']} Params={props['Params']} setListDataSelect={setListDataSelect} />
-            </View>
+                        <FormsComponent 
+                            program={props['Programa']} 
+                            item={props['COVERSIONTO']}
+                            handleChange = {handleChange}
+                            setFieldValue = {setFieldValue}
+                            handleSubmit = {handleSubmit}
+                            form = {formikRef}
+                            values = {values}
+                        />
+
+                    )}
+                    </Formik>
+                </View>
+                <View>
+                    {( programs2.length > 0 && props['TIPO'] == null && (
+                        <Picker
+                            style={{color:'black'}}
+                            style={styles.formControlSelect}
+                            onValueChange={(value)=>console.log(value)}
+                        >
+                            {programs2.map((item) => {
+                                return(
+                                    <Picker.Item label={item.COTITULO} value={item.COMESSAGE} />
+                                )
+                            })}
+                            
+                        </Picker> 
+
+                    ))}
+                </View>
+                <View>
+                    <ListDataModule Programa={props['Programa']} dataList={listData} OPFORMA={props['OPFORMA']} Params={props['Params']} setListDataSelect={setListDataSelect} />
+                </View>
+            </ScrollView>
             <View style={styles.fixedButton}>
                 <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} listDataSelect={listDataSelect} />
             </View>
