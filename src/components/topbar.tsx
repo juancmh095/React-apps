@@ -33,7 +33,6 @@ const TopbarModule = (props) => {
       var form = props['form'];
       var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
       usuario = JSON.parse(usuario)
-      console.log(props['data']['OPFORMA'],props['data']['Programa'],id)
       if(id == 2){
         let dataForm = form['current']['values'];
         var keysObject = Object.keys(form['current']['values']);
@@ -159,7 +158,6 @@ const TopbarModule = (props) => {
       if(id==1){
         var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
         usuario = JSON.parse(usuario)
-        console.log(props['data']['TIPO']);
 
         var form = props['form'];
         let dispositivo = DeviceInfo.getDeviceNameSync();
@@ -202,7 +200,6 @@ const TopbarModule = (props) => {
 
     useEffect(() => {
         // Función para obtener los botones desde la API
-        console.log('propstopbar',props)
         const fetchButtons = async () => {
           try {
             var btn = [];

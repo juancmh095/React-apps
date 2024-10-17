@@ -4,7 +4,7 @@ import { Avatar, Button, ButtonGroup, Icon, Image, Input, Text } from "react-nat
 import axios from "axios";
 import { Formik } from "formik";
 import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet, PermissionsAndroid } from "react-native";
-import * as rqdata from '../../components/tools/params_request';
+import * as rqdata from '../../components/tools/params_request.tsx';
 import storage from "../../services/Storage";
 import { Picker } from "@react-native-picker/picker";
 import Geolocation from 'react-native-geolocation-service';

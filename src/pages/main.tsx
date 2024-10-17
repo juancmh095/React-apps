@@ -10,7 +10,7 @@ import { Input,  Header } from '@rneui/themed';
 import React, { useEffect, useRef } from 'react';
 import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
 import axios from 'axios';
-import * as rqdata from '../components/tools/params_request';
+import * as rqdata from '../components/tools/params_request.tsx';
 //import DatePicker from 'react-native-date-picker'
 import { TimeDatePicker, Modes } from "react-native-time-date-picker";
 import { Picker } from '@react-native-picker/picker';

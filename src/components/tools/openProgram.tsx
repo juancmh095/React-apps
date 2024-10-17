@@ -6,7 +6,7 @@ import ProgramPage from '../../pages/program';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const OpenProgram =  ({ route, navigation }) => {
 
-    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params, Opcion, TipoAcceso, COTIPO, dataSelect, TIPO } = route.params;
+    const { Programa, OPMESSAGE, OPFORMA, COVERSIONTO, Params, Opcion, TipoAcceso, COTIPO, dataSelect, TIPO,BACKPROGRAM,BACKFORMA } = route.params;
     const [showPrm, setShowPrm] = useState(false);
 
     const openBForUBE = async (tipo) => {
@@ -16,7 +16,7 @@ const OpenProgram =  ({ route, navigation }) => {
         console.log(tipo)
         if(tipo == 'BF'){
           let bfParams = await _apiServices('program','','INTERCONECT',[{action:"I",Data:'PLOTE|WLOTEA|'+Programa+'|||'}],{},'Mi App','0');
-          console.log('rParams',bfParams);
+          //console.log('rParams',bfParams);
           let campos = '';
           for (let index = 0; index < bfParams.length; index++) {
               const element = bfParams[index];
@@ -26,7 +26,8 @@ const OpenProgram =  ({ route, navigation }) => {
                   campos = campos + ',@' + element['PPCAMPOTO'] + ':' + dataSelect[element['PPCAMPOFROM']];
               }
           }
-          let params = usuario['usukides']+'|'+usuario['ususer']+'|'+Programa+'|'+OPFORMA+'|'+campos+'|';
+          let params = usuario['usukides']+'|'+usuario['ususer']+'|'+BACKPROGRAM+'|'+BACKFORMA+'|ItemNumber|'+campos+'||';
+          console.log('------------------->',route.params)
           let response = await await _apiServices('FUNC','Mi Appescolar','Executefunction',params,'','Utilerias','0');
           console.log('response BF',response)
           navigation.goBack()
@@ -62,6 +63,7 @@ const OpenProgram =  ({ route, navigation }) => {
         const alert = async () => {
           try {
             if(OPMESSAGE != ''){
+              navigation.setOptions({ title: '' });
               var idioma:any = await AsyncStorage.getItem('idioma');
               let parm = OPMESSAGE+'|'+idioma+'|';
               const response = await _apiServices('program','','MESSAGE',[{action:"I",Data:parm}],{},'Mi App','0');

@@ -5,7 +5,7 @@ import axios from "axios";
 import { Picker } from '@react-native-picker/picker';
 import { Formik } from "formik";
 import { ScrollView, View, Modal, ToastAndroid, Linking, StyleSheet } from "react-native";
-import * as rqdata from '../../components/tools/params_request';
+import * as rqdata from '../../components/tools/params_request.tsx';
 import storage from "../../services/Storage";
 import HomeComponent from '../../../components/App.tsx';
 import ModuleComponent from '../../../components/Module.tsx';
@@ -174,7 +174,7 @@ const MaestroHomeComponent = ({navigation}) => {
                     usukides:usukides,
                     grukidgr: grukidgr,
                     opcion: item['Opcion'],
-                    list: datx['Fregasistencia']?datx['Fregasistencia']:[],
+                    list: response?response:[],
                     item:item,
                     checks:chks
                 }

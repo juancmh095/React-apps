@@ -42,6 +42,7 @@ const FormsComponent = (props) => {
             var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
             usuario = JSON.parse(usuario)
             const response = await _apiServices('program','','INQFORMNAME',[{action:"I",Data:usuario['usukides']+'|'+props['program']+'|'}],{},'Mi App','0');
+            console.log(response);
             if(response.length > 0){
                 var dta = "0|"+usuario['usukiduser']+'|'+props['program']+'|A|'+response[0]['OPFORMDEFAULT']+'|'+props['item']+'|';
                 const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');

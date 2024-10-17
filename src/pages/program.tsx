@@ -74,7 +74,9 @@ const ProgramPage = (props) => {
             OPMESSAGE:pSelect['COMESSAGE'], 
             'Opcion':pSelect['COTITULO'], 
             dataSelect:listDataSelect,
-            COTIPO:pSelect['COTIPO']
+            COTIPO:pSelect['COTIPO'],
+            BACKPROGRAM: props['Programa'],
+            BACKFORMA: props['OPFORMA']
         }
         //console.log(dataProgram);
         navigation.push('Program',dataProgram)
@@ -133,6 +135,7 @@ const ProgramPage = (props) => {
 
                         <FormsComponent 
                             program={props['Programa']} 
+                            OPFORMA={props['OPFORMA']} 
                             item={props['COVERSIONTO']}
                             handleChange = {handleChange}
                             setFieldValue = {setFieldValue}
