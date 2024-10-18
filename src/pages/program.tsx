@@ -44,13 +44,18 @@ const ProgramPage = (props) => {
             for (let i = 0; i < paramsArr.length; i++) {
                 const element = paramsArr[i];
                 let item = element.split(':');
-                formikRef.current.setFieldValue(item[0],item[1]);
+
+                const regex = /[,]/gm;
+                const subst = '';
+                const str = item[1]?item[1]:'';
+                const result = str.replace(regex, subst);
+
+                formikRef.current.setFieldValue(item[0],result);
             }
         }
     }
 
     const selectProgram = (program) => {
-        console.log(props);
         setPSelect({...program});
     }
 
@@ -101,7 +106,6 @@ const ProgramPage = (props) => {
                             style={styles.formControlSelect}
                             selectedValue={idP1}
                             onValueChange={(value,index)=>{
-                                console.log(programs1[index-1])
                                 setIdP1(value);
                                 setPSelect({...programs1[index-1]})
                             }}
@@ -169,7 +173,7 @@ const ProgramPage = (props) => {
                 </View>
             </ScrollView>
             <View style={styles.fixedButton}>
-                <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} listDataSelect={listDataSelect} />
+                <ButtomBarModule program={props['Programa']} OPFORMA={props['OPFORMA']} listDataSelect={listDataSelect} TipoAcceso={props['TipoAcceso']} />
             </View>
         </View>
     )

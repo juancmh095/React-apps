@@ -29,7 +29,6 @@ const TopbarModule = (props) => {
     const navigation = React.useContext(NavigationContext);
 
     const action = async (id) => {
-      console.log('idddddddddd',id)
       var form = props['form'];
       var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
       usuario = JSON.parse(usuario)
@@ -40,9 +39,13 @@ const TopbarModule = (props) => {
         for (let i = 0; i < keysObject.length; i++) {
           const element = keysObject[i];
             if(i == 0){
+              if(dataForm[keysObject[i]] != ''){
                 campos = campos + '@' + keysObject[i] + ':' + dataForm[keysObject[i]];
+              }
             }else{
+              if(dataForm[keysObject[i]] != ''){
                 campos = campos + '@' + keysObject[i] + ':' + dataForm[keysObject[i]];
+              }
             }
         }
         let r = '2|22|'+props['data']['Programa'] + '|F|' + props['data']['OPFORMA'] + '|' + props['data']['COVERSIONTO'] + '|' + campos + '|';
@@ -93,19 +96,23 @@ const TopbarModule = (props) => {
       }
 
       if(id==1){
-
         let r = usuario['usukiduser']+'|'+usuario['ususer']+'|'+ props['data']['Programa'] + '|U|WLOTEB' +'|'+props['listDataSelect']['LOITEM']+'|';
         let response = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
-        console.log(response);
+        
+        let items = response.filter((res)=> res['LOITEM']===props['listDataSelect']['LOITEM']);
 
         let campos = '';
-        let oKeys = Object.keys(response[0]);
+        let oKeys = Object.keys(items[0]);
         for (let index = 0; index < oKeys.length; index++) {
             const element = oKeys[index];
             if(index == 0){
-                campos = campos + '@' + element + ':' + response[0][element];
+                if(items[0][element] != ''){
+                  campos = campos + '@' + element + ':' + items[0][element];
+                }
             }else{
-                campos = campos + ',@' + element + ':' + response[0][element];
+              if(items[0][element] != ''){
+                campos = campos + ',@' + element + ':' + items[0][element];
+              }
             }
         }
         let dataProgram = {
@@ -119,7 +126,7 @@ const TopbarModule = (props) => {
             COTIPO:'APP',
             TIPO:'U'
         }
-        console.log(dataProgram);
+       
         navigation.push('Program',dataProgram)
 
       }
@@ -127,7 +134,6 @@ const TopbarModule = (props) => {
       if(id==3){
         let r = usuario['usukiduser']+"|"+ props['data']['Programa'] +"|A|F|@0@"+props['listDataSelect']['LOITEM']+"|";
         let response = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:r}],{},'Mi App','0');
-        console.log(response);
 
         let dataProgram = {
           COVERSIONTO:props['data']['COVERSIONTO'], 
@@ -140,7 +146,6 @@ const TopbarModule = (props) => {
           COTIPO:'APP',
           TIPO:'A'
         }
-        console.log(dataProgram);
         navigation.push('Program',dataProgram)
 
       }
@@ -150,7 +155,6 @@ const TopbarModule = (props) => {
     }
 
     const action2 = async (id) => {
-      console.log(id);
       if(id==2){
         navigation.goBack()
       }
@@ -167,7 +171,6 @@ const TopbarModule = (props) => {
         let rgx = /[:,/]/gm;
         let horaD = timeDevice.replace(rgx,'');
         var lte = form['current']['values'];
-        console.log(dateDevice,fechaD,horaD);
 
         if(props['data']['TIPO'] == 'U'){
           const regex = /[:,/]/gm;
@@ -175,7 +178,6 @@ const TopbarModule = (props) => {
           let r = 'U|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'+usuario['usukiduser']+'|'+dispositivo+'|'+props['data']['Programa']+'|'+fechaD+'|'+horaD+'|'
           
           let response = await _apiServices('GLOTE','FLOTE','ValidateInfo',r,{},'Utilerias','0');
-          console.log(response)
           if(response[0] === 'OK'){
               ToastAndroid.show('Actualizado correctamente', ToastAndroid.LONG);
               navigation.goBack()
@@ -187,7 +189,6 @@ const TopbarModule = (props) => {
           let dta = lte.LODATRECEIP.replace(regex,'');
           r = 'A|0|' + lte.LOITEM+'|'+lte.LOBARCODE+'|'+lte.LOCAT1+'|'+lte.LOCAT2+'|'+dta+'|'+lte.LOTIMEREC+'|'+usuario['usukiduser']+'|'+dispositivo+'|'+props['data']['Programa']+'|'+fechaD+'|'+horaD+'|'
           let response = await _apiServices('GLOTE','FLOTE','ValidateInfo',r,{},'Utilerias','0');
-          console.log(response)
           if(response[0] === 'OK'){
               ToastAndroid.show('Item Guardado correctamente', ToastAndroid.LONG);
               form['current']['resetForm']({})
@@ -206,7 +207,12 @@ const TopbarModule = (props) => {
             const response = await _apiServices('program','','INQBARRA',[{action:"I",Data:"0|1|"}],{},'Mi App','0');
             for (let i = 0; i < response.length; i++) {
               const element = response[i];
-              btn.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonText}>{element.Titulo}</Text></View>)        
+              if(props['TipoAcceso'] == '1'){
+                btn.push(<View style={styles.navBarLeftButton}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text>{element.Titulo}</Text></View>)        
+              }else{
+                iconsColor={ 1:'gray', 2:'gray', 3:'gray', 4:'gray'}
+                btn.push(<View style={styles.navBarLeftBd}><Icon name={icons[element.Id]} color={iconsColor[element.Id]} /><Text style={styles.buttonTextd}>{element.Titulo}</Text></View>)        
+              }
             }
             setButtonsTop([...btn])
           } catch (error) {
@@ -253,6 +259,14 @@ const styles = StyleSheet.create({
   navBarLeftButton: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  navBarLeftBd: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    color:'gray',
+  },
+  buttonTextd:{
+    color:'gray'
   }
 });
 

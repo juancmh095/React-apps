@@ -19,10 +19,12 @@ const LoginComponent = ({navigation}) => {
     const [modalVisible, setModalVisible] = React.useState(false);
     const [newApi, setNewApi] = React.useState('');
     const [lablesURL, setLabelsURL] = React.useState({METITLE:'',MEOK:'',MEMESSAGE:'',MECANCEL:''});
+    const [labels, setLabels] = React.useState({METITLE:'',MEMESSAGE:'',METITLE1:'',METITLE2:'', MEOK:'',METITLE3:''});
     const url_api = "http://20.64.97.37/api/products";
    
     useEffect(() => {
         validateUser();
+        getLabels();
     },[])
 
     const validateUser = async () => {
@@ -51,6 +53,16 @@ const LoginComponent = ({navigation}) => {
         }
     }
     
+    const getLabels = async () => {
+        try {
+            const response = await _apiServices('program','','LABELS',[{action:"I",Data:"LOGIN|1|"}],{},'Mi App','0');
+            console.log(response);
+            setLabels({...response[0]});
+            navigation.setOptions({ title: labels['METITLE'] });   
+        } catch (error) {
+            console.log(error);
+        }
+    }
     
     const loginFunc = async () => {
         var forms = formikRef.current.values;
@@ -125,9 +137,9 @@ const LoginComponent = ({navigation}) => {
             >
                 {({ handleChange, setFieldValue, handleSubmit, values }) => (
                     <View style={styles.inputs}>
-                        <Text h4 style={{textAlign:'center'}}>{textinit}</Text>
+                        <Text h4 style={{textAlign:'center'}}>{labels['MEMESSAGE']}</Text>
                         <Input 
-                            placeholder='Usuario'
+                            placeholder={labels['METITLE1']}
                             leftIcon={
                                 <Icon
                                     name='person'
@@ -138,7 +150,7 @@ const LoginComponent = ({navigation}) => {
                             onChangeText={handleChange('user')}
                             />
                         <Input 
-                            placeholder='Password'
+                            placeholder={labels['METITLE2']}
                             secureTextEntry={passView}
                             leftIcon={
                                 <Icon
@@ -157,14 +169,14 @@ const LoginComponent = ({navigation}) => {
                             onChangeText={handleChange('password')}
 
                             />
-                        <Button title={'Enviar'} onPress={() => loginFunc()}></Button>
+                        <Button title={labels['MEOK']} onPress={() => loginFunc()}></Button>
 
                     </View>
 
                 )}
             </Formik>
 
-            <Button title={'URL'} type="clear" onPress={()=> getLabelsUrl()} />
+            <Button title={labels['METITLE3']} type="clear" onPress={()=> getLabelsUrl()} />
         </View>
 
         <Modal

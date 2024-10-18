@@ -37,7 +37,7 @@ const ListDataModule = (props) => {
         if(props['Params']){
             params = props['Params'];
         }else{
-            let response = await _apiServices('program','','INTERCONECT',[{action:"I",Data:props['Programa']+'|'+props['OPFORMA']+'|'+props['Programa']+'|'+props['OPFORMA']+'||'}],{},'Mi App','0');
+            let response = await _apiServices('program','','INTERCONECT',[{action:"I",Data:props['Programa']+'|'+props['OPFORMA']+'|'+props['Programa']+'|'+'WLOTEB'+'||'}],{},'Mi App','0');
             params = response;    
         }
 
@@ -60,7 +60,6 @@ const ListDataModule = (props) => {
                 var itemsData = props['dataList'];
                 var realData = itemsData.splice(i,1);
                 props['setListDataSelect']([...realData]);
-                console.log(realData.length);
             }},
         ]);
 
@@ -102,8 +101,8 @@ const ListDataModule = (props) => {
                     <CheckBox
                         checked={checked === i}
                         onPress={() => {
-                            setChecked(i)
-                            props['setListDataSelect'](item);
+                            setChecked(i);
+                            props['setListDataSelect']({...item});
                         }}
                     />
                     <ListItem.Content>

@@ -13,7 +13,6 @@ const OpenProgram =  ({ route, navigation }) => {
       try {
         var usuario = await AsyncStorage.getItem('FUSERSLOGIN');
         usuario = JSON.parse(usuario)
-        console.log(tipo)
         if(tipo == 'BF'){
           let bfParams = await _apiServices('program','','INTERCONECT',[{action:"I",Data:'PLOTE|WLOTEA|'+Programa+'|||'}],{},'Mi App','0');
           //console.log('rParams',bfParams);
@@ -27,13 +26,10 @@ const OpenProgram =  ({ route, navigation }) => {
               }
           }
           let params = usuario['usukides']+'|'+usuario['ususer']+'|'+BACKPROGRAM+'|'+BACKFORMA+'|ItemNumber|'+campos+'||';
-          console.log('------------------->',route.params)
           let response = await await _apiServices('FUNC','Mi Appescolar','Executefunction',params,'','Utilerias','0');
-          console.log('response BF',response)
           navigation.goBack()
         }else{
           let bfParams = await _apiServices('program','','INTERCONECT',[{action:"I",Data:'PLOTE|WLOTEA|'+Programa+'||'+COVERSIONTO+'|'}],{},'Mi App','0');
-          console.log('rParams',bfParams);
           let campos = '';
           for (let index = 0; index < bfParams.length; index++) {
               const element = bfParams[index];
@@ -43,10 +39,10 @@ const OpenProgram =  ({ route, navigation }) => {
                   campos = campos + '@' + element['PPCAMPOTO'] + '|1|1|' + dataSelect[element['PPCAMPOFROM']]+'|';
               }
           }
-          //let params = campos;
-          let params = '@ALITEM|1|1|MC0001|@ALBARCODE|1|1|12345678|';
+          let params = campos;
+          //let params = '@ALITEM|1|1|MC0001|@ALBARCODE|1|1|12345678|';
           let response = await await _apiServices('FUNCUBE',Programa,'ExecuteReport',params,'','Utilerias','0');
-          console.log(response);
+          navigation.goBack()
 
         }
         
@@ -67,7 +63,6 @@ const OpenProgram =  ({ route, navigation }) => {
               var idioma:any = await AsyncStorage.getItem('idioma');
               let parm = OPMESSAGE+'|'+idioma+'|';
               const response = await _apiServices('program','','MESSAGE',[{action:"I",Data:parm}],{},'Mi App','0');
-              console.log('params',response);
                 if(response.length > 0){
                     Alert.alert(response[0]['METITLE'], response[0]['MEMESSAGE'], [
                         {

@@ -62,7 +62,16 @@ const ButtomBarModule = (props) => {
                 campos = campos + ',@' + element['PPCAMPOTO'] + ':' + props['listDataSelect'][element['PPCAMPOFROM']];
             }
         }
-        let dataProgram = {COVERSIONTO:PROGRAM['OPVERSION'], OPFORMA:PROGRAM['OPFORMATO'], Programa:PROGRAM['OPOBNMOPC'],Params:campos, OPMESSAGE:PROGRAM['OPMESSAGE'], 'Opcion':PROGRAM['OPTITULO'], dataSelect:props['listDataSelect']}
+        let dataProgram = {
+          COVERSIONTO:PROGRAM['OPVERSION'], 
+          OPFORMA:PROGRAM['OPFORMATO'], 
+          Programa:PROGRAM['OPOBNMOPC'],
+          Params:campos, 
+          OPMESSAGE:PROGRAM['OPMESSAGE'], 
+          'Opcion':PROGRAM['OPTITULO'], 
+          dataSelect:props['listDataSelect'], 
+          TipoAcceso:props['TipoAcceso']
+        }
         //console.log(dataProgram);
         navigation.push('Program',dataProgram)
     }

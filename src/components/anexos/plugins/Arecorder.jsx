@@ -56,6 +56,11 @@ const AudioRecorderComponent = ({setModalVisible,req}) => {
       setCurrentDurationSec(e.duration);
       setPlayTime(audioRecorderPlayer.mmssss(Math.floor(e.currentPosition)));
       setDuration(audioRecorderPlayer.mmssss(Math.floor(e.duration)));
+      console.log(e.currentPosition,e.duration)
+      if (e.currentPosition >= e.duration * 0.99) {
+        setIsPlaying(false);
+      }
+
       return;
     });
     console.log(result);

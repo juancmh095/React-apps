@@ -42,7 +42,6 @@ const FormsComponent = (props) => {
             var usuario:any = await AsyncStorage.getItem('FUSERSLOGIN');
             usuario = JSON.parse(usuario)
             const response = await _apiServices('program','','INQFORMNAME',[{action:"I",Data:usuario['usukides']+'|'+props['program']+'|'}],{},'Mi App','0');
-            console.log(response);
             if(response.length > 0){
                 var dta = "0|"+usuario['usukiduser']+'|'+props['program']+'|A|'+response[0]['OPFORMDEFAULT']+'|'+props['item']+'|';
                 const responseForm = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:dta}],{},'Mi App','0');
@@ -100,7 +99,7 @@ const FormsComponent = (props) => {
                                     maxLength={Number(item.UDLONGITUD)}
                                     value={props['values'][item.UDCAMPO]}
                                     secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
-                                    rightIcon = {(props['values'][item.UDCAMPO] != '' && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
+                                    rightIcon = {(props['values'][item.UDCAMPO] != '' && props['values'][item.UDCAMPO] && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
                                     disabled={(tabSelect == item['FOTAB'])?false:true}
                                     containerStyle={(tabSelect == item['FOTAB'] && item['FOVISIBLE'] != 'N')?styles.formControl:{display:'none'}}
                                     inputContainerStyle={{borderBottomWidth:0}}
@@ -108,6 +107,11 @@ const FormsComponent = (props) => {
                                     keyboardType={item['UDTIPO'] == 'N'?'numeric':'default'}
                                     returnKeyType="next"
                                     onChangeText={props['handleChange'](item.UDCAMPO)}
+                                    onEndEditing={()=>{
+                                        if(item['UDTIPO'] == 'numeric'){
+                                            props['setFieldValue'](item.UDCAMPO,Number(props['values'][item.UDCAMPO]).toFixed(2))
+                                        }
+                                    }}
                                 />
                             )
                         }else{
@@ -125,6 +129,12 @@ const FormsComponent = (props) => {
                                         returnKeyType="next"
                                         value={props['values'][item.UDCAMPO]}
                                         onChangeText={props['handleChange'](item.UDCAMPO)}
+                                        onEndEditing={()=>{
+                                            if(item['UDTIPO'] == 'numeric'){
+                                                let limitN = Number(item['FODECIMALES'])
+                                                props['setFieldValue'](item.UDCAMPO,Number(props['values'][item.UDCAMPO]).toFixed(limitN))
+                                            }
+                                        }}
                                     />
                                 )
                             }else{
@@ -157,7 +167,7 @@ const FormsComponent = (props) => {
                                                 inputContainerStyle={{borderBottomWidth:0}}
                                                 secureTextEntry={item['FOATRIBUTO']=='P'?true:false}
                                                 maxLength={Number(item.UDLONGITUD)}
-                                                rightIcon = {(props['values'][item.UDCAMPO] != '' && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
+                                                rightIcon = {(props['values'][item.UDCAMPO] != '' && props['values'][item.UDCAMPO] &&  (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
                                                 onFocus={()=> DateTimePickerAndroid.open({mode:'date', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                 onChangeText={props['handleChange'](item.UDCAMPO)}
                                                 returnKeyType="next"
@@ -175,7 +185,7 @@ const FormsComponent = (props) => {
                                                     containerStyle={(tabSelect == item['FOTAB'] && item['FOVISIBLE'] != 'N')?styles.formControl:{display:'none'}}
                                                     inputContainerStyle={{borderBottomWidth:0}}
                                                     maxLength={Number(item.UDLONGITUD)}
-                                                    rightIcon = {(props['values'][item.UDCAMPO] != '' && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
+                                                    rightIcon = {(props['values'][item.UDCAMPO] != '' && props['values'][item.UDCAMPO] && (<Icon name='close' onPress={()=> props['form'].current.setFieldValue(item.UDCAMPO,'')} />))}
                                                     onFocus={()=> DateTimePickerAndroid.open({mode:'time', value:datePk, is24Hour:true, onChange:(event,value)=>{changeDateTime(props['setFieldValue'],item.UDCAMPO,value,event)} })}
                                                     onChangeText={props['handleChange'](item.UDCAMPO)}
                                                     returnKeyType="next"
