@@ -118,10 +118,10 @@ const OrdenCompraComponent =  ({ navigation }) => {
     const getLabelsItems = async (user)=>{
         try {
             console.log('entra a buscar info2',user)
-            let data = '0|PCOMPRAS|E|H|';
+            let data = '2|22|PCOMPRAS|E|WCOMPRASA|||';
 
             const response = await _apiServices('program','','ProgramInquiry',[{action:"I",Data:data}],{},'Mi App','0');
-            console.log('pestanas',response);
+            console.log('pestanas--->',response);
 
             if(response.length > 0){
                 let d = response;
